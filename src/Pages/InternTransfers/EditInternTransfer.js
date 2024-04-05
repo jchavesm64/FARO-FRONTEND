@@ -1,0 +1,151 @@
+import React, { useEffect, useState } from "react";
+import Select from "react-select";
+import { Card, CardBody, Container, Row } from "reactstrap";
+import Breadcrumbs from "../../components/Common/Breadcrumb";
+import { infoAlert } from "../../helpers/alert";
+import { useApolloClient, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { useNavigate } from 'react-router-dom';
+import SpanSubtitleForm from "../../components/Forms/SpanSubtitleForm";
+import { OBTENER_CHEQUEO, SAVE_CHEQUEO } from "../../services/ChequeoService";
+import { OBTENER_ALMACENES } from "../../services/AlmacenService";
+import { OBTENER_LINEAS_ALMACEN } from "../../services/AlmacenLineaService";
+import TrInternTransferLine from "./TrInternTransferLine";
+import { GUARDAR_TRANSFERENCIA } from "../../services/TransferenciaInternaService";
+import { OBTENER_LINEAS_TRANSFERENCIA_INTERNA } from "../../services/TransferenciaInternaLineaService";
+
+
+const EditInternTransfer = ({ props, internTransfer }) => {
+    document.title = "Transferencias internas | FARO";
+
+    const navigate = useNavigate();
+    const apolloClient = useApolloClient();
+
+    const [insertar] = useMutation(GUARDAR_TRANSFERENCIA);
+    
+    const [ fecha, setFecha ] = useState(``)
+    const [ nota, setNota ] = useState('')
+    const [ almacenDesde, setAlmacenDesde ] = useState(null)
+    const [ almacenHasta, setAlmacenHasta ] = useState(null)
+    const [ lineasAlmacen, setLineasAlmacen ] = useState([])
+    
+    const { loading: load_lineas, data: data_lineas } = useQuery(OBTENER_LINEAS_TRANSFERENCIA_INTERNA, { variables: { id: internTransfer.id }, pollInterval: 1000 })
+
+    const getFecha = (fechaString) => {
+        if (fechaString !== null && fechaString.trim().length > 0) {
+            const fecha = new Date(fechaString)
+            return `${fecha.getFullYear()}-${(fecha.getMonth() + 1) >= 10 ? (fecha.getMonth() + 1) : '0' + (fecha.getMonth() + 1)}-${fecha.getDate() >= 10 ? fecha.getDate() : '0' + fecha.getDate()}`
+        }
+        return ''
+    }
+    
+    useEffect(() => {
+        setFecha(getFecha(internTransfer.fecha))
+        setNota(internTransfer.nota || '')
+        setAlmacenDesde(internTransfer.almacenDesde)
+        setAlmacenHasta(internTransfer.almacenHasta)
+        setLineasAlmacen()
+    }, [])
+
+    useEffect(() => {
+        setLineasAlmacen(data_lineas?.obtenerLineasTransferenciaInterna || [])
+    }, [data_lineas])
+
+    if (load_lineas) {
+        return (
+            <React.Fragment>
+                <div className="page-content">
+                    <Container fluid={true}>
+                    <Breadcrumbs title='Ver transferencia interna' breadcrumbItem='Transferencias internas' breadcrumbItemUrl='/internTransfers'/>
+                        <Row>
+                            <div className="col text-center pt-3 pb-3">
+                                <div className="spinner-border" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </Row>
+                    </Container>
+                </div>
+            </React.Fragment>)
+    }
+
+    return (
+        <React.Fragment>
+            <div className="page-content">
+                <Container fluid={true}>
+                <Breadcrumbs title='Ver transferencia interna' breadcrumbItem='Transferencias internas' breadcrumbItemUrl='/internTransfers'/>
+                <Row>
+                    <div className="col mb-3">
+                        <SpanSubtitleForm subtitle='Información general' />
+                    </div>
+                </Row>
+                <Row>
+                    <div className="col-md-5 col-sm-12">
+                        <Row>
+                            <div className="col mb-3">
+                                <label htmlFor="fecha" className="form-label">Fecha</label>
+                                <input readOnly={true} className="form-control" type="date" id="fecha" value={fecha}/>
+                            </div>
+                        </Row>
+                        <Row>
+                            <div className="col mb-3">
+                                <label htmlFor="almacenDesde" className="form-label">Almacén que envía</label>
+                                <input className="form-control" readOnly={true} type="text" value={almacenDesde?.nombre}/>
+                            </div>
+                        </Row>
+                        <Row>
+                            <div className="col mb-3">
+                                <label htmlFor="almacenHasta" className="form-label">Almacén que recibe</label>
+                                <input className="form-control" readOnly={true} type="text" value={almacenHasta?.nombre}/>
+                                
+                            </div>
+                        </Row>
+                        <Row>
+                            <div className="col mb-3">
+                                <label htmlFor="nota" className="form-label">Nota</label>
+                                <textarea id="nota" className="form-control" rows={3} value={nota} readOnly={true}></textarea>
+                            </div>
+                        </Row>
+                    </div>
+                    <div className="col-md-7 col-sm-12">
+                        <Row>
+                            <div className="col mb-3">
+                                <SpanSubtitleForm subtitle='Productos transferidos' />
+                            </div>
+                        </Row>
+                        <Row>
+                            <div className="col">
+                                <Card>
+                                    <CardBody>
+                                        <div className="table-responsive">
+                                            <table className="table table-hover table-striped mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Producto</th>
+                                                        <th>Cantidad transferida</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        lineasAlmacen.map((linea, i) => (
+                                                            <tr key={`lineaAlmacen-${i}`}>
+                                                                <td>{linea.producto.nombre}</td>
+                                                                <td>{`${linea.cantidad} ${linea.producto.unidad}`}</td>
+                                                            </tr>
+                                                        ))
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </CardBody>
+                                </Card>
+                            </div>
+                        </Row>
+                    </div>
+                </Row>
+                </Container>
+            </div>
+        </React.Fragment>
+    );
+};
+
+export default EditInternTransfer;
