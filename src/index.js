@@ -12,8 +12,8 @@ import { configureStore } from "./store/store";
 import { ApolloClient, InMemoryCache, ApolloProvider, gql } from '@apollo/client';
 
 const client = new ApolloClient({
-  uri: 'http://localhost:4000/graphql',
-  //uri: 'http://3.144.180.47:4000/graphql',
+  uri: 'http://localhost:4000/graphql', //local database
+  //uri: process.env.REACT_APP_DATABASEURI, //production database
   cache: new InMemoryCache({
     addTypename: false
   }),
