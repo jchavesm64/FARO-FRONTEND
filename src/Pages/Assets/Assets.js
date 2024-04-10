@@ -95,9 +95,6 @@ const Assets = () => {
         );
     }
 
-    if (error_activos) {
-        return null
-    }
 
     return (
         <React.Fragment>

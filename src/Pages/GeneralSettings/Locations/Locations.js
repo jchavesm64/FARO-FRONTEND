@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Container, Row, Card, CardBody } from "reactstrap";
 import withRouter from "../../../components/Common/withRouter";
 import Breadcrumb from "../../../components/Common/Breadcrumb";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DataList from "../../../components/Common/DataList";
 import { useMutation, useQuery } from "@apollo/client";
 import Swal from "sweetalert2";
 import { infoAlert } from "../../../helpers/alert";
-import { OBTENER_UBICACIONES, SAVE_UBICACION, DELETE_UBICACION } from '../../../services/UbicacionService';
+import { OBTENER_UBICACIONES, DELETE_UBICACION } from '../../../services/UbicacionService';
 import { convertirDataUbicacionesExcel, exportAndDownloadExcel } from "../../../helpers/exportExcel";
 
 const Locations = ({ ...props }) => {
@@ -19,15 +19,9 @@ const Locations = ({ ...props }) => {
     const [displayLength, setDisplayLength] = useState(10);
     const [filter, setFilter] = useState('');
     const [modo, setModo] = useState('1')
-    const [nuevo, setNuevo] = useState('');
     const { loading, error, data: categorias } = useQuery(OBTENER_UBICACIONES, { pollInterval: 1000 });
-    const [insertar] = useMutation(SAVE_UBICACION);
     const [desactivar] = useMutation(DELETE_UBICACION);
     const [disableSave, setDisableSave] = useState(true);
-
-    useEffect(() => {
-        setDisableSave(nuevo === '')
-    }, [nuevo])
 
     const onDeletLocation = (id, nombre) => {
         Swal.fire({
@@ -105,33 +99,6 @@ const Locations = ({ ...props }) => {
 
     const data = getData();
 
-    const handleNuevo = (e) => {
-        setNuevo(e.target.value)
-    }
-
-    const onClickSave = async () => {
-        try {
-            setDisableSave(true)
-            const input = {
-                nombre: nuevo,
-                estado: "ACTIVO"
-            }
-            const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
-            const { estado, message } = data.insertarUbicacion;
-            if (estado) {
-                infoAlert('Excelente', message, 'success', 3000, 'top-end')
-                navigate('/locations');
-            } else {
-                infoAlert('Oops', message, 'error', 3000, 'top-end')
-            }
-            setDisableSave(false)
-        } catch (error) {
-            console.log(error)
-            infoAlert('Oops', 'Ocurrió un error inesperado al guardar la ubicación', 'error', 3000, 'top-end')
-            setDisableSave(false)
-        }
-    }
-
     return (
         <React.Fragment>
             <div className="page-content">
@@ -139,23 +106,21 @@ const Locations = ({ ...props }) => {
                     <Breadcrumb title="Gestión de Ubicaciones" breadcrumbItem="Ajustes Generales" breadcrumbItemUrl="/generalsettings" />
 
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
-                        <div className="col-md-5 mb-3">
+                        <div className="col-md-10 mb-3">
                             <label htmlFor="example-search-input" className="col-md-4 col-form-label">
                                 Busca la ubicación
                             </label>
                             <input className="form-control" type="search" placeholder="Escribe el nombre de la ubicación" />
                         </div>
-                        <div className="col-md-5 mb-3">
-                            <label htmlFor="example-search-input" className="col-md-3 col-form-label">
-                                Nueva ubicación
-                            </label>
-                            <input className="form-control" type="search" placeholder="Escribe el nombre de la ubicación" onChange={handleNuevo} value={nuevo} />
-                        </div>
                         <div className="col-md-2 col-sm-12 mb-3">
-                            <button type="button" className="btn btn-primary waves-effect waves-light" style={{ width: '100%' }} disabled={disableSave} onClick={() => onClickSave()} >
+                            <Link to="/newlocation"><button
+                                type="button"
+                                className="btn btn-primary waves-effect waves-light"
+                                style={{ width: '100%' }}
+                            >
                                 Agregar{" "}
                                 <i className="mdi mdi-plus align-middle ms-2"></i>
-                            </button>
+                            </button></Link>
                         </div>
                     </Row>
 

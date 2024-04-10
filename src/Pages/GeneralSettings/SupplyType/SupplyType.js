@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, Row, Card, CardBody } from "reactstrap";
 import withRouter from "../../../components/Common/withRouter";
 import Breadcrumb from "../../../components/Common/Breadcrumb";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DataList from "../../../components/Common/DataList";
 import { useMutation, useQuery } from "@apollo/client";
 import Swal from "sweetalert2";
@@ -20,9 +20,7 @@ const SupplyType = ({ ...props }) => {
     const [modo, setModo] = useState('1')
     const [filter, setFilter] = useState('');
     const [confimation, setConfirmation] = useState(false);
-    const [nuevo, setNuevo] = useState('');
     const { loading, error, data: tipos } = useQuery(OBTENER_TIPO_PROVEDURIA, { pollInterval: 1000 });
-    const [insertar] = useMutation(SAVE_TIPO_PROVEDURIA);
     const [desactivar] = useMutation(DELETE_TIPO_PROVEDURIA);
 
     const onDeletSupply = (id, tipo) => {
@@ -88,37 +86,6 @@ const SupplyType = ({ ...props }) => {
 
     const data = getData();
 
-    const handleNuevo = (e) => {
-        setNuevo(e.target.value)
-    }
-    const [disableSave, setDisableSave] = useState(true);
-
-    useEffect(() => {
-        setDisableSave(nuevo === '')
-    }, [nuevo])
-
-    const onClickSave = async () => {
-        try {
-            setDisableSave(true)
-            const input = {
-                tipo: nuevo,
-                estado: "ACTIVO"
-            }
-            const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
-            const { estado, message } = data.insertarTipoProveduria;
-            if (estado) {
-                infoAlert('Excelente', message, 'success', 3000, 'top-end')
-                navigate('/suppliertype');
-            } else {
-                infoAlert('Oops', message, 'error', 3000, 'top-end')
-            }
-            setDisableSave(false)
-        } catch (error) {
-            infoAlert('Oops', 'Ocurrió un error inesperado al guardar el tipo de proveeduría', 'error', 3000, 'top-end')
-            setDisableSave(false)
-        }
-    }
-
     return (
         <React.Fragment>
             <div className="page-content">
@@ -126,23 +93,21 @@ const SupplyType = ({ ...props }) => {
                     <Breadcrumb title="Gestion de Tipos de Proveeduría" breadcrumbItem="Ajustes Generales" breadcrumbItemUrl="/generalsettings" />
 
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
-                        <div className="col-md-5 mb-3">
+                        <div className="col-md-10 mb-3">
                             <label htmlFor="example-search-input" className="col-md-6 col-form-label">
-                                Busca el nombre de proveeduría
+                                Busca el nombre del tipo de proveeduría
                             </label>
-                            <input className="form-control" type="search" placeholder="Escribe el nombre del proveedor" />
-                        </div>
-                        <div className="col-md-5 mb-3">
-                            <label htmlFor="example-search-input" className="col-md-3 col-form-label">
-                                Nuevo proveedor
-                            </label>
-                            <input className="form-control" type="search" placeholder="Escribe el nombre del proveedor" onChange={handleNuevo} value={nuevo} />
+                            <input className="form-control" type="search" placeholder="Escribe el nombre del tipo de proveeduría" />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
-                            <button type="button" className="btn btn-primary waves-effect waves-light" style={{ width: '100%' }} disabled={disableSave} onClick={() => onClickSave()} >
+                            <Link to="/newsuppliertype"><button
+                                type="button"
+                                className="btn btn-primary waves-effect waves-light"
+                                style={{ width: '100%' }}
+                            >
                                 Agregar{" "}
                                 <i className="mdi mdi-plus align-middle ms-2"></i>
-                            </button>
+                            </button></Link>
                         </div>
                     </Row>
 

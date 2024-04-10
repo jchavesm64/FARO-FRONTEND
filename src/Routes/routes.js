@@ -74,6 +74,8 @@ import EditAsset from "../Pages/Assets/EditAsset";
 import AssetsMove from "../Pages/AssetsMove/AssetsMove";
 import AssetMove from "../Pages/AssetsMove/AssetMove";
 import NewAssetMove from "../Pages/AssetsMove/NewAssetMove";
+import NewSupplyType from "../Pages/GeneralSettings/SupplyType/NewSupplyType";
+import NewLocation from "../Pages/GeneralSettings/Locations/NewLocation";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -153,9 +155,11 @@ const authProtectedRoutes = [
   { path: "/newrole", component: <NewRole /> },
   { path: "/editrole/:id", component: <EditRoleContainer /> },
   { path: "/suppliertype", component: <SupplyType /> },
+  { path: "/newsuppliertype", component: <NewSupplyType /> },
   { path: "/editsuppliertype/:id", component: <EditSupplyType /> },
   { path: "/locations", component: <Location /> },
   { path: "/editlocation/:id", component: <EditLocation /> },
+  { path: "/newlocation", component: <NewLocation /> },
 
   {
     path: "/",
