@@ -34,13 +34,14 @@ const AccountsReceivable = ({ ...props }) => {
   }
 
   function getFilteredByKey(modo, key, value) {
-    const valName = key.nombre.toLowerCase()
-    const valCode = key.codigo.toLowerCase()
-    const valCountry = key.pais.toLowerCase()
+    const valIdenticator = key.consecutivo.consecutivo.toLowerCase()
+    const valSupplier = key.proveedor?.empresa.toLowerCase()
+    const valClient = key.cliente?.nombre.toLowerCase()
+    const valUser = key.usuario?.nombre.toLowerCase()
     const val = value.toLowerCase()
 
 
-    if (valName.includes(val) || valCode.includes(val) || valCountry.includes(val)) {
+    if (valIdenticator.includes(val) || valSupplier?.includes(val) || valClient?.includes(val) || valUser?.includes(val)) {
       return key
     }
 
@@ -80,21 +81,28 @@ const AccountsReceivable = ({ ...props }) => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <Breadcrumb title="Cuentas por cobrar"/>
-          
+          <Breadcrumb title="Cuentas por cobrar" />
+
           <Row className="flex" style={{ alignItems: 'flex-end' }}>
             <div className="col-md-10 mb-3">
-              <label htmlFor="example-search-input" className="col-md-3 col-form-label">
+              <label htmlFor="search-input" className="col-md-3 col-form-label">
                 Busca el registro contable
               </label>
-              <input className="form-control" type="search" placeholder="Escribe el número de registro" />
+              <input
+                className="form-control"
+                type="search"
+                id="search-input"
+                placeholder="Escribe el número de registro"
+                value={filter}
+                onChange={(e) => { setFilter(e.target.value) }}
+              />
             </div>
             <div className="col-md-2 col-sm-12 mb-3">
               <Link to="/newaccountscontrol/COBRAR">
                 <button type="button" className="btn btn-primary waves-effect waves-light" style={{ width: '100%' }} >
-                Agregar{" "}
-                <i className="mdi mdi-plus align-middle ms-2"></i>
-              </button>
+                  Agregar{" "}
+                  <i className="mdi mdi-plus align-middle ms-2"></i>
+                </button>
               </Link>
             </div>
           </Row>

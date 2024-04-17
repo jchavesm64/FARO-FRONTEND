@@ -8,7 +8,7 @@ import { convertDataInternTransfers, exportAndDownloadExcel } from "../../helper
 import { OBTENER_TRANSFERENCIAS } from "../../services/TransferenciaInternaService";
 
 
-const InternTransfers = ({...props}) => {
+const InternTransfers = ({ ...props }) => {
     document.title = "Transferencias internas | FARO";
 
     const [filter, setFilter] = useState('')
@@ -20,7 +20,7 @@ const InternTransfers = ({...props}) => {
         const val3 = key.almacenHasta?.nombre.toLowerCase() || '';
         const val = value.toLowerCase();
 
-        if(val1.includes(val) || val2.includes(val) || val3.includes(val)){
+        if (val1.includes(val) || val2.includes(val) || val3.includes(val)) {
             return key
         }
 
@@ -48,7 +48,7 @@ const InternTransfers = ({...props}) => {
 
     const data = getData();
 
-    if(load_transferencias_internas){
+    if (load_transferencias_internas) {
         return (
             <React.Fragment>
                 <div className="page-content">
@@ -71,36 +71,43 @@ const InternTransfers = ({...props}) => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Transferencias internas" />
-                    <Row className="flex" style={{alignItems: 'flex-end'}}>
+                    <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
                             <label
-                                htmlFor="example-search-input"
+                                htmlFor="search-input"
                                 className="col-md-2 col-form-label"
                             >
                                 Busca la transferencia interna
                             </label>
-                            <input className="form-control" value={filter} onChange={(e)=>{setFilter(e.target.value)}} type="search" placeholder="Escribe el nombre del almacén" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                                type="search"
+                                placeholder="Escribe el nombre del almacén o del usuario"
+                            />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <Link to="/newinterntransfer"><button
-                              type="button"
-                              className="btn btn-primary waves-effect waves-light"
-                              style={{width: '100%'}}
+                                type="button"
+                                className="btn btn-primary waves-effect waves-light"
+                                style={{ width: '100%' }}
                             >
-                              Agregar{" "}
-                              <i className="mdi mdi-plus align-middle ms-2"></i>
+                                Agregar{" "}
+                                <i className="mdi mdi-plus align-middle ms-2"></i>
                             </button></Link>
                         </div>
                     </Row>
                     <Row className="">
                         <div className="col mb-3">
                             <button
-                              type="button"
-                              className="btn btn-outline-secondary waves-effect waves-light"
-                              onClick={()=>{onClickExportExcel()}}
+                                type="button"
+                                className="btn btn-outline-secondary waves-effect waves-light"
+                                onClick={() => { onClickExportExcel() }}
                             >
-                              Exportar Excel{" "}
-                              <i className="mdi mdi-file-excel align-middle ms-2"></i>
+                                Exportar Excel{" "}
+                                <i className="mdi mdi-file-excel align-middle ms-2"></i>
                             </button>
                         </div>
                     </Row>

@@ -19,11 +19,11 @@ const PurchaseOrders = ({ ...props }) => {
 
     function getFilteredByKey(key, value) {
         const val1 = key.proveedor.empresa.toLowerCase();
-        const val2 = key.numeroComprobante.toLowerCase();
+        const val2 = key.numeroComprobante?.toLowerCase();
         const val = value.toLowerCase();
-        const val3 = key.consecutivo ? key.consecutivo.consecutivo.toLowerCase() : '';
+        const val3 = key.consecutivo?.consecutivo.toLowerCase();
 
-        if (val1.includes(val) || val2.includes(val) || val3.includes(val)) {
+        if (val1.includes(val) || val2?.includes(val) || val3.includes(val)) {
             return key
         }
 
@@ -99,12 +99,18 @@ const PurchaseOrders = ({ ...props }) => {
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
                             <label
-                                htmlFor="example-search-input"
+                                htmlFor="search-input"
                                 className="col-md-2 col-form-label"
                             >
                                 Busca la órden de compra
                             </label>
-                            <input className="form-control" value={filter} onChange={(e) => { setFilter(e.target.value) }} type="search" placeholder="Escribe el nombre del proveedor, número de comprobante" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                                type="search"
+                                placeholder="Escribe el nombre del proveedor, número de comprobante o identificador" />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <Link to="/newpurchaseorder"><button

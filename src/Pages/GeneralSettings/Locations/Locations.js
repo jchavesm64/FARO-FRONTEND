@@ -81,12 +81,9 @@ const Locations = ({ ...props }) => {
 
     function getFilteredByKey(modo, key, value) {
         const valName = key.nombre.toLowerCase()
-        const valCode = key.codigo.toLowerCase()
-        const valCountry = key.pais.toLowerCase()
         const val = value.toLowerCase()
 
-
-        if (valName.includes(val) || valCode.includes(val) || valCountry.includes(val)) {
+        if (valName.includes(val)) {
             return key
         }
 
@@ -107,10 +104,17 @@ const Locations = ({ ...props }) => {
 
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
-                            <label htmlFor="example-search-input" className="col-md-4 col-form-label">
+                            <label htmlFor="search-input" className="col-md-4 col-form-label">
                                 Busca la ubicación
                             </label>
-                            <input className="form-control" type="search" placeholder="Escribe el nombre de la ubicación" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                type="search"
+                                placeholder="Escribe el nombre de la ubicación"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                            />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <Link to="/newlocation"><button

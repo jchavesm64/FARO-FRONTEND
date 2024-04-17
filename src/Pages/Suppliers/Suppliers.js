@@ -10,7 +10,7 @@ import { convertDataSuppliersExcel, exportAndDownloadExcel } from "../../helpers
 import { DELETE_PROVEEDOR, OBTENER_PROVEEDORES } from "../../services/ProveedorService";
 
 
-const Suppliers = ({...props}) => {
+const Suppliers = ({ ...props }) => {
     document.title = "Proveedores | FARO";
 
     const [filter, setFilter] = useState('')
@@ -23,12 +23,14 @@ const Suppliers = ({...props}) => {
         const valCode = key.cedula.toLowerCase();
         const valCountry = key.pais.toLowerCase();
         const val = value.toLowerCase()
-        
+        const valEmail = key.correos?.some(correo => correo.email.includes(val));
+        const valPhone = key.telefonos?.some(telefono => telefono.telefono.includes(val));
+
         let condition = false
-        if(key.provedurias && key.provedurias.length > 0){
+        if (key.provedurias && key.provedurias.length > 0) {
             condition = key.provedurias.filter(p => p.tipo.toLowerCase().includes(val)).length > 0
         }
-        if(valName.includes(val) || valCode.includes(val) || valCountry.includes(val) || condition){
+        if (valName.includes(val) || valCode.includes(val) || valCountry.includes(val) || condition || valEmail || valPhone) {
             return key
         }
 
@@ -59,7 +61,7 @@ const Suppliers = ({...props}) => {
             cancelButtonColor: "#FF3D60",
             cancelButtonText: 'Cancelar',
             confirmButtonText: "Sí, ¡eliminar!"
-        }).then(async(result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
                 const { data } = await desactivar({ variables: { id } });
                 const { estado, message } = data.desactivarProveedor;
@@ -78,14 +80,14 @@ const Suppliers = ({...props}) => {
 
     const data = getData();
 
-    if(load_proveedores){
+    if (load_proveedores) {
         return (
             <React.Fragment>
                 <div className="page-content">
                     <Container fluid={true}>
-                        <Breadcrumbs title="Proveedores"  />
+                        <Breadcrumbs title="Proveedores" />
                         <Row>
-                        <div className="col text-center pt-3 pb-3">
+                            <div className="col text-center pt-3 pb-3">
                                 <div className="spinner-border" role="status">
                                     <span className="visually-hidden">Loading...</span>
                                 </div>
@@ -100,37 +102,43 @@ const Suppliers = ({...props}) => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Proveedores"  />
-                    <Row className="flex" style={{alignItems: 'flex-end'}}>
+                    <Breadcrumbs title="Proveedores" />
+                    <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
                             <label
-                                htmlFor="example-search-input"
+                                htmlFor="search-input"
                                 className="col-md-2 col-form-label"
                             >
                                 Busca el proveedor
                             </label>
-                            <input className="form-control" value={filter} onChange={(e)=>{setFilter(e.target.value)}} type="search" placeholder="Escribe el nombre, identificación o país del proveedor" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                                type="search"
+                                placeholder="Escribe el nombre, identificación, correo, teléfono o país del proveedor" />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <Link to="/newsupplier"><button
-                              type="button"
-                              className="btn btn-primary waves-effect waves-light"
-                              style={{width: '100%'}}
+                                type="button"
+                                className="btn btn-primary waves-effect waves-light"
+                                style={{ width: '100%' }}
                             >
-                              Agregar{" "}
-                              <i className="mdi mdi-plus align-middle ms-2"></i>
+                                Agregar{" "}
+                                <i className="mdi mdi-plus align-middle ms-2"></i>
                             </button></Link>
                         </div>
                     </Row>
                     <Row className="">
                         <div className="col mb-3">
                             <button
-                              type="button"
-                              className="btn btn-outline-secondary waves-effect waves-light"
-                              onClick={()=>{onClickExportExcel()}}
+                                type="button"
+                                className="btn btn-outline-secondary waves-effect waves-light"
+                                onClick={() => { onClickExportExcel() }}
                             >
-                              Exportar Excel{" "}
-                              <i className="mdi mdi-file-excel align-middle ms-2"></i>
+                                Exportar Excel{" "}
+                                <i className="mdi mdi-file-excel align-middle ms-2"></i>
                             </button>
                         </div>
                     </Row>

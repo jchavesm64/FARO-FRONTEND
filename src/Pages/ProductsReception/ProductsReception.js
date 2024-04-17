@@ -7,7 +7,7 @@ import { convertDataProductReceptionExcel, exportAndDownloadExcel } from "../../
 import { OBTENER_RECEPCION_PRODUCTOS } from "../../services/RecepcionProductosService";
 
 
-const ProductsReception = ({...props}) => {
+const ProductsReception = ({ ...props }) => {
     document.title = "Recepción de productos | FARO";
 
     const [filter, setFilter] = useState('')
@@ -16,8 +16,9 @@ const ProductsReception = ({...props}) => {
     function getFilteredByKey(key, value) {
         const val1 = key.proveedor.empresa.toLowerCase();
         const val = value.toLowerCase();
+        const val2 = key.pedido.consecutivo?.consecutivo.toLowerCase();
 
-        if(val1.includes(val)){
+        if (val1.includes(val) || val2.includes(val)) {
             return key
         }
 
@@ -45,14 +46,14 @@ const ProductsReception = ({...props}) => {
 
     const data = getData();
 
-    if(load_recepcion_productos){
+    if (load_recepcion_productos) {
         return (
             <React.Fragment>
                 <div className="page-content">
                     <Container fluid={true}>
                         <Breadcrumbs title="Recepción de productos" />
                         <Row>
-                        <div className="col text-center pt-3 pb-3">
+                            <div className="col text-center pt-3 pb-3">
                                 <div className="spinner-border" role="status">
                                     <span className="visually-hidden">Loading...</span>
                                 </div>
@@ -68,26 +69,32 @@ const ProductsReception = ({...props}) => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Recepción de productos" />
-                    <Row className="flex" style={{alignItems: 'flex-end'}}>
+                    <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-12 mb-3">
                             <label
-                                htmlFor="example-search-input"
+                                htmlFor="search-input"
                                 className="col-md-2 col-form-label"
                             >
                                 Busca la recepción
                             </label>
-                            <input className="form-control" value={filter} onChange={(e)=>{setFilter(e.target.value)}} type="search" placeholder="Escribe el nombre del proveedor" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                                type="search"
+                                placeholder="Escribe el nombre del proveedor o identificador" />
                         </div>
                     </Row>
                     <Row className="">
                         <div className="col mb-3">
                             <button
-                              type="button"
-                              className="btn btn-outline-secondary waves-effect waves-light"
-                              onClick={()=>{onClickExportExcel()}}
+                                type="button"
+                                className="btn btn-outline-secondary waves-effect waves-light"
+                                onClick={() => { onClickExportExcel() }}
                             >
-                              Exportar Excel{" "}
-                              <i className="mdi mdi-file-excel align-middle ms-2"></i>
+                                Exportar Excel{" "}
+                                <i className="mdi mdi-file-excel align-middle ms-2"></i>
                             </button>
                         </div>
                     </Row>

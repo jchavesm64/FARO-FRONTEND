@@ -74,12 +74,19 @@ const AssetsMove = ({ ...props }) => {
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-12 mb-3">
                             <label
-                                htmlFor="example-search-input"
+                                htmlFor="search-input"
                                 className="col-md-2 col-form-label"
                             >
                                 Busca el movimiento
                             </label>
-                            <input className="form-control" value={filter} onChange={(e) => { setFilter(e.target.value) }} type="search" placeholder="Escribe el identificador, beneficiario, activo o referencia interna" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                                type="search"
+                                placeholder="Escribe el identificador, beneficiario, activo o referencia interna"
+                            />
                         </div>
                     </Row>
                     <Row className="">

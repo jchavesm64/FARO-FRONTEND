@@ -10,20 +10,20 @@ import { convertDataStockExcel, exportAndDownloadExcel } from "../../helpers/exp
 import { DELETE_MATERIA_PRIMA, OBTENER_MATERIAS_PRIMAS_MOVIMIENTOS } from "../../services/MateriaPrimaService";
 
 
-const Stock = ({...props}) => {
+const Stock = ({ ...props }) => {
     document.title = "Inventario | FARO";
 
     const { stockType } = useParams();
 
     const [filter, setFilter] = useState('')
-    const { loading: load_materia_prima, error: error_materia_prima, data: data_materia_prima } = useQuery(OBTENER_MATERIAS_PRIMAS_MOVIMIENTOS, {variables: { tipo: stockType }, pollInterval: 1000 })
+    const { loading: load_materia_prima, error: error_materia_prima, data: data_materia_prima } = useQuery(OBTENER_MATERIAS_PRIMAS_MOVIMIENTOS, { variables: { tipo: stockType }, pollInterval: 1000 })
     const [desactivar] = useMutation(DELETE_MATERIA_PRIMA);
 
     function getFilteredByKey(key, value) {
         const val1 = key.materia_prima.nombre.toLowerCase();
         const val = value.toLowerCase();
 
-        if(val1.includes(val)){
+        if (val1.includes(val)) {
             return key
         }
 
@@ -31,8 +31,8 @@ const Stock = ({...props}) => {
     }
 
     const getData = () => {
-        if(data_materia_prima){
-            if(data_materia_prima.obtenerMateriasPrimasConMovimientos){
+        if (data_materia_prima) {
+            if (data_materia_prima.obtenerMateriasPrimasConMovimientos) {
                 return data_materia_prima.obtenerMateriasPrimasConMovimientos.filter((value, index) => {
                     if (filter !== "") {
                         return getFilteredByKey(value, filter);
@@ -73,14 +73,14 @@ const Stock = ({...props}) => {
 
     const data = getData();
 
-    if(load_materia_prima){
+    if (load_materia_prima) {
         return (
             <React.Fragment>
                 <div className="page-content">
                     <Container fluid={true}>
                         <Breadcrumbs title={`Inventario - ${stockType}`} />
                         <Row>
-                        <div className="col text-center pt-3 pb-3">
+                            <div className="col text-center pt-3 pb-3">
                                 <div className="spinner-border" role="status">
                                     <span className="visually-hidden">Loading...</span>
                                 </div>
@@ -96,36 +96,42 @@ const Stock = ({...props}) => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title={`Inventario - ${stockType}`} />
-                    <Row className="flex" style={{alignItems: 'flex-end'}}>
+                    <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
                             <label
-                                htmlFor="example-search-input"
+                                htmlFor="search-input"
                                 className="col-md-2 col-form-label"
                             >
                                 Busca el producto
                             </label>
-                            <input className="form-control" value={filter} onChange={(e)=>{setFilter(e.target.value)}} type="search" placeholder="Escribe el nombre del producto" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                                type="search"
+                                placeholder="Escribe el nombre del producto" />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <Link to={`/newproduct/${stockType}`}><button
-                              type="button"
-                              className="btn btn-primary waves-effect waves-light"
-                              style={{width: '100%'}}
+                                type="button"
+                                className="btn btn-primary waves-effect waves-light"
+                                style={{ width: '100%' }}
                             >
-                              Agregar{" "}
-                              <i className="mdi mdi-plus align-middle ms-2"></i>
+                                Agregar{" "}
+                                <i className="mdi mdi-plus align-middle ms-2"></i>
                             </button></Link>
                         </div>
                     </Row>
                     <Row className="">
                         <div className="col mb-3">
                             <button
-                              type="button"
-                              className="btn btn-outline-secondary waves-effect waves-light"
-                              onClick={()=>{onClickExportExcel()}}
+                                type="button"
+                                className="btn btn-outline-secondary waves-effect waves-light"
+                                onClick={() => { onClickExportExcel() }}
                             >
-                              Exportar Excel{" "}
-                              <i className="mdi mdi-file-excel align-middle ms-2"></i>
+                                Exportar Excel{" "}
+                                <i className="mdi mdi-file-excel align-middle ms-2"></i>
                             </button>
                         </div>
                     </Row>

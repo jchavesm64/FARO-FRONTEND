@@ -11,7 +11,7 @@ import { DELETE_ORDEN_COMPRA, OBTENER_ORDENES_COMPRA } from "../../services/Orde
 import { ELIMINAR_ALMANCEN, OBTENER_ALMACENES } from "../../services/AlmacenService";
 
 
-const Warehouses = ({...props}) => {
+const Warehouses = ({ ...props }) => {
     document.title = "Almacenes | FARO";
 
     const [filter, setFilter] = useState('')
@@ -23,7 +23,7 @@ const Warehouses = ({...props}) => {
         const val2 = key.descripcion.toLowerCase();
         const val = value.toLowerCase();
 
-        if(val1.includes(val) || val2.includes(val)){
+        if (val1.includes(val) || val2.includes(val)) {
             return key
         }
 
@@ -54,7 +54,7 @@ const Warehouses = ({...props}) => {
             cancelButtonColor: "#FF3D60",
             cancelButtonText: 'Cancelar',
             confirmButtonText: "Sí, ¡eliminar!"
-        }).then(async(result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
                 const { data } = await desactivar({ variables: { id } });
                 const { estado, message } = data.desactivarAlmacen;
@@ -73,7 +73,7 @@ const Warehouses = ({...props}) => {
 
     const data = getData();
 
-    if(load_almacenes){
+    if (load_almacenes) {
         return (
             <React.Fragment>
                 <div className="page-content">
@@ -96,36 +96,42 @@ const Warehouses = ({...props}) => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Almacenes" />
-                    <Row className="flex" style={{alignItems: 'flex-end'}}>
+                    <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
                             <label
-                                htmlFor="example-search-input"
+                                htmlFor="search-input"
                                 className="col-md-2 col-form-label"
                             >
                                 Busca el almacén
                             </label>
-                            <input className="form-control" value={filter} onChange={(e)=>{setFilter(e.target.value)}} type="search" placeholder="Escribe el nombre o la descripción del almacén" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                                type="search"
+                                placeholder="Escribe el nombre o la descripción del almacén" />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <Link to="/newwarehouse"><button
-                              type="button"
-                              className="btn btn-primary waves-effect waves-light"
-                              style={{width: '100%'}}
+                                type="button"
+                                className="btn btn-primary waves-effect waves-light"
+                                style={{ width: '100%' }}
                             >
-                              Agregar{" "}
-                              <i className="mdi mdi-plus align-middle ms-2"></i>
+                                Agregar{" "}
+                                <i className="mdi mdi-plus align-middle ms-2"></i>
                             </button></Link>
                         </div>
                     </Row>
                     <Row className="">
                         <div className="col mb-3">
                             <button
-                              type="button"
-                              className="btn btn-outline-secondary waves-effect waves-light"
-                              onClick={()=>{onClickExportExcel()}}
+                                type="button"
+                                className="btn btn-outline-secondary waves-effect waves-light"
+                                onClick={() => { onClickExportExcel() }}
                             >
-                              Exportar Excel{" "}
-                              <i className="mdi mdi-file-excel align-middle ms-2"></i>
+                                Exportar Excel{" "}
+                                <i className="mdi mdi-file-excel align-middle ms-2"></i>
                             </button>
                         </div>
                     </Row>

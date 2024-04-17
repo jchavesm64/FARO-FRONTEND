@@ -7,14 +7,13 @@ import DataList from "../../components/Common/DataList";
 import { useMutation, useQuery } from "@apollo/client";
 import Swal from "sweetalert2";
 import { infoAlert } from "../../helpers/alert";
-import { DELETE_IMPUESTO, OBTENER_IMPUESTOS, SAVE_IMPUESTO, UPDATE_IMPUESTO } from '../../services/ImpuestoService';
+import { DELETE_IMPUESTO, OBTENER_IMPUESTOS } from '../../services/ImpuestoService';
 import { convertDataTaxesExcel, exportAndDownloadExcel } from "../../helpers/exportExcel";
 
 const TaxManagement = ({ ...props }) => {
     document.title = "Impuestos | FARO";
 
     const [filter, setFilter] = useState('')
-    const [modo, setModo] = useState('1')
     const [page, setPage] = useState(1);
     const [displayLength, setDisplayLength] = useState(10);
 
@@ -22,21 +21,12 @@ const TaxManagement = ({ ...props }) => {
     const { loading: loading_tax, error: error_tax, data: data_tax } = useQuery(OBTENER_IMPUESTOS, { pollInterval: 1000 });
     const [desactivar] = useMutation(DELETE_IMPUESTO);
 
-    const handleChangePage = (dataKey) => {
-        setPage(dataKey)
-    }
-
-    const handleChangeLength = (dataKey) => {
-        setPage(1);
-        setDisplayLength(dataKey);
-    }
-
     const getData = () => {
         if (data_tax) {
             if (data_tax.obtenerImpuestos) {
                 return data_tax.obtenerImpuestos.filter((value, index) => {
-                    if (filter !== "" && modo !== "") {
-                        return getFilteredByKey(modo, value, filter);
+                    if (filter !== "") {
+                        return getFilteredByKey(value, filter);
                     }
                     return value
                 });
@@ -45,10 +35,11 @@ const TaxManagement = ({ ...props }) => {
         return []
     }
 
-    function getFilteredByKey(value, key) {
-        const val = value.nombre.toLowerCase();
-        const val2 = key.toLowerCase();
-        if (val.includes(val2)) {
+    function getFilteredByKey(key, value) {
+        const val1 = key.nombre.toLowerCase();
+        const val2 = key.valor.toString();
+        const val = value.toLowerCase();
+        if (val1.includes(val) || val2.includes(val) || val2.includes(val.replace('%', ''))) {
             return key
         }
     }
@@ -90,10 +81,17 @@ const TaxManagement = ({ ...props }) => {
 
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
-                            <label htmlFor="example-search-input" className="col-md-3 col-form-label">
+                            <label htmlFor="search-input" className="col-md-3 col-form-label">
                                 Busca por nombre
                             </label>
-                            <input className="form-control" type="search" placeholder="Escribe el nombre aquí" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                type="search"
+                                placeholder="Escribe el nombre o porcentaje del impuesto"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                            />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <Link to="/newtaxmanagement">
