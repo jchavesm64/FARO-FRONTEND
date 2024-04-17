@@ -17,9 +17,7 @@ const SupplyType = ({ ...props }) => {
 
     const [page, setPage] = useState(1);
     const [displayLength, setDisplayLength] = useState(10);
-    const [modo, setModo] = useState('1')
     const [filter, setFilter] = useState('');
-    const [confimation, setConfirmation] = useState(false);
     const { loading, error, data: tipos } = useQuery(OBTENER_TIPO_PROVEDURIA, { pollInterval: 1000 });
     const [desactivar] = useMutation(DELETE_TIPO_PROVEDURIA);
 
@@ -46,21 +44,11 @@ const SupplyType = ({ ...props }) => {
         });
     }
 
-    function getFilteredByKey(modo, key, value) {
-        if (modo === "1") {
-            const val = key.nombre.toLowerCase();
-            const val2 = value.toLowerCase();
-
-            if (val.includes(val2)) {
-                return key
-            }
-        } else {
-            const val = key.cedula.toLowerCase();
-            const val2 = value.toLowerCase();
-
-            if (val.includes(val2)) {
-                return key
-            }
+    function getFilteredByKey(key, value) {
+        const valName = key.tipo.toLowerCase();
+        const val = value.toLowerCase();
+        if (valName.includes(val)) {
+            return key
         }
         return null;
     }
@@ -69,8 +57,8 @@ const SupplyType = ({ ...props }) => {
         if (tipos) {
             if (tipos.obtenerTipoProveduria) {
                 return tipos.obtenerTipoProveduria.filter((value, index) => {
-                    if (filter !== "" && modo !== "") {
-                        return getFilteredByKey(modo, value, filter);
+                    if (filter !== "") {
+                        return getFilteredByKey(value, filter);
                     }
                     return value
                 });
@@ -94,10 +82,17 @@ const SupplyType = ({ ...props }) => {
 
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
-                            <label htmlFor="example-search-input" className="col-md-6 col-form-label">
+                            <label htmlFor="search-input" className="col-md-6 col-form-label">
                                 Busca el nombre del tipo de proveeduría
                             </label>
-                            <input className="form-control" type="search" placeholder="Escribe el nombre del tipo de proveeduría" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                type="search"
+                                placeholder="Escribe el nombre del tipo de proveeduría"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                            />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <Link to="/newsuppliertype"><button

@@ -14,16 +14,14 @@ const AccountingControl = ({ ...props }) => {
   document.title = "Profile | FARO";
 
   const [filter, setFilter] = useState('')
-  const [modo, setModo] = useState('1')
   const { loading: load_accounting, error: error_accounting, data: data_accounting } = useQuery(OBTENER_REGISTROS_CONTABLES, { pollInterval: 1000 })
-
 
   const getData = () => {
     if (data_accounting) {
       if (data_accounting.obtenerRegistrosContables) {
         return data_accounting.obtenerRegistrosContables.filter((value, index) => {
-          if (filter !== "" && modo !== "") {
-            return getFilteredByKey(modo, value, filter);
+          if (filter !== "") {
+            return getFilteredByKey(value, filter);
           }
           return value
         });
@@ -32,14 +30,15 @@ const AccountingControl = ({ ...props }) => {
     return []
   }
 
-  function getFilteredByKey(modo, key, value) {
-    const valName = key.nombre.toLowerCase()
-    const valCode = key.codigo.toLowerCase()
-    const valCountry = key.pais.toLowerCase()
+  function getFilteredByKey(key, value) {
+    const valIdenticator = key.consecutivo?.consecutivo.toLowerCase()
+    const valSupplier = key.proveedor?.empresa.toLowerCase()
+    const valClient = key.cliente?.nombre.toLowerCase()
+    const valUser = key.usuario?.nombre.toLowerCase()
     const val = value.toLowerCase()
 
 
-    if (valName.includes(val) || valCode.includes(val) || valCountry.includes(val)) {
+    if (valIdenticator?.includes(val) || valSupplier?.includes(val) || valClient?.includes(val) || valUser?.includes(val)) {
       return key
     }
 
@@ -82,11 +81,18 @@ const AccountingControl = ({ ...props }) => {
         <Container fluid>
           <Breadcrumb title="Control contable" />
           <Row className="flex" style={{ alignItems: 'flex-end' }}>
-            <label htmlFor="example-search-input" className="col-md-3 col-form-label">
+            <label htmlFor="search-input" className="col-md-3 col-form-label">
               Busca el registro contable
             </label>
             <div className="col-md-12 mb-3 d-flex align-items-end">
-              <input className="form-control" type="search" placeholder="Escribe el número de registro" />
+              <input
+                className="form-control"
+                type="search"
+                id="search-input"
+                placeholder="Escribe el identificador o proveedor"
+                value={filter}
+                onChange={(e) => { setFilter(e.target.value) }}
+              />
             </div>
           </Row>
 

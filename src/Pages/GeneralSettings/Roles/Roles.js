@@ -16,14 +16,8 @@ const Roles = ({ ...props }) => {
     const [page, setPage] = useState(1);
     const [displayLength, setDisplayLength] = useState(10);
     const [filter, setFilter] = useState('')
-    const [modo, setModo] = useState('1')
-    const [confimation, setConfirmation] = useState(false);
     const { loading: load_roles, error: error_roles, data: data_roles } = useQuery(OBTENER_ROLES, { pollInterval: 1000 })
     const [desactivar] = useMutation(DELETE_ROL);
-    const [nameRol, setNameRol] = useState('');
-    const [idRol, setIdRol] = useState('');
-    const [estadoBoton, setEstadoBoton] = useState('Agregar');
-    const [iconButton, setIconButton] = useState('ri-save-line align-middle ms-2');
 
     const onDeleteRol = (id, name) => {
         Swal.fire({
@@ -48,28 +42,11 @@ const Roles = ({ ...props }) => {
         });
     }
 
-    const onEditRol = async (id, nombre) => {
-        setNameRol(nombre);
-        setIdRol(id);
-        setEstadoBoton('Editar');
-        setIconButton('ri-edit-line align-middle ms-2');
-    }
-
-    function getFilteredByKey(modo, key, value) {
-        if (modo === "1") {
-            const val = key.nombre.toLowerCase();
-            const val2 = value.toLowerCase();
-
-            if (val.includes(val2)) {
-                return key
-            }
-        } else {
-            const val = key.cedula.toLowerCase();
-            const val2 = value.toLowerCase();
-
-            if (val.includes(val2)) {
-                return key
-            }
+    function getFilteredByKey(key, value) {
+        const valName = key.nombre.toLowerCase();
+        const val = value.toLowerCase();
+        if (valName.includes(val)) {
+            return key
         }
         return null;
     }
@@ -78,8 +55,8 @@ const Roles = ({ ...props }) => {
         if (data_roles) {
             if (data_roles.obtenerRoles) {
                 return data_roles.obtenerRoles.filter((value, index) => {
-                    if (filter !== "" && modo !== "") {
-                        return getFilteredByKey(modo, value, filter);
+                    if (filter !== "") {
+                        return getFilteredByKey(value, filter);
                     }
                     return value
                 });
@@ -88,49 +65,8 @@ const Roles = ({ ...props }) => {
         return []
     }
 
-    function getFilteredByKey(modo, key, value) {
-        if (modo === "1") {
-            const val = key.descripcion.toLowerCase();
-            const val2 = value.toLowerCase();
-            if (val.includes(val2)) {
-                return key
-            }
-        } else {
-            const val = getPermisosSoloUnString(key).toLowerCase();
-            const val2 = value.toLowerCase();
-            if (val.includes(val2)) {
-                return key
-            }
-        }
-        return null;
-    }
-
-    const getPermisosSoloUnString = (rol) => {
-        let permisos = ''
-        if (rol.permisos) {
-            let permisosDescripcion = []
-            rol.permisos.forEach(permiso => {
-                permisosDescripcion.push(permiso.descripcion)
-            });
-            permisos = permisosDescripcion.join(', ')
-        }
-        return permisos
-    }
-
-    const limpiarRol = () => {
-        setNameRol('');
-        setIdRol('');
-        setEstadoBoton('Agregar');
-        setIconButton('ri-save-line align-middle ms-2');
-    }
-
-
     const onClickExportExcel = () => {
         exportAndDownloadExcel('Roles', convertirDataRolesExcel(data))
-    }
-
-    const handleNameRolChange = (e) => {
-        setNameRol(e.target.value)
     }
 
     const data = getData();
@@ -143,10 +79,17 @@ const Roles = ({ ...props }) => {
 
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
-                            <label htmlFor="example-search-input" className="col-md-3 col-form-label">
+                            <label htmlFor="search-input" className="col-md-3 col-form-label">
                                 Busca el rol
                             </label>
-                            <input className="form-control" type="search" placeholder="Escribe el nombre del rol" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                type="search"
+                                placeholder="Escribe el nombre del rol"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                            />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <Link to="/newrole">
@@ -166,12 +109,6 @@ const Roles = ({ ...props }) => {
                                 onClick={() => { onClickExportExcel() }}>
                                 Exportar Excel{" "}
                                 <i className="mdi mdi-file-excel align-middle ms-2"></i>
-                            </button>
-                        </div>
-                        <div className="col-2 text-end">
-                            <button type="button" className="btn btn-outline-secondary waves-effect waves-light" onClick={() => { limpiarRol() }}>
-                                Limpiar{" "}
-                                <i className="ri-delete-bin-line align-middle"></i>
                             </button>
                         </div>
                     </Row>

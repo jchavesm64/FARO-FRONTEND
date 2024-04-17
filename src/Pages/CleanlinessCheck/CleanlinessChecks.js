@@ -10,7 +10,7 @@ import { convertDataCleanlinessCheck, exportAndDownloadExcel } from "../../helpe
 import { OBTENER_TODOS_CHEQUEOS } from "../../services/ChequeoService";
 
 
-const CleanlinessChecks = ({...props}) => {
+const CleanlinessChecks = ({ ...props }) => {
     document.title = "Chequeos de limpieza | FARO";
 
     const [filter, setFilter] = useState('')
@@ -21,9 +21,9 @@ const CleanlinessChecks = ({...props}) => {
         const val1 = key.puesto_limpieza.nombre.toLowerCase()
         const val2 = key.usuario?.nombre.toLowerCase() || ''
         const val = value.toLowerCase()
-        
 
-        if(val1.includes(val) || val2.includes(val)){
+
+        if (val1.includes(val) || val2.includes(val)) {
             return key
         }
 
@@ -31,8 +31,8 @@ const CleanlinessChecks = ({...props}) => {
     }
 
     const getData = () => {
-        if(data_chequeos){
-            if(data_chequeos.obtenerTodosChequeos){
+        if (data_chequeos) {
+            if (data_chequeos.obtenerTodosChequeos) {
                 return data_chequeos.obtenerTodosChequeos.filter((value, index) => {
                     if (filter !== "") {
                         return getFilteredByKey(value, filter);
@@ -50,14 +50,14 @@ const CleanlinessChecks = ({...props}) => {
 
     const data = getData();
 
-    if(load_chequeos){
+    if (load_chequeos) {
         return (
             <React.Fragment>
                 <div className="page-content">
                     <Container fluid={true}>
-                        <Breadcrumbs title="Chequeos"  />
+                        <Breadcrumbs title="Chequeos" />
                         <Row>
-                        <div className="col text-center pt-3 pb-3">
+                            <div className="col text-center pt-3 pb-3">
                                 <div className="spinner-border" role="status">
                                     <span className="visually-hidden">Loading...</span>
                                 </div>
@@ -72,27 +72,27 @@ const CleanlinessChecks = ({...props}) => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Chequeos de limpieza"  />
-                    <Row className="flex" style={{alignItems: 'flex-end'}}>
+                    <Breadcrumbs title="Chequeos de limpieza" />
+                    <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-12 mb-3">
                             <label
-                                htmlFor="example-search-input"
+                                htmlFor="search-input"
                                 className="col-md-2 col-form-label"
                             >
                                 Busca el chequeo
                             </label>
-                            <input className="form-control" value={filter} onChange={(e)=>{setFilter(e.target.value)}} type="search" placeholder="Escribe el nombre del puesto o el usuario" />
+                            <input className="form-control" id="search-input" value={filter} onChange={(e) => { setFilter(e.target.value) }} type="search" placeholder="Escribe el nombre del puesto o el usuario" />
                         </div>
                     </Row>
                     <Row className="">
                         <div className="col mb-3">
                             <button
-                              type="button"
-                              className="btn btn-outline-secondary waves-effect waves-light"
-                              onClick={()=>{onClickExportExcel()}}
+                                type="button"
+                                className="btn btn-outline-secondary waves-effect waves-light"
+                                onClick={() => { onClickExportExcel() }}
                             >
-                              Exportar Excel{" "}
-                              <i className="mdi mdi-file-excel align-middle ms-2"></i>
+                                Exportar Excel{" "}
+                                <i className="mdi mdi-file-excel align-middle ms-2"></i>
                             </button>
                         </div>
                     </Row>

@@ -20,12 +20,11 @@ const Assets = () => {
 
     function getFilteredByKey(key, value) {
         const valName = key.nombre.toLowerCase()
-        //const valUnit = key.unidad.toLowerCase()
-        const valInternalRef = key.referenciaInterna.toLowerCase()
+        const valInternalRef = key.referenciaInterna?.toLowerCase()
         const val = value.toLowerCase()
 
 
-        if (valName.includes(val) /*|| valUnit.includes(val)*/ || valInternalRef.includes(val)) {
+        if (valName.includes(val) || valInternalRef?.includes(val)) {
             return key
         }
 
@@ -104,12 +103,17 @@ const Assets = () => {
 
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
-                            <label htmlFor="example-search-input" className="col-md-3 col-form-label">
+                            <label htmlFor="search-input" className="col-md-3 col-form-label">
                                 Busca el activo
                             </label>
                             {/*<input className="form-control" value={filter} onChange={(e) => { setFilter(e.target.value) }} type="search"
                                 placeholder="Escribe el nombre, la unidad o la referencia interna del activo" />*/}
-                            <input className="form-control" value={filter} onChange={(e) => { setFilter(e.target.value) }} type="search"
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                                type="search"
                                 placeholder="Escribe el nombre o la referencia interna del activo" />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">

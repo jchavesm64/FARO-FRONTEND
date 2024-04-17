@@ -14,53 +14,17 @@ const Users = ({ ...props }) => {
     document.title = "Usuarios | FARO";
 
     const [filter, setFilter] = useState('')
-    const [modo, setModo] = useState('1')
 
     const [displayLength, setDisplayLength] = useState(10);
-    const [confimation, setConfirmation] = useState(false);
     const { loading: load_usuarios, error: error_usuarios, data: data_usuarios } = useQuery(OBTENER_USUARIOS_ACTIVOS, { pollInterval: 1000 })
     const [desactivar] = useMutation(DELETE_USER);
-    const [tipoVista, setTipoVista] = useState('grid')
-
-    useEffect(() => {
-        if (!localStorage.getItem('tipoVistaUsuarios')) {
-            localStorage.setItem('tipoVistaUsuarios', tipoVista)
-        } else {
-            setTipoVista(localStorage.getItem('tipoVistaUsuarios'))
-        }
-
-    }, [])
-
-    const onSetTipoVista = (tipo) => {
-        localStorage.setItem('tipoVistaUsuarios', tipo)
-        setTipoVista(tipo)
-    }
-
-    function getFilteredByKey(modo, key, value) {
-        if (modo === "1") {
-            const val = key.nombre.toLowerCase();
-            const val2 = value.toLowerCase();
-
-            if (val.includes(val2)) {
-                return key
-            }
-        } else {
-            const val = key.cedula.toLowerCase();
-            const val2 = value.toLowerCase();
-
-            if (val.includes(val2)) {
-                return key
-            }
-        }
-        return null;
-    }
 
     const getData = () => {
         if (data_usuarios) {
             if (data_usuarios.obtenerUsuariosActivos) {
                 return data_usuarios.obtenerUsuariosActivos.filter((value, index) => {
-                    if (filter !== "" && modo !== "") {
-                        return getFilteredByKey(modo, value, filter);
+                    if (filter !== "") {
+                        return getFilteredByKey(value, filter);
                     }
                     return value
                 });
@@ -69,14 +33,14 @@ const Users = ({ ...props }) => {
         return []
     }
 
-    function getFilteredByKey(modo, key, value) {
-        const valName = key.nombre.toLowerCase()
-        const valCode = key.codigo.toLowerCase()
-        const valCountry = key.pais.toLowerCase()
+    function getFilteredByKey(key, value) {
         const val = value.toLowerCase()
+        const valName = key.nombre.toLowerCase()
+        const valId = key.cedula.toLowerCase()
+        const valEmail = key.correos?.some(correo => correo.email.includes(val));
+        const valPhone = key.telefonos?.some(telefono => telefono.telefono.includes(val));
 
-
-        if (valName.includes(val) || valCode.includes(val) || valCountry.includes(val)) {
+        if (valName.includes(val) || valId.includes(val) || valEmail || valPhone) {
             return key
         }
 
@@ -121,10 +85,17 @@ const Users = ({ ...props }) => {
 
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
-                            <label htmlFor="example-search-input" className="col-md-3 col-form-label">
+                            <label htmlFor="search-input" className="col-md-3 col-form-label">
                                 Busca el usuario
                             </label>
-                            <input className="form-control" type="search" placeholder="Escribe el nombre del usuario" />
+                            <input
+                                className="form-control"
+                                id="search-input"
+                                type="search"
+                                placeholder="Escribe el nombre, identificación, correo o teléfono del usuario"
+                                value={filter}
+                                onChange={(e) => { setFilter(e.target.value) }}
+                            />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <Link to="/newuser">
