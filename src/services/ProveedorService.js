@@ -13,7 +13,9 @@ export const OBTENER_PROVEEDORES = gql`
             cp
             direccion
             telefonos{
-                telefono
+                telefono,
+                ext,
+                descripcion
             }
             correos{
                 email
@@ -56,7 +58,9 @@ export const OBTENER_PROVEEDOR = gql`
             cp
             direccion
             telefonos{
-                telefono
+                telefono,
+                ext,
+                descripcion
             }
             correos{
                 email
