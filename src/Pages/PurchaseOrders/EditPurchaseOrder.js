@@ -125,7 +125,7 @@ const EditPurchaseOrder = ({ props, purchaseOrder }) => {
     const onChangeProducto = (p) => {
         if (p) {
             setProducto(p)
-            setPrecioUnitario(p.value.precioCostoPromedio ? p.value.precioCostoPromedio !== null : 0)
+            setPrecioUnitario(p.value.precioCompra ? p.value.precioCompra : 0)
             setCantidad(1)
             setPorcentajeDescuento(0)
             if (p.value.impuestos) {

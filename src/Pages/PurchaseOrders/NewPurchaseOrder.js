@@ -74,7 +74,7 @@ const NewPurchaseOrder = (props) => {
     const onChangeProducto = (p) => {
         if (p) {
             setProducto(p)
-            setPrecioUnitario(p.value.precioCostoPromedio ? p.value.precioCostoPromedio !== null : 0)
+            setPrecioUnitario(p.value.precioCompra ? p.value.precioCompra : 0)
             setCantidad(1)
             setPorcentajeDescuento(0)
             if (p.value.impuestos) {
@@ -237,7 +237,6 @@ const NewPurchaseOrder = (props) => {
             }
 
             const inputLineas = lineasPedido.map(linea => {
-                console.log(linea);
                 let l = {
                     estado: 'ACTIVO',
                     producto: linea.producto.id,
@@ -264,7 +263,6 @@ const NewPurchaseOrder = (props) => {
             const { estado, message, data: dataOC } = data.insertarOrdenCompra;
             if (estado) {
                 infoAlert('Excelente', message, 'success', 3000, 'top-end')
-                console.log(data)
                 navigate(`/editpurchaseorder/${dataOC.id}`);
             } else {
                 infoAlert('Oops', message, 'error', 3000, 'top-end')
