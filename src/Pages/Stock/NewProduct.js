@@ -26,7 +26,7 @@ const NewProduct = (props) => {
     const [unidad, setUnidad] = useState(null)
 
     const [precioCompra, setPrecioCompra] = useState(0)
-    const [precioVenta, setPrecioVenta] = useState(0)
+    const [margen, setMargen] = useState(0)
 
     const [disableSave, setDisableSave] = useState(true);
 
@@ -50,7 +50,7 @@ const NewProduct = (props) => {
                 descripcion: descripcion,
                 precioCompra: parseFloat(precioCompra),
                 precioCostoPromedio: 0,
-                precioVenta: parseFloat(precioVenta),
+                margen: parseFloat(margen),
             }
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
             const { estado, message } = data.insertarMateriaPrima;
@@ -129,8 +129,11 @@ const NewProduct = (props) => {
                                     <input className="form-control" type="number" id="precioCosto" value={precioCompra} onChange={(e) => setPrecioCompra(e.target.value)} />
                                 </div>
                                 <div className="col-md-6 col-sm-12 mb-3">
-                                    <label htmlFor="precioVenta" className="form-label">Precio venta</label>
-                                    <input className="form-control" type="number" id="precioVenta" value={precioVenta} onChange={(e) => setPrecioVenta(e.target.value)} />
+                                    <label htmlFor="profitMargin" className="form-label">Margen de ganancia</label>
+                                    <div className="input-group">
+                                        <input className="form-control" type="number" id="profitMargin" value={margen} onChange={(e) => setMargen(e.target.value)} />
+                                        <span className="input-group-text" id="basic-addon2">%</span>
+                                    </div>
                                 </div>
                             </Row>
                         </div>
