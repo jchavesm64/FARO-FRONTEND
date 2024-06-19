@@ -9,7 +9,7 @@ const TableMenu = ({ ...props }) => {
 
     const { data, onDelete } = props;
 
-    const onClickDelete = async(id, nombre) => {
+    const onClickDelete = async (id, nombre) => {
         await onDelete(id, nombre)
     }
 
@@ -22,24 +22,22 @@ const TableMenu = ({ ...props }) => {
                         <th>Tipo</th>
                         <th>Nombre</th>
                         <th>Precio costo</th>
-                        <th>Precio venta</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {
-                        data.map((menuItem, i)=>(
+                        data.map((menuItem, i) => (
                             <tr key={`menu-${i}`}>
                                 <td>{menuItem.tipo}</td>
                                 <td>{menuItem.nombre}</td>
                                 <td>₡{menuItem.precioCosto}</td>
-                                <td>₡{menuItem.precioVenta}</td>
                                 <td>
                                     <div className="d-flex">
                                         <Link to={`/restaurant/editmenu/${menuItem.id}`}>
-                                            <ButtonIconTable icon='mdi mdi-pencil' color='warning'/>
+                                            <ButtonIconTable icon='mdi mdi-pencil' color='warning' />
                                         </Link>
-                                        <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={()=>{onClickDelete(menuItem.id, menuItem.nombre)}}/>
+                                        <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(menuItem.id, menuItem.nombre) }} />
                                     </div>
                                 </td>
                             </tr>
