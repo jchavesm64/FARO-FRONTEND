@@ -4,7 +4,6 @@ import { OBTENER_ACTIVO_CON_MOVIMIENTOS } from '../../services/ActivosService';
 import { useQuery } from '@apollo/client';
 import { Card, CardBody, Container, Row } from 'reactstrap';
 import Breadcrumbs from '../../components/Common/Breadcrumb';
-import Select from "react-select";
 import DataList from '../../components/Common/DataList';
 
 const AssetMove = () => {
@@ -25,13 +24,11 @@ const AssetMove = () => {
         if (data_asset) {
             setNombre(data_asset.obtenerActivoConMovimientos.nombre)
             setReferenciaInterna(data_asset.obtenerActivoConMovimientos.referenciaInterna)
-            setUnidad({ label: data_asset.obtenerActivoConMovimientos.unidad, value: data_asset.obtenerActivoConMovimientos.unidad })
         }
     }, [data_asset])
 
     const [nombre, setNombre] = useState('');
     const [referenciaInterna, setReferenciaInterna] = useState('');
-    const [unidad, setUnidad] = useState(null)
 
     if (loading_asset) {
         return (
@@ -57,43 +54,20 @@ const AssetMove = () => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title={"Movimientos Activo"} breadcrumbItem={"Activos"} breadcrumbItemUrl={"/assets"} />
-                    <Row className="d-flex justify-content-between">
-                        <span className='col-md-2 col-sm-12 mb-3'></span>
-                        <div className="col-md-5 col-sm-12 mb-3">
-                            <Row>
-                                <div className="col-md-6 col-sm-12 mb-3">
-                                    <Link to={`/asset/newmovement/SALIDA/${id}`}>
-                                        <button type="button" className="btn btn-danger waves-effect waves-light" style={{ width: '100%' }}>
-                                            Agregar salida{" "}
-                                            <i className="mdi mdi-minus align-middle ms-2"></i>
-                                        </button>
-                                    </Link>
-                                </div>
-                                <div className="col-md-6 col-sm-12 mb-3">
-                                    <Link to={`/asset/newmovement/ENTRADA/${id}`}>
-                                        <button type="button" className="btn btn-success waves-effect waves-light" style={{ width: '100%' }}>
-                                            Agregar entrada{" "}
-                                            <i className="mdi mdi-plus align-middle ms-2"></i>
-                                        </button></Link>
-                                </div>
-                            </Row>
+                    <Row>
+                        <div className="col mb-3 text-end">
+                            <Link to={`/asset/newmovement/${id}`}>
+                                <button type="button" className="btn btn-primary waves-effect waves-light">
+                                    Agregar movimiento{" "}
+                                    <i className="mdi mdi-plus align-middle ms-2"></i>
+                                </button>
+                            </Link>
                         </div>
                     </Row>
                     <Row>
                         <div className="col-md-4 mb-3">
                             <label htmlFor="nombre" className="form-label">Nombre</label>
                             <input className="form-control" type="text" id="nombre" value={nombre} disabled />
-                        </div>
-                        <div className="col-md-2 mb-3">
-                            <label htmlFor="unidad" className="form-label">Unidad de medida</label>
-                            <Select
-                                menuPosition="fixed"
-                                id="unidad"
-                                value={unidad}
-                                isDisabled
-                                options={[{ label: 'Kilogramo', value: 'Kilogramo' }, { label: 'Litro', value: 'Litro' }, { label: 'Unidades', value: 'Unidades' }]}
-                                classNamePrefix="select2-selection"
-                            />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <label htmlFor="refInterna" className="form-label">Referencia interna</label>

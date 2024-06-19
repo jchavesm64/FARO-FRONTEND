@@ -5,6 +5,7 @@ import DataList from "../../components/Common/DataList";
 import { useQuery } from "@apollo/client";
 import { convertirDataMovimientosActivosExcel, exportAndDownloadExcel } from "../../helpers/exportExcel";
 import { OBTENER_MOVIMIENTOS_ACTIVOS } from "../../services/MovimientosActivosService";
+import { Link } from "react-router-dom";
 
 
 const AssetsMove = ({ ...props }) => {
@@ -72,7 +73,7 @@ const AssetsMove = ({ ...props }) => {
                 <Container fluid={true}>
                     <Breadcrumbs title="Movimiento de Activos" breadcrumbItem="Inicio" breadcrumbItemUrl="/home" />
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
-                        <div className="col-md-12 mb-3">
+                        <div className="col-md-10 mb-3">
                             <label
                                 htmlFor="search-input"
                                 className="col-md-2 col-form-label"
@@ -87,6 +88,14 @@ const AssetsMove = ({ ...props }) => {
                                 type="search"
                                 placeholder="Escribe el identificador, beneficiario, activo o referencia interna"
                             />
+                        </div>
+                        <div className="col-md-2 col-sm-12 mb-3">
+                            <Link to="/asset/newmovement/">
+                                <button type="button" className="btn btn-primary waves-effect waves-light" style={{ width: '100%' }} >
+                                    Agregar Movimiento{" "}
+                                    <i className="mdi mdi-plus align-middle ms-2"></i>
+                                </button>
+                            </Link>
                         </div>
                     </Row>
                     <Row className="">
