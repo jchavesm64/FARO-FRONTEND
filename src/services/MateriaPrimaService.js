@@ -9,7 +9,8 @@ export const OBTENER_MATERIAS_PRIMAS = gql`
             unidad
             existencias
             estado
-            tipo
+            tipo,
+            precioCompra
         }
     }
 `;
@@ -30,7 +31,7 @@ export const OBTENER_TODAS_MATERIAS_PRIMAS = gql`
             descripcion
             precioCompra
             precioCostoPromedio
-            precioVenta
+            margen
             impuestos{
                 impuesto
                 aplicaVentas
@@ -92,7 +93,7 @@ export const OBTENER_MATERIA_PRIMA = gql`
             descripcion
             precioCompra
             precioCostoPromedio
-            precioVenta
+            margen
             impuestos{
                 impuesto
                 aplicaVentas

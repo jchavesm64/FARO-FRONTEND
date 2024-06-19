@@ -35,7 +35,7 @@ const TableSuppliers = ({ ...props }) => {
                                 <td>{proveedor.cedula}</td>
                                 <td>{proveedor.provedurias && proveedor.provedurias.length > 0 ? proveedor.provedurias[0].tipo + '...' : ''}</td>
                                 <td>{proveedor.correos && proveedor.correos.length > 0 ? proveedor.correos[0].email : ''}</td>
-                                <td>{proveedor.telefonos && proveedor.telefonos.length > 0 ? proveedor.telefonos[0].telefono : ''}</td>
+                                <td>{proveedor.telefonos && proveedor.telefonos.length > 0 ? proveedor.telefonos[0].telefono + (proveedor.telefonos[0].ext ? ', ext: ' + proveedor.telefonos[0].ext : '') : ''}</td>
                                 <td>
                                     <div className="d-flex">
                                         <Link to={`/editsupplier/${proveedor.id}`}>

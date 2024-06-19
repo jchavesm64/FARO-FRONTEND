@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
-import { Container, Row } from "reactstrap";
+import { Card, CardBody, Container, Row } from "reactstrap";
 import Breadcrumbs from "../../../components/Common/Breadcrumb";
 import { infoAlert } from "../../../helpers/alert";
 import { useMutation, useQuery } from "@apollo/client";
@@ -22,7 +22,6 @@ const NewMenu = (props) => {
     const [nombre, setNombre] = useState('')
     const [descripcion, setDescripcion] = useState('')
     const [tipo, setTipo] = useState(null)
-    const [precioVenta, setPrecioVenta] = useState(0)
 
     const [producto, setProducto] = useState(null)
     const [cantidad, setCantidad] = useState(0)
@@ -152,7 +151,6 @@ const NewMenu = (props) => {
                 nombre: nombre,
                 descripcion: descripcion,
                 precioCosto: 0,
-                precioVenta: precioVenta,
                 tipo: tipo.value
             }
 
@@ -244,12 +242,6 @@ const NewMenu = (props) => {
                                     <textarea className="form-control" type="text" id="descripcion" value={descripcion} onChange={(e) => setDescripcion(e.target.value)}></textarea>
                                 </div>
                             </Row>
-                            <Row>
-                                <div className="col mb-3">
-                                    <label htmlFor="precioVenta" className="form-label">Precio venta</label>
-                                    <input className="form-control" type="number" id="precioVenta" value={precioVenta} onChange={(e) => setPrecioVenta(e.target.value)} />
-                                </div>
-                            </Row>
                         </div>
                         <div className="col-md-7 col-sm-12 mb-3">
                             <Row className="align-items-center">
@@ -299,7 +291,7 @@ const NewMenu = (props) => {
                                 </div>
                             </Row>
                             <Row>
-                                <div className='col mt-3 mb-3'>
+                                <div className='col mt-3'>
                                     <div className="table-responsive">
                                         <table className="table">
                                             <thead className="table-light">
@@ -307,6 +299,7 @@ const NewMenu = (props) => {
                                                     <th>Producto</th>
                                                     <th>Cantidad</th>
                                                     <th>Unidad</th>
+                                                    <th>Costo</th>
                                                     <th></th>
                                                 </tr>
                                             </thead>
@@ -317,6 +310,7 @@ const NewMenu = (props) => {
                                                             <td>{linea.producto.nombre}</td>
                                                             <td>{linea.cantidad}</td>
                                                             <td>{linea.producto.unidad}</td>
+                                                            <td>{'₡' + linea.producto.precioCompra * linea.cantidad}</td>
                                                             <td>
                                                                 <div className="d-flex justify-content-end mx-1 my-1">
                                                                     <ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={() => { editarLinea(linea, index) }} />
@@ -328,6 +322,16 @@ const NewMenu = (props) => {
                                                 }
                                             </tbody>
                                         </table>
+                                    </div>
+                                </div>
+                            </Row>
+                            <Row className="bg-white d-flex align-center">
+                                <div className="col-8 mb-3 bg-white">
+                                    <div>
+                                        {'Total: ₡'}
+                                    </div>
+                                    <div className="col-4 mb-3 bg-white">
+                                        {lineasMenu.reduce((acc, l) => acc + (l.producto.precioCompra * l.cantidad), 0)}
                                     </div>
                                 </div>
                             </Row>

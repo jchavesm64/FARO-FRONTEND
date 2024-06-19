@@ -7,7 +7,7 @@ export const OBTENER_MOVIMIENTOS_ACTIVOS = gql`
             tipo
             beneficiario
             fecha
-            activo{
+            activos{
                 id
                 nombre
                 referenciaInterna

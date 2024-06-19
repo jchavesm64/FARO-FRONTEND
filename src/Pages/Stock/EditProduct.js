@@ -28,7 +28,7 @@ const EditProduct = ({ stockType, product }) => {
 
     const [precioCompra, setPrecioCompra] = useState(0)
     const [precioCostoPromedio, setPrecioCostoPromedio] = useState(0)
-    const [precioVenta, setPrecioVenta] = useState(0)
+    const [margen, setMargen] = useState(0)
     const [precioVentaConImpuesto, setPrecioVentaConImpuesto] = useState(0)
 
     useEffect(() => {
@@ -40,7 +40,7 @@ const EditProduct = ({ stockType, product }) => {
         setCodigoBarras(product.codigoBarras || '')
         setCodigoCabys(product.codigoCabys || '')
         setPrecioCompra(product.precioCompra || 0)
-        setPrecioVenta(product.precioVenta || 0)
+        setMargen(product.margen || 0)
         setPrecioCostoPromedio(product.precioCostoPromedio || 0)
     }, [product])
 
@@ -65,7 +65,7 @@ const EditProduct = ({ stockType, product }) => {
                 descripcion: descripcion,
                 precioCompra: parseFloat(precioCompra),
                 precioCostoPromedio: product.precioCostoPromedio,
-                precioVenta: parseFloat(precioVenta),
+                margen: parseFloat(margen),
             }
 
             const { data } = await actualizar({ variables: { id: product.id, input }, errorPolicy: 'all' });
@@ -106,7 +106,7 @@ const EditProduct = ({ stockType, product }) => {
                                 </div>
                                 <div className="col-3 mb-3">
                                     <label htmlFor="existencias" className="form-label">Existencias</label>
-                                    <input readOnly={true} className="form-control" type="number" id="existencias" value={existencias} onChange={(e) => setExistencias(e.target.value)} />
+                                    <input disabled className="form-control" type="number" id="existencias" value={existencias} onChange={(e) => setExistencias(e.target.value)} />
                                 </div>
                                 <div className="col-3 mb-3">
                                     <label htmlFor="unidad" className="form-label">* Unidad de medida</label>
@@ -149,20 +149,12 @@ const EditProduct = ({ stockType, product }) => {
                                     <input className="form-control" type="number" id="precioCosto" value={precioCompra} onChange={(e) => setPrecioCompra(e.target.value)} />
                                 </div>
                                 <div className="col-md-6 col-sm-12 mb-3">
-                                    <label htmlFor="precioCostoPromedio" className="form-label">Precio costo promedio</label>
-                                    <input readOnly={true} className="form-control" type="number" id="precioCostoPromedio" value={precioCostoPromedio} onChange={(e) => setPrecioCostoPromedio(e.target.value)} />
+                                    <label htmlFor="profitMargin" className="form-label">Margen de ganancia</label>
+                                    <div className="input-group">
+                                        <input className="form-control" type="number" id="profitMargin" value={margen} onChange={(e) => setMargen(e.target.value)} />
+                                        <span className="input-group-text" id="basic-addon2">%</span>
+                                    </div>
                                 </div>
-                            </Row>
-                            <Row>
-                                <div className="col-md-6 col-sm-12 mb-3">
-                                    <label htmlFor="precioVenta" className="form-label">Precio venta</label>
-                                    <input className="form-control" type="number" id="precioVenta" value={precioVenta} onChange={(e) => setPrecioVenta(e.target.value)} />
-                                </div>
-                                <div className="col-md-6 col-sm-12 mb-3">
-                                    <label htmlFor="precioVentaImpuestos" className="form-label">Precio venta más impuestos</label>
-                                    <input readOnly={true} className="form-control" type="number" id="precioVentaImpuestos" value={precioVentaConImpuesto} onChange={(e) => precioVentaConImpuesto(e.target.value)} />
-                                </div>
-
                             </Row>
                         </div>
                     </Row>

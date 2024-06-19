@@ -51,6 +51,8 @@ const EditCustomer = ({ props, customer }) => {
     const [customerType, setCustomerType] = useState(null);
     const [customerId, setCustomerId] = useState('')
     const [customerName, setCustomerName] = useState('')
+    const [billingName, setBillingName] = useState('')
+    const [isSameAsCustomer, setIsSameAsCustomer] = useState(false)
 
     const [country, setCountry] = useState(null);
     const [countryState, setCountryState] = useState(null);
@@ -68,12 +70,16 @@ const EditCustomer = ({ props, customer }) => {
     const [correoTemp, setCorreoTemp] = useState('');
     const [redes, setRedes] = useState([]);
     const [redTemp, setRedTemp] = useState('');
+    const [ext, setExt] = useState('');
+    const [description, setDescription] = useState('')
 
     const [actualizar] = useMutation(UPDATE_CLIENTE);
 
     useEffect(() => {
         setCustomerType(getCustomerType(customer.tipo))
         setCustomerName(customer.nombre)
+        setBillingName(customer.nombreFacturacion ? customer.nombreFacturacion : '')
+        setIsSameAsCustomer(customer.nombre === customer.nombreFacturacion)
         setCustomerId(customer.codigo)
         setCountry(getPais(customer.pais))
         setCountryState(getCiudad(customer.ciudad))
@@ -168,17 +174,50 @@ const EditCustomer = ({ props, customer }) => {
         setSocialMediaType(c)
     }
 
+    const handleOnClickIsSameAsCustomer = () => {
+        setIsSameAsCustomer(!isSameAsCustomer)
+        if (!isSameAsCustomer) {
+            setBillingName(customerName)
+        } else {
+            setBillingName('')
+        }
+    }
+
+    const handleSetCustomerName = (e) => {
+        setCustomerName(e.target.value)
+        if (isSameAsCustomer) {
+            setBillingName(e.target.value)
+        }
+    }
+
     const agregarTelefono = () => {
         if (code) {
             var band = false;
             telefonos.map(t => {
                 if (t.telefono === code.value + ' ' + telefonoTemp) {
-                    band = true;
+                    if (t.ext === ext || t.ext === undefined) {
+                        band = true;
+                    } else {
+                        band = false;
+                    }
                 }
             })
             if (!band) {
-                setTelefonos([...telefonos, { 'telefono': `${code.value} ${telefonoTemp}` }])
+                if (ext.trim().length === 0) {
+                    setTelefonos([...telefonos, {
+                        'telefono': `${code.value} ${telefonoTemp}`,
+                        'descripcion': description
+                    }])
+                } else {
+                    setTelefonos([...telefonos, {
+                        'telefono': `${code.value} ${telefonoTemp}`,
+                        'ext': `${ext}`,
+                        'descripcion': description
+                    }])
+                }
                 setTelefonoTemp('');
+                setExt('');
+                setDescription('');
             } else {
                 infoAlert('Oops', 'Ese teléfono ya existe', 'error', 3000, 'top-end')
             }
@@ -249,8 +288,11 @@ const EditCustomer = ({ props, customer }) => {
     const [disableSave, setDisableSave] = useState(true);
 
     useEffect(() => {
-        setDisableSave(!customerType || customerName.trim().length === 0 || customerId.trim().length === 0 || !country || !countryState || !city)
-    }, [customerType, customerName, customerId, country, countryState, city])
+        setDisableSave(
+            !customerType || customerName.trim().length === 0 || customerId.trim().length === 0
+            || !country || !countryState || !city || (billingName.trim().length === 0 && !isSameAsCustomer)
+        )
+    }, [customerType, customerName, customerId, country, countryState, city, billingName, isSameAsCustomer])
 
     const onClickSave = async () => {
         try {
@@ -258,6 +300,7 @@ const EditCustomer = ({ props, customer }) => {
             const input = {
                 tipo: customerType.value,
                 nombre: customerName,
+                nombreFacturacion: billingName,
                 codigo: customerId,
                 pais: country.value.name,
                 ciudad: countryState.value.name,
@@ -319,13 +362,54 @@ const EditCustomer = ({ props, customer }) => {
                                 </div>
                                 <div className="col-md-6 col-sm-12 mb-3">
                                     <label htmlFor="id" className="form-label">* Identificación</label>
-                                    <input className="form-control" type="text" id="id" value={customerId} onChange={(e) => { setCustomerId(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        id="id"
+                                        value={customerId}
+                                        placeholder="ej. 102340567"
+                                        onChange={(e) => { setCustomerId(e.target.value) }}
+                                    />
                                 </div>
                             </Row>
                             <Row>
                                 <div className="col-md-12 col-sm-12 mb-3">
                                     <label htmlFor="name" className="form-label">* Nombre</label>
-                                    <input className="form-control" type="text" id="name" value={customerName} onChange={(e) => { setCustomerName(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        id="name"
+                                        value={customerName}
+                                        placeholder="ej. Juan Rafael Pérez Bolaños"
+                                        onChange={(e) => { handleSetCustomerName(e) }}
+                                    />
+                                </div>
+                            </Row>
+                            <Row>
+                                <div className="col-md-12 col-sm-12 mb-3 d-flex align-items-center">
+                                    <div className="flex-grow-1">
+                                        <label htmlFor="billingName" className="form-label">* Nombre de facturación</label>
+                                        <input
+                                            className="form-control"
+                                            type="text"
+                                            id="billingName"
+                                            value={billingName}
+                                            placeholder={isSameAsCustomer ? "ej. Juan Rafael Pérez Bolaños" : "ej. Juan Pérez"}
+                                            disabled={isSameAsCustomer}
+                                            onChange={(e) => { setBillingName(e.target.value) }}
+                                        />
+                                    </div>
+                                    <div className="form-check ms-3 mt-4">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id="isSameAsCustomer"
+                                            readOnly
+                                            checked={isSameAsCustomer}
+                                            onClick={() => { handleOnClickIsSameAsCustomer() }}
+                                        />
+                                        <label htmlFor="isSameAsCustomer" className="form-check-label ms-2">Igual que Nombre</label>
+                                    </div>
                                 </div>
                             </Row>
                         </div>
@@ -364,21 +448,47 @@ const EditCustomer = ({ props, customer }) => {
                             <Row>
                                 <div className="col-md-4 col-sm-12 mb-3">
                                     <label htmlFor="city" className="form-label">* Ciudad</label>
-                                    <input className="form-control" type="text" id="city" value={city} onChange={(e) => { setCity(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="text" id="city"
+                                        value={city}
+                                        placeholder="ej. San José"
+                                        onChange={(e) => { setCity(e.target.value) }}
+                                    />
                                 </div>
                                 <div className="col-md-4 col-sm-12 mb-3">
                                     <label htmlFor="street" className="form-label">Calle</label>
-                                    <input className="form-control" type="text" id="street" value={street} onChange={(e) => { setStreet(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="text" id="street"
+                                        value={street}
+                                        placeholder="ej. Avenida Central, Calle 5"
+                                        onChange={(e) => { setStreet(e.target.value) }}
+                                    />
                                 </div>
                                 <div className="col-md-4 col-sm-12 mb-3">
                                     <label htmlFor="postalCode" className="form-label">Código postal</label>
-                                    <input className="form-control" type="text" id="postalCode" value={postalCode} onChange={(e) => { setPostalCode(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        id="postalCode"
+                                        value={postalCode}
+                                        placeholder="ej. 10101"
+                                        onChange={(e) => { setPostalCode(e.target.value) }}
+                                    />
                                 </div>
                             </Row>
                             <Row>
                                 <div className="col-md-12col-sm-12 mb-3">
                                     <label htmlFor="address" className="form-label">Señas</label>
-                                    <textarea className="form-control" type="text" id="address" value={address} onChange={(e) => { setAddress(e.target.value) }}></textarea>
+                                    <textarea
+                                        className="form-control"
+                                        type="text"
+                                        id="address"
+                                        value={address}
+                                        placeholder="ej. Frente al Parque Central, Edificio Azul con Puertas Blancas"
+                                        onChange={(e) => { setAddress(e.target.value) }}
+                                    ></textarea>
                                 </div>
                             </Row>
                         </div>
@@ -393,35 +503,58 @@ const EditCustomer = ({ props, customer }) => {
                                         </div>
                                     </Row>
                                     <div className="row row-cols-lg-auto g-3 align-items-center">
-                                        <div className="col-12 mb-1">
+                                        <div className=" mb-1">
                                             <Select
                                                 value={code}
                                                 onChange={(e) => {
                                                     handleCode(e);
                                                 }}
                                                 options={codes}
+                                                placeholder="Código"
                                                 classNamePrefix="select2-selection"
                                             />
                                         </div>
-                                        <div className="col-12 mb-1">
-                                            <label className="visually-hidden" htmlFor="inlineTel">Username</label>
+                                        <div className="mb-1">
+                                            <label className="visually-hidden" htmlFor="phone">Teléfono</label>
                                             <input
                                                 type="tel"
                                                 className="form-control"
-                                                id="inlineTel"
+                                                id="phone"
                                                 placeholder="Teléfono"
                                                 value={telefonoTemp}
                                                 onChange={(e) => { setTelefonoTemp(e.target.value) }}
                                             />
                                         </div>
-                                        <div className="col-12 mb-1">
+                                        <div className="col-lg-3 mb-1">
+                                            <label className="visually-hidden" htmlFor="extension">Extensión</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="extension"
+                                                placeholder="Extensión"
+                                                value={ext}
+                                                onChange={(e) => { setExt(e.target.value) }}
+                                            />
+                                        </div>
+                                        <div className="mb-1">
+                                            <label className="visually-hidden" htmlFor="description">Descripción</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="description"
+                                                placeholder="Descripción"
+                                                value={description}
+                                                onChange={(e) => { setDescription(e.target.value) }}
+                                            />
+                                        </div>
+                                        <div className="mb-1">
                                             <button type="submit" className="btn btn-outline-primary" onClick={() => { agregarTelefono() }}>
                                                 Agregar
                                             </button>
                                         </div>
                                     </div>
                                     <Row>
-                                        <ListInfo data={telefonos} headers={['Teléfono']} keys={['telefono']} enableEdit={false} enableDelete={true} actionDelete={eliminarTelefono} mainKey={'telefono'} />
+                                        <ListInfo data={telefonos} headers={['Descripción', 'Teléfono', 'Extensión']} keys={['descripcion', 'telefono', 'ext']} enableEdit={false} enableDelete={true} actionDelete={eliminarTelefono} mainKey={'telefono'} />
                                     </Row>
                                 </CardBody>
                             </Card>
@@ -436,11 +569,11 @@ const EditCustomer = ({ props, customer }) => {
                                     </Row>
                                     <div className="row row-cols-lg-auto g-3 align-items-center">
                                         <div className="col-12 mb-1">
-                                            <label className="visually-hidden" htmlFor="inlineEmail">Correo</label>
+                                            <label className="visually-hidden" htmlFor="email">Correo</label>
                                             <input
                                                 type="email"
                                                 className="form-control"
-                                                id="inlineEmail"
+                                                id="email"
                                                 placeholder="ejemplo@correo.com"
                                                 value={correoTemp}
                                                 onChange={(e) => { setCorreoTemp(e.target.value) }}
@@ -474,15 +607,16 @@ const EditCustomer = ({ props, customer }) => {
                                                     handleSocialMediaType(e);
                                                 }}
                                                 options={socialMediaTypes}
+                                                placeholder="Red social"
                                                 classNamePrefix="select2-selection"
                                             />
                                         </div>
                                         <div className="col-12 mb-1">
-                                            <label className="visually-hidden" htmlFor="inlineLink">link</label>
+                                            <label className="visually-hidden" htmlFor="link">link</label>
                                             <input
-                                                type="tel"
+                                                type="text"
                                                 className="form-control"
-                                                id="inlineLink"
+                                                id="link"
                                                 placeholder="URL de red social"
                                                 value={redTemp}
                                                 onChange={(e) => { setRedTemp(e.target.value) }}

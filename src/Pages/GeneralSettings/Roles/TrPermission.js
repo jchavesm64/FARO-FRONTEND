@@ -70,19 +70,19 @@ const TrPermission = ({ permission, onHandlePermission }) => {
             <td>{permission.modulo}</td>
             <td style={{ display: 'flex', alignItems: 'center' }}>
                 <div className="me-5">
-                    <input className="form-check-input me-2" type="checkbox" checked={edit} onClick={(e) => { onHandleValue('edit') }} />
+                    <input className="form-check-input me-2" type="checkbox" readOnly checked={edit} onClick={(e) => { onHandleValue('edit') }} />
                     <span>editar</span>
                 </div>
                 <div className="me-5">
-                    <input className="form-check-input me-2" type="checkbox" checked={deleteR} onClick={(e) => { onHandleValue('delete') }} />
+                    <input className="form-check-input me-2" type="checkbox" readOnly checked={deleteR} onClick={(e) => { onHandleValue('delete') }} />
                     <span>eliminar</span>
                 </div>
                 <div className="me-5">
-                    <input className="form-check-input me-2" type="checkbox" checked={add} onClick={(e) => { onHandleValue('add') }} />
+                    <input className="form-check-input me-2" type="checkbox" readOnly checked={add} onClick={(e) => { onHandleValue('add') }} />
                     <span>agregar</span>
                 </div>
                 <div className="me-5">
-                    <input className="form-check-input me-2" type="checkbox" checked={see} onClick={(e) => { onHandleValue('see') }} />
+                    <input className="form-check-input me-2" type="checkbox" readOnly checked={see} onClick={(e) => { onHandleValue('see') }} />
                     <span>ver</span>
                 </div>
                 <div className="me-5">

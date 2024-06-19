@@ -7,12 +7,12 @@ const ListInfo = ({ data, headers, keys, enableDelete, actionDelete, enableEdit,
 
 
     const onDelete = (element) => {
-        if(!secondKey){
+        if (!secondKey) {
             actionDelete(element[mainKey])
-        }else{
+        } else {
             actionDelete(element[mainKey], element[secondKey])
         }
-        
+
     }
 
 
@@ -22,7 +22,7 @@ const ListInfo = ({ data, headers, keys, enableDelete, actionDelete, enableEdit,
                 <thead>
                     <tr>
                         {
-                            headers.map((header, index)=> (
+                            headers.map((header, index) => (
                                 <th key={header}>{header}</th>
                             ))
                         }
@@ -34,23 +34,23 @@ const ListInfo = ({ data, headers, keys, enableDelete, actionDelete, enableEdit,
                 </thead>
                 <tbody>
                     {
-                        data.map((line, index)=> (
+                        data.map((line, index) => (
                             <tr key={index}>
                                 {
-                                    keys.map((key, indexKey)=>(
+                                    keys.map((key, indexKey) => (
                                         <td key={`${index}-${key}`}>
                                             {line[key]}
                                         </td>
                                     ))
                                 }
                                 {
-                                    enableEdit || enableDelete &&
+                                    (enableEdit || enableDelete) &&
                                     <th className="d-flex justify-content-center">
                                         {
-                                            enableEdit && <ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={actionEdit}/>
+                                            enableEdit && <ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={actionEdit} />
                                         }
                                         {
-                                            enableDelete && <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={()=> {onDelete(line)}}/>
+                                            enableDelete && <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onDelete(line) }} />
                                         }
                                     </th>
                                 }

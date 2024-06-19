@@ -21,6 +21,7 @@ const TableCustomers = ({ ...props }) => {
                     <tr>
                         <th>Tipo</th>
                         <th>Nombre</th>
+                        <th>Nombre de Facturación</th>
                         <th>Identificación</th>
                         <th>País</th>
                         <th>Estado o Provincia</th>
@@ -35,11 +36,12 @@ const TableCustomers = ({ ...props }) => {
                             <tr key={`Customer-${i}`}>
                                 <td>{cliente.tipo}</td>
                                 <td>{cliente.nombre}</td>
+                                <td>{cliente.nombreFacturacion}</td>
                                 <td>{cliente.codigo}</td>
                                 <td>{cliente.pais}</td>
                                 <td>{cliente.ciudad}</td>
                                 <td>{cliente.correos.length > 0 ? cliente.correos[0].email : ''}</td>
-                                <td>{cliente.telefonos.length > 0 ? cliente.telefonos[0].telefono : ''}</td>
+                                <td>{cliente.telefonos.length > 0 ? cliente.telefonos[0].telefono + (cliente.telefonos[0].ext ? ', ext: ' + cliente.telefonos[0].ext : '') : ''}</td>
                                 <td>
                                     <div className="d-flex">
                                         <Link to={`/editcustomer/${cliente.id}`}>

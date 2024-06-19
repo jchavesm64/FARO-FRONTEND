@@ -6,6 +6,7 @@ export const OBTENER_CLIENTES = gql`
             id
             tipo
             nombre
+            nombreFacturacion
             codigo
             pais
             ciudad
@@ -14,7 +15,9 @@ export const OBTENER_CLIENTES = gql`
             cp
             direccion
             telefonos{
-                telefono
+                telefono,
+                ext,
+                descripcion
             }
             correos{
                 email
@@ -34,6 +37,7 @@ export const OBTENER_CLIENTE = gql`
             id
             tipo
             nombre
+            nombreFacturacion
             codigo
             pais
             ciudad
@@ -42,7 +46,9 @@ export const OBTENER_CLIENTE = gql`
             cp
             direccion
             telefonos{
-                telefono
+                telefono,
+                ext,
+                descripcion
             }
             correos{
                 email

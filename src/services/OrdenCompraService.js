@@ -53,7 +53,7 @@ export const OBTENER_ORDEN_COMPRA = gql`
                     descripcion
                     precioCompra
                     precioCostoPromedio
-                    precioVenta
+                    margen
                     impuestos{
                         impuesto
                         aplicaVentas
