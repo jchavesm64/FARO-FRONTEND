@@ -29,10 +29,11 @@ const NewInternTransfer = (props) => {
     const [lineasAlmacen, setLineasAlmacen] = useState([])
     const [lineasAlmacenCargadas, setChequeoCargado] = useState(false)
     const [loadingLineasAlmacen, setLoadingLineasAlmacen] = useState(false)
+    const [disableCargar, setDisableCargar] = useState(true)
 
     const { loading: load_almacenes, data: data_almacenes } = useQuery(OBTENER_ALMACENES, { pollInterval: 1000 })
     const { data: data_usuario } = useQuery(OBTENER_USUARIO_CODIGO, { variables: { codigo: localStorage.getItem('cedula') } });
-    const [getWarehouseLines, { loading: load_lineas_almacen, data: data_lineas_almacen }] = useLazyQuery(OBTENER_LINEAS_ALMACEN, { pollInterval: 1000 });
+    const [getWarehouseLines, { called: called_lineas_almacen, loading: load_lineas_almacen, data: data_lineas_almacen }] = useLazyQuery(OBTENER_LINEAS_ALMACEN, { pollInterval: 1000 });
 
     useEffect(() => {
         if (load_lineas_almacen) {
@@ -40,15 +41,21 @@ const NewInternTransfer = (props) => {
         }
         if (data_lineas_almacen) {
             setLoadingLineasAlmacen(false)
-            setLineasAlmacen(data_lineas_almacen.obtenerLineasAlmacen.map((l, i) => {
-                return {
-                    ...l,
-                    cantidadTransferir: 0
-                }
-            }))
-            setChequeoCargado(true)
+            if (data_lineas_almacen.obtenerLineasAlmacen.length === 0) {
+                infoAlert('Oops', 'No hay productos en el almacén que envía', 'error', 3000, 'top-end')
+                setDisableCargar(true)
+            } else {
+                setLineasAlmacen(data_lineas_almacen.obtenerLineasAlmacen.map((l, i) => {
+                    return {
+                        ...l,
+                        cantidadTransferir: 0
+                    }
+                }))
+                setChequeoCargado(true)
+            }
+
         }
-    }, [data_lineas_almacen, load_lineas_almacen])
+    }, [data_lineas_almacen, load_lineas_almacen, called_lineas_almacen])
 
     const onClickClean = () => {
         // setPuestoLimpieza(null)
@@ -114,25 +121,8 @@ const NewInternTransfer = (props) => {
         }
     }
 
-    if (load_almacenes) {
-        return (
-            <React.Fragment>
-                <div className="page-content">
-                    <Container fluid={true}>
-                        <Breadcrumbs title='Nueva transferencia interna' breadcrumbItem='Transferencias internas' breadcrumbItemUrl='/internTransfers' />
-                        <Row>
-                            <div className="col text-center pt-3 pb-3">
-                                <div className="spinner-border" role="status">
-                                    <span className="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        </Row>
-                    </Container>
-                </div>
-            </React.Fragment>)
-    }
-
     const onChangeAlmacenDesde = (e) => {
+        setDisableCargar(false)
         setAlmacenDesde(e)
         setAlmacenHasta(null)
     }
@@ -152,6 +142,10 @@ const NewInternTransfer = (props) => {
         });
     }
 
+    const onBack = () => {
+        setLoadingLineasAlmacen(false)
+        setChequeoCargado(false)
+    }
 
     const cargarLineasAlmacen = () => {
         if (!almacenDesde || almacenDesde === null || !almacenHasta || almacenHasta === null) {
@@ -165,6 +159,23 @@ const NewInternTransfer = (props) => {
         }
     }
 
+    if (load_almacenes) {
+        return (
+            <React.Fragment>
+                <div className="page-content">
+                    <Container fluid={true}>
+                        <Breadcrumbs title='Nueva transferencia interna' breadcrumbItem='Transferencias internas' breadcrumbItemUrl='/internTransfers' />
+                        <Row>
+                            <div className="col text-center pt-3 pb-3">
+                                <div className="spinner-border" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </Row>
+                    </Container>
+                </div>
+            </React.Fragment>)
+    }
 
     return (
         <React.Fragment>
@@ -174,6 +185,12 @@ const NewInternTransfer = (props) => {
                     {
                         lineasAlmacenCargadas && lineasAlmacen.length > 0 &&
                         <Row>
+                            <div className="col mb-3 text-end">
+                                <button onClick={onBack} type="button" className="btn btn-danger waves-effect waves-light" >
+                                    Atrás{" "}
+                                    <i className="ri-arrow-left-line align-middle ms-2"></i>
+                                </button>
+                            </div>
                             <div className="col mb-3 text-end">
                                 <button disabled={disableSave} onClick={onSave} type="button" className="btn btn-primary waves-effect waves-light" >
                                     Guardar{" "}
@@ -251,7 +268,7 @@ const NewInternTransfer = (props) => {
                                 <Row>
                                     <div className="col mb-3">
 
-                                        <button onClick={cargarLineasAlmacen} type="button" className="btn btn-outline-primary waves-effect waves-light w-100" >
+                                        <button disabled={disableCargar} onClick={cargarLineasAlmacen} type="button" className="btn btn-outline-primary waves-effect waves-light w-100" >
                                             Cargar{" "}
                                             <i className="ri-save-line align-middle ms-2"></i>
                                         </button>
