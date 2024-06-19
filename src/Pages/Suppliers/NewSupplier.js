@@ -141,6 +141,8 @@ const NewSupplier = (props) => {
     const [correoTemp, setCorreoTemp] = useState('');
     const [redes, setRedes] = useState([]);
     const [redTemp, setRedTemp] = useState('');
+    const [ext, setExt] = useState('')
+    const [description, setDescription] = useState('')
 
 
     const agregarTelefono = () => {
@@ -148,12 +150,29 @@ const NewSupplier = (props) => {
             var band = false;
             telefonos.map(t => {
                 if (t.telefono === code.value + ' ' + telefonoTemp) {
-                    band = true;
+                    if (t.ext === ext || t.ext === undefined) {
+                        band = true;
+                    } else {
+                        band = false;
+                    }
                 }
             })
             if (!band) {
-                setTelefonos([...telefonos, { 'telefono': `${code.value} ${telefonoTemp}` }])
+                if (ext.trim().length === 0) {
+                    setTelefonos([...telefonos, {
+                        'telefono': `${code.value} ${telefonoTemp}`,
+                        'descripcion': description
+                    }])
+                } else {
+                    setTelefonos([...telefonos, {
+                        'telefono': `${code.value} ${telefonoTemp}`,
+                        'ext': `${ext}`,
+                        'descripcion': description
+                    }])
+                }
                 setTelefonoTemp('');
+                setExt('');
+                setDescription('');
             } else {
                 infoAlert('Oops', 'Ese teléfono ya existe', 'error', 3000, 'top-end')
             }
@@ -304,11 +323,25 @@ const NewSupplier = (props) => {
                             <Row>
                                 <div className="col-md-8 col-sm-12 mb-3">
                                     <label htmlFor="name" className="form-label">* Nombre</label>
-                                    <input className="form-control" type="text" id="name" value={name} onChange={(e) => { setName(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        id="name"
+                                        value={name}
+                                        placeholder="ej. Dos Pinos"
+                                        onChange={(e) => { setName(e.target.value) }}
+                                    />
                                 </div>
                                 <div className="col-md-4 col-sm-12 mb-3">
                                     <label htmlFor="id" className="form-label">* Identificación</label>
-                                    <input className="form-control" type="text" id="id" value={supplierId} onChange={(e) => { setSupplierId(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        id="id"
+                                        value={supplierId}
+                                        placeholder="ej. 102340567"
+                                        onChange={(e) => { setSupplierId(e.target.value) }}
+                                    />
                                 </div>
                             </Row>
                             <Row>
@@ -320,6 +353,7 @@ const NewSupplier = (props) => {
                                         isMulti={true}
                                         menuPosition="fixed"
                                         value={provedurias}
+                                        placeholder="Seleccione los tipos de proveeduría"
                                         onChange={(e) => { setProvedurias(e) }}
                                         isClearable={true}
                                         isSearchable={true}
@@ -327,14 +361,20 @@ const NewSupplier = (props) => {
                                 </div>
                             </Row>
                             <Row>
-                                <div className="col mt-3 mb-3">
+                                <div className="col mb-3">
                                     <SpanSubtitleForm subtitle='Fecha de vencimiento de pago' />
                                 </div>
                             </Row>
                             <Row>
                                 <div className="col-md-6 col-sm-12 mb-3">
                                     <label htmlFor="vencimientoPago" className="form-label">Cantidad de días/meses/años</label>
-                                    <input className="form-control" type="number" id="vencimientoPago" value={vencimientoPago} onChange={(e) => { setVencimientoPago(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="number"
+                                        id="vencimientoPago"
+                                        value={vencimientoPago}
+                                        onChange={(e) => { setVencimientoPago(e.target.value) }}
+                                    />
                                 </div>
                                 <div className="col-md-6 col-sm-12 mb-3">
                                     <Label>Días/meses/años</Label>
@@ -350,9 +390,15 @@ const NewSupplier = (props) => {
                             <Row>
                                 <div className="col-md-6 col-sm-12 mb-3">
                                     <label htmlFor="alertaDiasAntes" className="form-label">Generar alerta</label>
-                                    <div class="input-group">
-                                        <input className="form-control" type="number" id="alertaDiasAntes" value={alertaDiasAntes} onChange={(e) => { setAlertaDiasAntes(e.target.value) }} />
-                                        <span class="input-group-text" id="basic-addon2">días antes</span>
+                                    <div className="input-group">
+                                        <input
+                                            className="form-control"
+                                            type="number"
+                                            id="alertaDiasAntes"
+                                            value={alertaDiasAntes}
+                                            onChange={(e) => { setAlertaDiasAntes(e.target.value) }}
+                                        />
+                                        <span className="input-group-text" id="basic-addon2">días antes</span>
                                     </div>
 
                                 </div>
@@ -369,6 +415,7 @@ const NewSupplier = (props) => {
                                     <Label>* País</Label>
                                     <Select
                                         value={country}
+                                        placeholder="Seleccione un país"
                                         onChange={(e) => {
                                             handleCountry(e);
                                         }}
@@ -381,6 +428,7 @@ const NewSupplier = (props) => {
                                     <Label>* Provincia/Estado</Label>
                                     <Select
                                         value={countryState}
+                                        placeholder="Seleccione una provincia/estado"
                                         onChange={(e) => {
                                             handleCountryState(e);
                                         }}
@@ -393,21 +441,49 @@ const NewSupplier = (props) => {
                             <Row>
                                 <div className="col-md-4 col-sm-12 mb-3">
                                     <label htmlFor="city" className="form-label">* Ciudad</label>
-                                    <input className="form-control" type="text" id="city" value={city} onChange={(e) => { setCity(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        id="city"
+                                        value={city}
+                                        placeholder="ej. San José"
+                                        onChange={(e) => { setCity(e.target.value) }}
+                                    />
                                 </div>
                                 <div className="col-md-4 col-sm-12 mb-3">
                                     <label htmlFor="street" className="form-label">Calle</label>
-                                    <input className="form-control" type="text" id="street" value={street} onChange={(e) => { setStreet(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        id="street"
+                                        value={street}
+                                        placeholder="ej. Avenida Central, Calle 5"
+                                        onChange={(e) => { setStreet(e.target.value) }}
+                                    />
                                 </div>
                                 <div className="col-md-4 col-sm-12 mb-3">
                                     <label htmlFor="postalCode" className="form-label">Código postal</label>
-                                    <input className="form-control" type="text" id="postalCode" value={postalCode} onChange={(e) => { setPostalCode(e.target.value) }} />
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        id="postalCode"
+                                        value={postalCode}
+                                        placeholder="ej. 10101"
+                                        onChange={(e) => { setPostalCode(e.target.value) }}
+                                    />
                                 </div>
                             </Row>
                             <Row>
                                 <div className="col-md-12col-sm-12 mb-3">
                                     <label htmlFor="address" className="form-label">Señas</label>
-                                    <textarea className="form-control" type="text" id="address" value={address} onChange={(e) => { setAddress(e.target.value) }}></textarea>
+                                    <textarea
+                                        className="form-control"
+                                        type="text"
+                                        id="address"
+                                        value={address}
+                                        placeholder="ej. Frente al Parque Central, Edificio Azul con Puertas Blancas"
+                                        onChange={(e) => { setAddress(e.target.value) }}
+                                    ></textarea>
                                 </div>
                             </Row>
                         </div>
@@ -422,35 +498,58 @@ const NewSupplier = (props) => {
                                         </div>
                                     </Row>
                                     <div className="row row-cols-lg-auto g-3 align-items-center">
-                                        <div className="col-12 mb-1">
+                                        <div className=" mb-1">
                                             <Select
                                                 value={code}
                                                 onChange={(e) => {
                                                     handleCode(e);
                                                 }}
                                                 options={codes}
+                                                placeholder="Código"
                                                 classNamePrefix="select2-selection"
                                             />
                                         </div>
-                                        <div className="col-12 mb-1">
-                                            <label className="visually-hidden" htmlFor="inlineTel">Username</label>
+                                        <div className="mb-1">
+                                            <label className="visually-hidden" htmlFor="phone">Teléfono</label>
                                             <input
                                                 type="tel"
                                                 className="form-control"
-                                                id="inlineTel"
+                                                id="phone"
                                                 placeholder="Teléfono"
                                                 value={telefonoTemp}
                                                 onChange={(e) => { setTelefonoTemp(e.target.value) }}
                                             />
                                         </div>
-                                        <div className="col-12 mb-1">
+                                        <div className="col-lg-3 mb-1">
+                                            <label className="visually-hidden" htmlFor="extension">Extensión</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="extension"
+                                                placeholder="Extensión"
+                                                value={ext}
+                                                onChange={(e) => { setExt(e.target.value) }}
+                                            />
+                                        </div>
+                                        <div className="mb-1">
+                                            <label className="visually-hidden" htmlFor="description">Descripción</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="description"
+                                                placeholder="Descripción"
+                                                value={description}
+                                                onChange={(e) => { setDescription(e.target.value) }}
+                                            />
+                                        </div>
+                                        <div className="mb-1">
                                             <button type="submit" className="btn btn-outline-primary" onClick={() => { agregarTelefono() }}>
                                                 Agregar
                                             </button>
                                         </div>
                                     </div>
                                     <Row>
-                                        <ListInfo data={telefonos} headers={['Teléfono']} keys={['telefono']} enableEdit={false} enableDelete={true} actionDelete={eliminarTelefono} mainKey={'telefono'} />
+                                        <ListInfo data={telefonos} headers={['Descripción', 'Teléfono', 'Extensión']} keys={['descripcion', 'telefono', 'ext']} enableEdit={false} enableDelete={true} actionDelete={eliminarTelefono} mainKey={'telefono'} />
                                     </Row>
                                 </CardBody>
                             </Card>
@@ -503,6 +602,7 @@ const NewSupplier = (props) => {
                                                     handleSocialMediaType(e);
                                                 }}
                                                 options={socialMediaTypes}
+                                                placeholder="Red social"
                                                 classNamePrefix="select2-selection"
                                             />
                                         </div>
