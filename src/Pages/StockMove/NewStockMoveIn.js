@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { OBTENER_ALMACENES } from "../../services/AlmacenService";
 import { OBTENER_PROVEEDORES } from "../../services/ProveedorService";
 import { OBTENER_CLIENTES } from "../../services/ClienteService";
+import { OBTENER_MATERIA_PRIMA } from "../../services/MateriaPrimaService";
 import { SAVE_MOVIMIENTO } from "../../services/MovimientosService";
 import { infoAlert } from "../../helpers/alert";
 
@@ -23,6 +24,7 @@ const NewStockMoveIn = (props) => {
     const { loading: load_proveedores, data: data_proveedores } = useQuery(OBTENER_PROVEEDORES, { pollInterval: 1000 })
     const { loading: load_clientes, data: data_clientes } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 })
     const { loading: load_almacenes, data: data_almacenes } = useQuery(OBTENER_ALMACENES, { pollInterval: 1000 })
+    const { loading: load_producto, data: data_producto } = useQuery(OBTENER_MATERIA_PRIMA, { variables: { id: productId }, pollInterval: 1000 })
     const { data: data_usuario } = useQuery(OBTENER_USUARIO_CODIGO, { variables: { codigo: localStorage.getItem('cedula') } });
 
     const [insertar] = useMutation(SAVE_MOVIMIENTO);
@@ -34,6 +36,7 @@ const NewStockMoveIn = (props) => {
     const [cantidad, setCantidad] = useState(0)
     const [precio, setPrecio] = useState(0)
     const [moneda, setMoneda] = useState('Colón')
+    const [unidad, setUnidad] = useState(null)
 
     const [disableSave, setDisableSave] = useState(false);
 
@@ -68,7 +71,6 @@ const NewStockMoveIn = (props) => {
                     almacen: almacen ? almacen.value.id : null,
                     usuario: userId,
                 }
-                console.log(input);
                 const { data } = await insertar({ variables: { input, almacen: almacen.value.id }, errorPolicy: 'all' });
                 const { estado, message } = data.insertarMovimiento;
                 if (estado) {
@@ -127,9 +129,14 @@ const NewStockMoveIn = (props) => {
         return datos;
     }
 
+    const getUnidad = () => {
+        if (data_producto.obtenerMateriaPrima) {
+            return data_producto.obtenerMateriaPrima.unidad
+        }
+        return null
+    }
 
-
-    if (load_proveedores || load_clientes || load_almacenes) {
+    if (load_proveedores || load_clientes || load_almacenes || load_producto) {
         return <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
@@ -179,25 +186,6 @@ const NewStockMoveIn = (props) => {
                                 </div>
                             </Row>
                             <Row>
-                                <div className='col mt-2'>
-                                    <div className="form-check">
-                                        <input
-                                            className="form-check-input"
-                                            type="checkbox"
-                                            value={cedido}
-                                            onChange={() => { setCedido(!cedido) }}
-                                            id="cedidoCheck"
-                                        />
-                                        <label
-                                            className="form-check-label"
-                                            htmlFor="cedidoCheck"
-                                        >
-                                            Marcar en caso de que el producto sea cedido por el cliente
-                                        </label>
-                                    </div>
-                                </div>
-                            </Row>
-                            <Row>
                                 <div className="col mb-3">
                                     {
                                         cedido ? (
@@ -236,12 +224,34 @@ const NewStockMoveIn = (props) => {
                                     }
                                 </div>
                             </Row>
+                            <Row>
+                                <div className='col mt-2'>
+                                    <div className="form-check">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            value={cedido}
+                                            onChange={() => { setCedido(!cedido) }}
+                                            id="cedidoCheck"
+                                        />
+                                        <label
+                                            className="form-check-label"
+                                            htmlFor="cedidoCheck"
+                                        >
+                                            Marcar en caso de que el producto sea cedido por el cliente
+                                        </label>
+                                    </div>
+                                </div>
+                            </Row>
                         </div>
                         <div className="col-md-6 col-sm-12">
                             <Row>
                                 <div className="col mb-3">
                                     <label htmlFor='cantidad'>Cantidad</label>
-                                    <input id='cantidad' value={cantidad} onChange={(e) => setCantidad(e.target.value)} placeholder='Cantidad' type='number' className='form-control' />
+                                    <div className="input-group">
+                                        <input className="form-control" type="number" id='cantidad' value={cantidad} onChange={(e) => setCantidad(e.target.value)} placeholder='Cantidad' />
+                                        <span className="input-group-text" id="basic-addon2">{getUnidad()}</span>
+                                    </div>
                                 </div>
                             </Row>
                             <Row>
