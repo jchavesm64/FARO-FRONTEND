@@ -36,7 +36,7 @@ const TableAssets = ({ ...props }) => {
                                 <td>{getFechaTZ('fecha', asset.fechaRegistro)}</td>
                                 <td>
                                     <div className="d-flex">
-                                        <Link to={`/asset/movements/${asset.nombre}/${asset.id}`}>
+                                        <Link to={`/asset/movements/${asset.id}`}>
                                             <button type="button" className="me-2 btn btn-outline-secondary waves-effect waves-light">
                                                 Movimientos{" "}
                                                 <i className="mdi mdi-swap-horizontal ms-2"></i>

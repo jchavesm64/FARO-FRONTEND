@@ -96,8 +96,9 @@ const authProtectedRoutes = [
   { path: "/newasset", component: <NewAsset /> },
   { path: "/editasset/:id", component: <EditAsset /> },
   { path: "/assets/movements", component: <AssetsMove /> },
-  { path: "/asset/movements/:name/:id", component: <AssetMove /> },
-  { path: "/asset/newmovement/:type/:id", component: <NewAssetMove /> },
+  { path: "/asset/movements/:id", component: <AssetMove /> },
+  { path: "/asset/newmovement/:id", component: <NewAssetMove /> },
+  { path: "/asset/newmovement", component: <NewAssetMove /> },
 
   { path: "/accountingcontrol", component: <AccountingControl /> },
   { path: "/accountspayable", component: <AccountsPayable /> },
