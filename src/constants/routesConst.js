@@ -200,6 +200,13 @@ export const sidebarRoutes = [
         ],
     },
     {
+        label: "Facturacíon",
+        icon: "fas fa-soap",
+        subItem: [
+            { sublabel: "Mantenimiento", link: "/invoice/maintenance" },
+        ],
+    },
+    {
         label: "Configuración",
         isMainMenu: true,
     },

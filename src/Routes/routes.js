@@ -77,6 +77,8 @@ import NewAssetMove from "../Pages/AssetsMove/NewAssetMove";
 import NewSupplyType from "../Pages/GeneralSettings/SupplyType/NewSupplyType";
 import NewLocation from "../Pages/GeneralSettings/Locations/NewLocation";
 
+import InvoiceMaintenance from "../Pages/Invoices/Maintenance/Maintenance";
+
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
   { path: "/profile", component: <UserProfile /> },
@@ -161,6 +163,8 @@ const authProtectedRoutes = [
   { path: "/locations", component: <Location /> },
   { path: "/editlocation/:id", component: <EditLocation /> },
   { path: "/newlocation", component: <NewLocation /> },
+
+  { path: "/invoice/maintenance", component: <InvoiceMaintenance /> },
 
   {
     path: "/",
