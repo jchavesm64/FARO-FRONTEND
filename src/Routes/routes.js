@@ -165,6 +165,11 @@ const authProtectedRoutes = [
   { path: "/newlocation", component: <NewLocation /> },
 
   { path: "/invoice/maintenance", component: <InvoiceMaintenance /> },
+  { path: "/invoice/credit/notes", component: <InvoiceMaintenance /> },
+  { path: "/invoice/debit/notes", component: <InvoiceMaintenance /> },
+  { path: "/invoice/issued", component: <InvoiceMaintenance /> },
+  { path: "/invoice/parameters", component: <InvoiceMaintenance /> },
+  { path: "/invoice/companies", component: <InvoiceMaintenance /> },
 
   {
     path: "/",
