@@ -77,7 +77,9 @@ import NewAssetMove from "../Pages/AssetsMove/NewAssetMove";
 import NewSupplyType from "../Pages/GeneralSettings/SupplyType/NewSupplyType";
 import NewLocation from "../Pages/GeneralSettings/Locations/NewLocation";
 
-import InvoiceMaintenance from "../Pages/Invoices/Maintenance/Maintenance";
+import InvoiceMaintenance from "../Pages/Invoices/Maintenance";
+import InvoiceIssued from "../Pages/Invoices/Issued";
+import InvoiceParameters from "../Pages/Invoices/Parameters";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -167,8 +169,8 @@ const authProtectedRoutes = [
   { path: "/invoice/maintenance", component: <InvoiceMaintenance /> },
   { path: "/invoice/credit/notes", component: <InvoiceMaintenance /> },
   { path: "/invoice/debit/notes", component: <InvoiceMaintenance /> },
-  { path: "/invoice/issued", component: <InvoiceMaintenance /> },
-  { path: "/invoice/parameters", component: <InvoiceMaintenance /> },
+  { path: "/invoice/issued", component: <InvoiceIssued /> },
+  { path: "/invoice/parameters", component: <InvoiceParameters /> },
   { path: "/invoice/companies", component: <InvoiceMaintenance /> },
 
   {

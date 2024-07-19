@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Container, Modal, ModalBody, ModalHeader, Row } from "reactstrap";
-import Breadcrumbs from "../../../components/Common/Breadcrumb";
+import Breadcrumbs from "../../components/Common/Breadcrumb";
 import Select from "react-select";
 import { useQuery } from "@apollo/client";
-import { OBTENER_FACTURAS_PARAMETROS_BY_TYPE } from "../../../services/FacturasParametrosService";
-import { OBTENER_TODAS_MATERIAS_PRIMAS } from "../../../services/MateriaPrimaService";
-import ButtonIconTable from "../../../components/Common/ButtonIconTable";
-import { OBTENER_CLIENTES } from "../../../services/ClienteService";
+import { OBTENER_FACTURAS_PARAMETROS_BY_TYPE } from "../../services/FacturasParametrosService";
+import { OBTENER_TODAS_MATERIAS_PRIMAS } from "../../services/MateriaPrimaService";
+import ButtonIconTable from "../../components/Common/ButtonIconTable";
+import { OBTENER_CLIENTES } from "../../services/ClienteService";
+import Swal from "sweetalert2";
 
 
 
@@ -50,6 +51,8 @@ const InvoiceMaintenance = ({ ...props }) => {
                 value: item.id,
                 label: item.value
             }));
+
+            console.log(options)
 
             setCondicionVentas(options)
         }
@@ -216,6 +219,80 @@ const InvoiceMaintenance = ({ ...props }) => {
 
     }, [articulosLista]);
 
+    const toEmit = () => {
+        Swal.fire({
+          title: "Emitir factura",
+          text: `¿Está seguro de emitir esta factura?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#0BB197",
+          cancelButtonColor: "#FF3D60",
+          cancelButtonText: 'Cancelar',
+          confirmButtonText: "Sí, ¡Emitir!"
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            if (clienteFacturar && selectedTipoFactura && selectedCondicionVenta && selectedMetodoPago && selectedTipoMoneda){
+                console.log("emitida")
+                const myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                myHeaders.append("Cookie", "session=qifO9RMl_v6U89RqK1yBNeYrK40-gYum763TWWpGmus");
+
+                const raw = JSON.stringify({
+                    "receiver_id_num": clienteFacturar.codigo,
+                    "document_type": selectedTipoFactura.value,
+                    "sale_condition": selectedCondicionVenta.value,
+                    "payment_method": selectedMetodoPago.value,
+                    "currency_type": selectedTipoMoneda.value,
+                    "items": articulosLista
+                });
+
+                const requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: raw,
+                redirect: "follow"
+                };
+
+                fetch("http://localhost/send/document", requestOptions)
+                .then((response) => response.json())
+                .then((result) => {
+                    console.log(result)
+                    if (result.result){
+                        Swal.fire({
+                            title: "Factura Emitida Correctamente",
+                            text: `Su factura ha sido emitida exitosamente.`,
+                            icon: 'Success',
+                            showConfirmButton: true,
+                            confirmButtonColor: "#0BB197"
+                        })
+                    }else{
+                        Swal.fire({
+                            title: "Error al Emitir la Factura",
+                            text: `
+                                Ha ocurrido un error al emitir su factura. Por favor, intente nuevamente más tarde.\n
+                                Si el problema persiste, contacte a nuestro soporte técnico.`,
+                            icon: 'Error',
+                            showConfirmButton: true,
+                            confirmButtonColor: "#0BB197"
+                        })
+                    }
+                })
+                .catch((error) => console.error(error));
+            }else{
+                Swal.fire({
+                    title: "Emición de factura",
+                    text: `Comprueba que todos los datos estén correctamente ingresados`,
+                    icon: "Info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#0BB197",
+                    cancelButtonColor: "#FF3D60",
+                  })
+            }
+
+          }
+        });
+      }
+
 
     const [subTotalValue, setSubTotalValue] = useState(0);
     const [descuentoTotalValue, setDescuentoTotalValue] = useState(0);
@@ -230,7 +307,7 @@ const InvoiceMaintenance = ({ ...props }) => {
                 <Container fluid={true}>
                     <Breadcrumbs title="Mantenimiento" />
                     <Row className="justify-content-between">
-                        <div className="col-md-6 mb-3" >
+                        <div className="col-md-5 mb-3" >
                             <Row>
                                 <label className="form-label">Cliente (F5)</label>
                             </Row>
@@ -282,8 +359,6 @@ const InvoiceMaintenance = ({ ...props }) => {
                                     </Row>
                                 </div>
                             </Row> */}
-                        </div>
-                        <div className="col-md-5 mb-3" >
                             <Row>
                                 {/* <div className="col-md-2 mb-3">
                                     <label className="form-label">Días Plazo</label>
@@ -362,71 +437,7 @@ const InvoiceMaintenance = ({ ...props }) => {
                                         </div>
                                     </Row>
                                 </div>
-                                <div className="col-md-6 mb-3">
-                                    <Row>
-                                        <div className="col-md-4 mb-3 pe-1">
-                                            <button type="button" className="btn btn-primary waves-effect waves-light" >
-                                                Emitir (F4)
-                                            </button>
-                                        </div>
-                                        <div className="col-md-6 mb-3 ps-1">
-                                            <button type="button" className="btn btn-warning waves-effect waves-light" >
-                                                Proforma (F6)
-                                            </button>
-                                        </div>
-                                    </Row>
-                                </div>
                             </Row>
-                        </div>
-                    </Row>
-                    <Row>
-                    {articulosLista.length > 0 ?
-                        <div className="col-md-6 table-responsive mb-3">
-                                <table className="table table-hover table-striped mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Descripcion</th>
-                                            <th>Código Cabys</th>
-                                            <th>Precio Unitario</th>
-                                            <th>Cantidad</th>
-                                            <th>Subtotal</th>
-                                            <th>Impuestos</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            articulosLista.map((asset, i) => (
-                                                <tr key={`asset-${i}`}>
-                                                    <td>{asset.descripcion}</td>
-                                                    <td>{asset.codigoCabys}</td>
-                                                    <td>{asset.precioCompra}</td>
-                                                    <td>{asset.cantidadArticulo}</td>
-                                                    <td>{asset.cantidadArticulo*asset.precioCompra}</td>
-                                                    <td>
-                                                        {asset.impuestos.length > 0 ? 
-                                                            <>
-                                                                %{asset.impuestos[0].impuesto}
-                                                            </>
-                                                            :
-                                                            null
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        <ButtonIconTable icon='mdi mdi-delete ' color='danger' onClick={() => { eliminarLinea(i) }} />
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        }
-                                    </tbody>
-                                </table>
-                        </div>
-                        :
-                        null
-                    }
-                    </Row>
-                    <Row className="justify-content-between">
-                        <div className="col-md-6 mb-3" >
                             <Row>
                                 <div className="col-md-6 mb-3">
                                     <label className="form-label">Subtotal</label>
@@ -451,33 +462,62 @@ const InvoiceMaintenance = ({ ...props }) => {
                                     <input className="form-control" type="number" placeholder="0.00" value={otrosCargosTotalValue}/>
                                 </div> */}
                             </Row>
-                            {/* <Row>
-                                <div className="col-md-6 mb-3">
-                                    <label className="form-label">IVA Devuelto</label>
-                                    <input className="form-control" type="number" placeholder="0.00" value={IVADevueltoValue}/>
+                            <Row>
+                                <div className="col-md-12">
+                                    <button type="button" className="btn btn-primary waves-effect waves-light w-100" onClick={()=>toEmit()}>
+                                        Emitir (F4)
+                                    </button>
                                 </div>
-                                <div className="col-md-6 mb-3">
-                                    <label className="form-label">Total a Pagar</label>
-                                    <input className="form-control" type="number" placeholder="0.00" value={totalPagarValue}/>
-                                </div>
-                            </Row> */}
-                            {/* <Row>
-                                <label className="form-label">Contingencia</label>
+                                {/* <div className="col-md-6 mb-3 ps-1">
+                                    <button type="button" className="btn btn-warning waves-effect waves-light" >
+                                        Proforma (F6)
+                                    </button>
+                                </div> */}
                             </Row>
-                            <Row className="d-flex">
-                                <div className="col mb-3 pe-0">
-                                    <input className="form-control" type="text" placeholder="Documento"/>
-                                </div>
-                                <div className="col-md-1 mb-3 px-0">
-                                    <input className="fs-3 form-control d-flex text-center p-0" type="text" value={"/"}/>
-                                </div>
-                                <div className="col mb-3 ps-0">
-                                    <input className="form-control" type="date" placeholder="Fecha"/>
-                                </div>
-                            </Row> */}
                         </div>
-                        <div className="col-md-5 mb-3" >
-                            
+                        <div className="col-md-7 mb-3" style={{border: '1px solid #ced4da', borderRadius: '0.25rem', height: '660px', overflowY: 'scroll'}}>
+                            <div className="col-md-12 table-responsive mb-3">
+                                    <table className="table table-hover table-striped mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th style={{width: '200px'}}>Descripcion</th>
+                                                <th>Código Cabys</th>
+                                                <th>Precio Unitario</th>
+                                                <th>Cantidad</th>
+                                                <th>Subtotal</th>
+                                                <th>Impuestos</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody >
+                                        {articulosLista.length > 0 ?
+                                            <>
+                                            {
+                                                articulosLista.map((asset, i) => (
+                                                    <tr key={`asset-${i}`}>
+                                                        <td>{asset.descripcion}</td>
+                                                        <td>{asset.codigoCabys}</td>
+                                                        <td>{asset.precioCompra}</td>
+                                                        <td>{asset.cantidadArticulo}</td>
+                                                        <td>{asset.cantidadArticulo*asset.precioCompra}</td>
+                                                        <td>
+                                                            %13
+                                                        </td>
+                                                        <td>
+                                                            <ButtonIconTable icon='mdi mdi-delete ' color='danger' onClick={() => { eliminarLinea(i) }} />
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            }
+                                            </>
+                                            :
+                                            <tr key={`asset-empty`}>
+                                                <td colSpan={7} className="text-center" style={{height: '600px', alignContent: 'center'}}>{"No hay articulos agregados!"}</td>
+                                            </tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                            </div>
                         </div>
                     </Row>
                 </Container>

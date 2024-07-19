@@ -9,3 +9,13 @@ export const OBTENER_FACTURAS_PARAMETROS_BY_TYPE = gql`
         }
     }
 `;
+
+export const OBTENER_FACTURAS_PARAMETROS = gql`
+    query obtenerFacturasParametros{
+        obtenerFacturasParametros{
+            id
+            value
+            type
+        }
+    }
+`;

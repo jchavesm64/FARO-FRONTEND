@@ -20,6 +20,8 @@ import TableCleanlinessCheck from '../../Pages/CleanlinessCheck/TableCleanliness
 import TableInternTransfers from '../../Pages/InternTransfers/TableInternTransfers';
 import TableAssets from '../../Pages/Assets/TableAssets';
 import TableAssetMove from '../../Pages/AssetsMove/TableAssetMove';
+import TableInvoicesIssued from '../../Pages/Invoices/TableInvoicesIssued';
+import TableInvoicesParameters from '../../Pages/Invoices/TableInvoicesParameters';
 
 const DataList = ({ ...props }) => {
     const { data, type, displayLength, onDelete } = props;
@@ -139,6 +141,14 @@ const DataList = ({ ...props }) => {
                 {
                     type === 'assetMove' &&
                     <TableAssetMove {...props} data={datos} />
+                }
+                {
+                    type === 'invoicesIssued' &&
+                    <TableInvoicesIssued {...props} data={datos} />
+                }
+                {
+                    type === 'invoicesParameters' &&
+                    <TableInvoicesParameters {...props} data={datos} />
                 }
             </div>
             {(data.length > displayLength) &&
