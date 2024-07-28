@@ -1,5 +1,10 @@
 export const menuRoutes = [
     {
+        label: "Recepción",
+        icon: "mdi mdi-ballot-outline",
+        link: '/reception'
+    },
+    {
         label: "Clientes",
         icon: "mdi mdi-account-group-outline",
         link: '/customers'
@@ -110,6 +115,43 @@ export const restaurantRoutes = [
     // },
 ]
 
+export const receptionRoutes = [
+    {
+        label: "Disponivilidad y Nueva reserva",
+        icon: 'mdi mdi-calendar-plus',
+        link: "/reception/availability"
+    },
+    {
+        label: "Check In",
+        icon: 'mdi mdi-briefcase-download',
+        link: "/reception/checkin"
+    },
+    {
+        label: "Check Out",
+        icon: 'mdi mdi-briefcase-upload',
+        link: "/reception/checkout"
+    },
+    {
+        label: "In House",
+        icon: 'mdi mdi-home-outline',
+        link: "/reception/inhouse"
+    },
+    {
+        label: "Reserva de Servicios Externos",
+        icon: 'mdi mdi-clipboard-plus-outline',
+        link: "/reception/externalservice"
+    },
+    {
+        label: "Reportes",
+        icon: 'mdi mdi-file-chart',
+        link: "/reception/reports"
+    },
+    {
+        label: "Listado de Reservas",
+        icon: 'mdi mdi-format-list-bulleted',
+        link: "/reception/listreservatios"
+    },
+]
 
 export const sidebarRoutes = [
     {
@@ -122,6 +164,12 @@ export const sidebarRoutes = [
         url: "/home",
         isHasArrow: true,
         bgcolor: "bg-primary",
+    },
+    {
+        label: "Recepción",
+        icon: "mdi mdi-ballot-outline",
+        url: '/reception',
+        isHasArrow: true,
     },
     {
         label: "Clientes",

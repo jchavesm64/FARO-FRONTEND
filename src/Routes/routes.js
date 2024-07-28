@@ -46,6 +46,8 @@ import EditMenuContainer from "../Pages/Restaurant/Menu/EditMenuContainer";
 import RestaurantHome from "../Pages/Restaurant/RestaurantHome";
 import CleaningJobs from "../Pages/CleaningJobs/CleaningJobs";
 
+import ReceptionHome from "../Pages/Reception/ReceptionHome";
+
 import TaxManagement from "../Pages/TaxManagement/TaxManagement";
 import NewTaxManagement from "../Pages/TaxManagement/NewTaxManagement";
 import EditTaxManagement from "../Pages/TaxManagement/EditTaxManagement";
@@ -127,6 +129,7 @@ const authProtectedRoutes = [
   { path: "/restaurant/newmenu", component: <NewMenu /> },
   { path: "/restaurant/editmenu/:id", component: <EditMenuContainer /> },
 
+  { path: "/reception", component: <ReceptionHome /> },
 
   { path: "/cleaningjobs", component: <CleaningJobs /> },
   { path: "/editcleaningjob/:id", component: <EditCleaningJobContainer /> },
