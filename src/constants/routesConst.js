@@ -153,6 +153,40 @@ export const receptionRoutes = [
     },
 ]
 
+export const hotelsettings = [
+
+    {
+        label: "Habitaciones",
+        icon: 'mdi mdi-bed-outline',
+        link: "/hotelsettings/typeroom"
+    },
+    {
+        label: "Tipo Habitación",
+        icon: 'mdi mdi-bed-king-outline',
+        link: "/hotelsettings/typeroom"
+    },
+    {
+        label: "Comodidades",
+        icon: 'mdi mdi-television',
+        link: "/reception/amenities"
+    },
+    {
+        label: "Servicios extra",
+        icon: 'mdi mdi-account-star-outline',
+        link: "/reception/extraservice"
+    },
+    {
+        label: "Temporada",
+        icon: 'mdi mdi-home-outline',
+        link: "/reception/inhouse"
+    },
+    {
+        label: "Paquetes",
+        icon: 'mdi mdi-clipboard-plus-outline',
+        link: "/reception/externalservice"
+    }
+]
+
 export const sidebarRoutes = [
     {
         label: "Menú",
@@ -296,4 +330,9 @@ export const menuRoutesGeneralSettings = [
         icon: "mdi mdi-currency-usd",
         link: '/taxmanagement'
     },
+    {
+        label: "Hotel",
+        icon: "mdi mdi-office-building",
+        link: '/hotelsettings'
+    }
 ]

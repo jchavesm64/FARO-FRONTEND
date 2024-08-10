@@ -1,12 +1,11 @@
 import React from 'react'
 import { Container, Row } from "reactstrap";
 
-import Breadcrumbs from "../../components/Common/Breadcrumb";
-import { receptionRoutes } from "../../constants/routesConst";
-import ButtomCardHome from "../Home/ButtonCardHome";
+import Breadcrumbs from "../../../components/Common/Breadcrumb";
+import ButtomCardHome from '../../Home/ButtonCardHome';
+import { hotelsettings } from '../../../constants/routesConst';
 
-export default function ReceptionHome() {
-    document.title = "Recepción | FARO";
+const HotelHomeSettings = () => {
     return (
         <React.Fragment>
             <div className="page-content">
@@ -14,7 +13,7 @@ export default function ReceptionHome() {
                     <Breadcrumbs title="Recepción" />
                     <Row className="flex justify-content-center gap-3">
                         {
-                            receptionRoutes.map((route, index) => (
+                            hotelsettings.map((route, index) => (
                                 <ButtomCardHome key={index} route={route} />
                             ))
                         }
@@ -24,3 +23,4 @@ export default function ReceptionHome() {
         </React.Fragment>
     )
 }
+export default HotelHomeSettings

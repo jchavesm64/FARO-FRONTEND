@@ -47,6 +47,7 @@ import RestaurantHome from "../Pages/Restaurant/RestaurantHome";
 import CleaningJobs from "../Pages/CleaningJobs/CleaningJobs";
 
 import ReceptionHome from "../Pages/Reception/ReceptionHome";
+import AvailabilityNewBooking from "../Pages/Reception/Availability/AvailabilityNewBooking"
 
 import TaxManagement from "../Pages/TaxManagement/TaxManagement";
 import NewTaxManagement from "../Pages/TaxManagement/NewTaxManagement";
@@ -78,6 +79,16 @@ import AssetMove from "../Pages/AssetsMove/AssetMove";
 import NewAssetMove from "../Pages/AssetsMove/NewAssetMove";
 import NewSupplyType from "../Pages/GeneralSettings/SupplyType/NewSupplyType";
 import NewLocation from "../Pages/GeneralSettings/Locations/NewLocation";
+import HotelHomeSettings from "../Pages/GeneralSettings/Hotel/HotelHomeSettings";
+import Amenities from "../Pages/GeneralSettings/Hotel/Amenities/Amenities";
+import NewAmenities from "../Pages/GeneralSettings/Hotel/Amenities/NewAmenities";
+import EditAmenities from "../Pages/GeneralSettings/Hotel/Amenities/EditAmenities";
+import TypeRoom from "../Pages/GeneralSettings/Hotel/TypeRoom/TypeRoom";
+import NewTypeRom from "../Pages/GeneralSettings/Hotel/TypeRoom/NewTypeRoom";
+import EditTypeRoom from "../Pages/GeneralSettings/Hotel/TypeRoom/EditTypeRoom";
+import ExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/ExtraService";
+import NewExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/NewExtraService";
+import EditExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/EditExtraService";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -130,6 +141,7 @@ const authProtectedRoutes = [
   { path: "/restaurant/editmenu/:id", component: <EditMenuContainer /> },
 
   { path: "/reception", component: <ReceptionHome /> },
+  { path: "/reception/availability", component: <AvailabilityNewBooking /> },
 
   { path: "/cleaningjobs", component: <CleaningJobs /> },
   { path: "/editcleaningjob/:id", component: <EditCleaningJobContainer /> },
@@ -164,6 +176,17 @@ const authProtectedRoutes = [
   { path: "/locations", component: <Location /> },
   { path: "/editlocation/:id", component: <EditLocation /> },
   { path: "/newlocation", component: <NewLocation /> },
+  { path: "/hotelsettings", component: <HotelHomeSettings /> },
+  { path: "/hotelsettings/typeroom", component: <TypeRoom /> },
+  { path: "/hotelsettings/newtyperoom", component: <NewTypeRom /> },
+  { path: "/hotelsettings/edittyperoom/:id", component: <EditTypeRoom /> },
+  { path: "/hotelsettings/amenities", component: <Amenities /> },
+  { path: "/hotelsettings/newamenities", component: <NewAmenities /> },
+  { path: "/hotelsettings/editamenities/:id", component: <EditAmenities /> },
+  { path: "/hotelsettings/extraservices", component: <ExtraService /> },
+  { path: "/hotelsettings/newextraservices", component: <NewExtraService /> },
+  { path: "/hotelsettings/extraservice/:id", component: <EditExtraService /> },
+  { path: "/hotelsettings/", component: <HotelHomeSettings /> },
 
   {
     path: "/",
