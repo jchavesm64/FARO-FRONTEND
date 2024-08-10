@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import TableCustomers from '../../Pages/Customers/TableCustomers';
 import TableAccountingControl from '../../Pages/AccountingControl/TableAccountingControl';
 import DataListPagination from './DataListPagination';
@@ -20,42 +20,43 @@ import TableCleanlinessCheck from '../../Pages/CleanlinessCheck/TableCleanliness
 import TableInternTransfers from '../../Pages/InternTransfers/TableInternTransfers';
 import TableAssets from '../../Pages/Assets/TableAssets';
 import TableAssetMove from '../../Pages/AssetsMove/TableAssetMove';
+import TableTypeRoom from '../../Pages/GeneralSettings/Hotel/TypeRoom/TableTypeRoom'
+import TableAmenities from '../../Pages/GeneralSettings/Hotel/Amenities/TableAmenities'
+import TableExtraService from '../../Pages/GeneralSettings/Hotel/ExtraService/TableExtraService'
 
 const DataList = ({ ...props }) => {
     const { data, type, displayLength, onDelete } = props;
-    var index = 0
-    const [page, setPage] = useState((localStorage.getItem('active_page_' + type) && (data.length > displayLength)) ? localStorage.getItem('active_page_' + type) : 1);
-    if (data.length < displayLength && page !== 1) {
-        setPage(1)
-    }
+    const [page, setPage] = useState(() => {
+        const savedPage = localStorage.getItem('active_page_' + type);
+        return savedPage && data.length > displayLength ? parseInt(savedPage, 10) : 1;
+    });
 
-    const [datos, setDatos] = useState([])
+    const [datos, setDatos] = useState([]);
+
+    // Memoriza la función getData para que no se redefina en cada renderizado
+    const getData = useCallback(() => {
+        let array = [];
+        const startIndex = (page - 1) * displayLength;
+        let size = data.length;
+
+        if (startIndex + displayLength <= data.length) {
+            size = startIndex + displayLength;
+        }
+
+        for (let i = startIndex; i < size; i++) {
+            array.push(data[i]);
+        }
+
+        return array;
+    }, [data, page, displayLength]);
 
     useEffect(() => {
-        setDatos(getData())
-    }, [page, data])
-
-
-    const getData = () => {
-        var array = [], size = data.length;
-        if (index + displayLength <= data.length) {
-            size = index + displayLength;
-        }
-        for (let i = index; i < size; i++) {
-            array.push(data[i])
-        }
-        return array
-    }
-
-    const calIndex = () => {
-        if (page === 1) {
-            index = 0
+        if (data.length < displayLength && page !== 1) {
+            setPage(1);
         } else {
-            index = (((page - 1) * displayLength))
+            setDatos(getData());
         }
-    }
-
-    calIndex()
+    }, [data, displayLength, page, getData]);
 
     return (
         <>
@@ -139,6 +140,18 @@ const DataList = ({ ...props }) => {
                 {
                     type === 'assetMove' &&
                     <TableAssetMove {...props} data={datos} />
+                }
+                {
+                    type === 'typeroom' &&
+                    <TableTypeRoom {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'amenities' &&
+                    <TableAmenities {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'extraservice' &&
+                    <TableExtraService {...props} data={datos} onDelete={onDelete} />
                 }
             </div>
             {(data.length > displayLength) &&
