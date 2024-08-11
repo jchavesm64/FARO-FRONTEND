@@ -106,7 +106,32 @@ const NewRoom = () => {
         setDisableSave(numberRoom.trim().length === 0 || !typeRoom || price <= 0 || amenitiesList.length === 0 || !stateRoom)
     }, [numberRoom, typeRoom, price, amenitiesList, stateRoom])
 
-    const onClickSave = async () => { }
+    const onClickSave = async () => {
+        try {
+            setDisableSave(true)
+            const input = {
+                numeroHabitacion: numberRoom,
+                tipoHabitacion: typeRoom.value.id,
+                precioPorNoche: price,
+                descripcion: description,
+                comodidades: amenitiesList,
+                estado: stateRoom.value
+            }
+            debugger
+            const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
+            const { estado, message } = data.insertarHabitacion;
+            if (estado) {
+                infoAlert('Excelente', message, 'success', 3000, 'top-end')
+                navigate('/hotelsettings/rooms');
+            } else {
+                infoAlert('Oops', message, 'error', 3000, 'top-end')
+            }
+            setDisableSave(false)
+        } catch (error) {
+            infoAlert('Oops', 'Ocurrió un error inesperado al guardar la habitación', 'error', 3000, 'top-end')
+            setDisableSave(false)
+        }
+    }
 
     if (loadAmenities || loadTypeRooms) {
         return (
