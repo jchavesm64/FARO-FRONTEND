@@ -51,7 +51,7 @@ const NewRoom = () => {
     const getTypeRooms = () => {
         const data = []
         if (typeRooms?.obtenerTiposHabitaciones) {
-            typeRooms.obtenerTiposHabitaciones.map((item) => {
+            typeRooms.obtenerTiposHabitaciones.forEach((item) => {
                 data.push({
                     "value": item,
                     "label": item.nombre
@@ -64,7 +64,7 @@ const NewRoom = () => {
     const getAmenities = () => {
         const data = []
         if (typeAmenities?.obtenerComodidades) {
-            typeAmenities?.obtenerComodidades.map((item) => {
+            typeAmenities?.obtenerComodidades.forEach((item) => {
                 data.push({
                     "value": item,
                     "label": item.nombre
@@ -114,7 +114,7 @@ const NewRoom = () => {
                 tipoHabitacion: typeRoom.value.id,
                 precioPorNoche: price,
                 descripcion: description,
-                comodidades: amenitiesList,
+                comodidades: amenitiesList.map(a => a.id),
                 estado: stateRoom.value
             }
             debugger
