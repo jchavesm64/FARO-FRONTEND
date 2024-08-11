@@ -23,6 +23,7 @@ import TableAssetMove from '../../Pages/AssetsMove/TableAssetMove';
 import TableTypeRoom from '../../Pages/GeneralSettings/Hotel/TypeRoom/TableTypeRoom'
 import TableAmenities from '../../Pages/GeneralSettings/Hotel/Amenities/TableAmenities'
 import TableExtraService from '../../Pages/GeneralSettings/Hotel/ExtraService/TableExtraService'
+import TableRooms from '../../Pages/GeneralSettings/Hotel/Rooms/TableRooms';
 
 const DataList = ({ ...props }) => {
     const { data, type, displayLength, onDelete } = props;
@@ -152,6 +153,10 @@ const DataList = ({ ...props }) => {
                 {
                     type === 'extraservice' &&
                     <TableExtraService {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'rooms' &&
+                    <TableRooms {...props} data={datos} onDelete={onDelete} />
                 }
             </div>
             {(data.length > displayLength) &&

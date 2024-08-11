@@ -89,6 +89,8 @@ import EditTypeRoom from "../Pages/GeneralSettings/Hotel/TypeRoom/EditTypeRoom";
 import ExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/ExtraService";
 import NewExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/NewExtraService";
 import EditExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/EditExtraService";
+import Rooms from "../Pages/GeneralSettings/Hotel/Rooms/Roms";
+import NewRoom from "../Pages/GeneralSettings/Hotel/Rooms/NewRoom";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -186,7 +188,8 @@ const authProtectedRoutes = [
   { path: "/hotelsettings/extraservices", component: <ExtraService /> },
   { path: "/hotelsettings/newextraservices", component: <NewExtraService /> },
   { path: "/hotelsettings/extraservice/:id", component: <EditExtraService /> },
-  { path: "/hotelsettings/", component: <HotelHomeSettings /> },
+  { path: "/hotelsettings/rooms", component: <Rooms /> },
+  { path: "/hotelsettings/newroom", component: <NewRoom /> },
 
   {
     path: "/",

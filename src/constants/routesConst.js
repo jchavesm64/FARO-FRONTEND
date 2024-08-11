@@ -158,7 +158,7 @@ export const hotelsettings = [
     {
         label: "Habitaciones",
         icon: 'mdi mdi-bed-outline',
-        link: "/hotelsettings/typeroom"
+        link: "/hotelsettings/rooms"
     },
     {
         label: "Tipo Habitación",
@@ -168,22 +168,22 @@ export const hotelsettings = [
     {
         label: "Comodidades",
         icon: 'mdi mdi-television',
-        link: "/reception/amenities"
+        link: "/hotelsettings/amenities"
     },
     {
         label: "Servicios extra",
         icon: 'mdi mdi-account-star-outline',
-        link: "/reception/extraservice"
+        link: "/hotelsettings/extraservice"
     },
     {
         label: "Temporada",
         icon: 'mdi mdi-home-outline',
-        link: "/reception/inhouse"
+        link: "/hotelsettings/inhouse"
     },
     {
-        label: "Paquetes",
+        label: "Administrar Paquetes",
         icon: 'mdi mdi-clipboard-plus-outline',
-        link: "/reception/externalservice"
+        link: "/hotelsettings/externalservice"
     }
 ]
 

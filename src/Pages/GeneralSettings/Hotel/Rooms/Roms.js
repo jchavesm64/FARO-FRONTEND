@@ -1,27 +1,26 @@
-import React, { useState } from "react";
-import { Card, Container, Row, CardBody } from "reactstrap";
-import { useMutation, useQuery } from "@apollo/client";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react'
+import { Card, CardBody, Container, Row } from "reactstrap";
+import Breadcrumbs from '../../../../components/Common/Breadcrumb';
+import { Link } from 'react-router-dom';
+import { useMutation, useQuery } from '@apollo/client';
+import { DELETE_HABITACION, OBTENER_HABITACIONES } from '../../../../services/HabitacionesService';
+import Swal from 'sweetalert2';
+import { infoAlert } from '../../../../helpers/alert';
+import DataList from '../../../../components/Common/DataList';
 
-import Breadcrumbs from "../../../../components/Common/Breadcrumb";
-import DataList from "../../../../components/Common/DataList";
-import { infoAlert } from "../../../../helpers/alert";
-import Swal from "sweetalert2";
-import { DELETE_COMODIDAD, OBTENER_COMODIDADES } from "../../../../services/ComodidadesService";
-
-const Amenities = ({ ...props }) => {
-    document.title = "Comodidades | FARO";
+const Rooms = ({ ...props }) => {
+    document.title = "Habitaciones | FARO";
 
     const [filter, setFilter] = useState('');
     const [modo] = useState('1')
 
-    const { data: tiposComodidades } = useQuery(OBTENER_COMODIDADES, { pollInterval: 1000 });
-    const [desactivar] = useMutation(DELETE_COMODIDAD);
+    const { data: habitaciones } = useQuery(OBTENER_HABITACIONES, { pollInterval: 1000 });
+    const [desactivar] = useMutation(DELETE_HABITACION);
 
-    const onDeleteAmenities = (id, nombre) => {
+    const onDeleteRooms = (id, nombre) => {
         Swal.fire({
-            title: "Eliminar Comodidad",
-            text: `¿Está seguro de eliminar la comodidad ${nombre}?`,
+            title: "Eliminar habitación",
+            text: `¿Está seguro de eliminar la habitación ${nombre}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#0BB197",
@@ -31,11 +30,11 @@ const Amenities = ({ ...props }) => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 const { data } = await desactivar({ variables: { id } });
-                const { estado, message } = data.desactivarComodidad;
+                const { estado, message } = data.desactivarHabitacion;
                 if (estado) {
-                    infoAlert('Comodidad eliminada', message, 'success', 3000, 'top-end')
+                    infoAlert('Habitacion eliminada', message, 'success', 3000, 'top-end')
                 } else {
-                    infoAlert('Eliminar comodidad', message, 'error', 3000, 'top-end')
+                    infoAlert('Eliminar habitación', message, 'error', 3000, 'top-end')
                 }
             }
         });
@@ -53,9 +52,9 @@ const Amenities = ({ ...props }) => {
     }
 
     const getData = () => {
-        if (tiposComodidades) {
-            if (tiposComodidades.obtenerComodidades) {
-                return tiposComodidades.obtenerComodidades.filter((value) => {
+        if (habitaciones) {
+            if (habitaciones.obtenerHabitaciones) {
+                return habitaciones.obtenerHabitaciones.filter((value) => {
                     if (filter !== "" && modo !== "") {
                         return getFilteredByKey(modo, value, filter);
                     }
@@ -72,23 +71,23 @@ const Amenities = ({ ...props }) => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Comodidades" breadcrumbItem="Ajustes generales Hotel" breadcrumbItemUrl="/hotelsettings" />
+                    <Breadcrumbs title="Habitaciones" breadcrumbItem="Ajustes generales Hotel" breadcrumbItemUrl="/hotelsettings" />
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
                             <label htmlFor="search-input" className="col-md-4 col-form-label">
-                                Busca tipo de comodidad
+                                Buscar habitacion
                             </label>
                             <input
                                 className="form-control"
                                 id="search-input"
                                 type="search"
-                                placeholder="Escribe el nombre del tipo de comodidad"
+                                placeholder="Escribe el número de la habitación"
                                 onChange={(e) => { setFilter(e.target.value) }}
 
                             />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
-                            <Link to="/hotelsettings/newamenities">
+                            <Link to="/hotelsettings/newroom">
                                 <button
                                     type="button"
                                     className="btn btn-primary waves-effect waves-light"
@@ -100,11 +99,12 @@ const Amenities = ({ ...props }) => {
                             </Link>
                         </div>
                     </Row>
+
                     <Row>
                         <div className="col mb-3">
                             <Card>
                                 <CardBody>
-                                    <DataList onDelete={onDeleteAmenities} data={data} type="amenities" displayLength={9} {...props} />
+                                    <DataList onDelete={onDeleteRooms} data={data} type="rooms" displayLength={9} {...props} />
                                 </CardBody>
                             </Card>
                         </div>
@@ -115,4 +115,4 @@ const Amenities = ({ ...props }) => {
     )
 }
 
-export default Amenities;
+export default Rooms

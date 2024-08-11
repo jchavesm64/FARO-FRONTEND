@@ -2,11 +2,12 @@ import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
 import withRouter from "../../../../components/Common/withRouter"
 import { Link } from 'react-router-dom';
 
-const TableTypeRoom = ({ ...props }) => {
+
+const TableRooms = ({ ...props }) => {
     const { data, onDelete } = props;
 
-    const onClickDelete = async (id, nombre) => {
-        await onDelete(id, nombre)
+    const onClickDelete = async (id, habitacio) => {
+        await onDelete(id, habitacio)
     }
     return (
 
@@ -14,25 +15,27 @@ const TableTypeRoom = ({ ...props }) => {
             <table className="table table-hover table-striped mb-0">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
+                        <th>Número de habitación</th>
+                        <th>Tipo de habitación</th>
+                        <th>Precio por noche</th>
                         <th>Descripción</th>
-                        <th>Precio</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {
-                        data.map((services, i) => (
-                            <tr key={`TypeRoom-${i}`}>
-                                <td>{services.nombre}</td>
-                                <td>{services.descripcion}</td>
-                                <td>{services.precio}</td>
+                        data.map((room, i) => (
+                            <tr key={`Room-${i}`}>
+                                <td>{room.numeroHabitacion}</td>
+                                <td>{room.tipoHabitacion}</td>
+                                <td>{room.precioPorNoche}</td>
+                                <td>{room.descripcion}</td>
                                 <td>
                                     <div className="d-flex justify-content-end mx-1 my-1">
-                                        <Link to={`/hotelsettings/extraservice/${services.id}`}>
+                                        <Link to={`/hotelsettings/extraservice/${room.id}`}>
                                             <ButtonIconTable icon='mdi mdi-pencil' color='warning' />
                                         </Link>
-                                        <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(services.id, services.nombre) }} />
+                                        <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(room.id, room.nombre) }} />
                                     </div>
                                 </td>
                             </tr>
@@ -44,4 +47,4 @@ const TableTypeRoom = ({ ...props }) => {
     )
 }
 
-export default withRouter(TableTypeRoom)
+export default withRouter(TableRooms)

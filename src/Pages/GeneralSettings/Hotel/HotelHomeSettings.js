@@ -1,8 +1,8 @@
 import React from 'react'
 import { Container, Row } from "reactstrap";
-
 import Breadcrumbs from "../../../components/Common/Breadcrumb";
 import ButtomCardHome from '../../Home/ButtonCardHome';
+
 import { hotelsettings } from '../../../constants/routesConst';
 
 const HotelHomeSettings = () => {
@@ -10,7 +10,7 @@ const HotelHomeSettings = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Recepción" />
+                    <Breadcrumbs title="Ajustes hotel" breadcrumbItem="Ajustes generales" breadcrumbItemUrl="/generalsettings" />
                     <Row className="flex justify-content-center gap-3">
                         {
                             hotelsettings.map((route, index) => (
