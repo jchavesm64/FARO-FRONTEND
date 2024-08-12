@@ -19,6 +19,7 @@ const TableRooms = ({ ...props }) => {
                         <th>Tipo de habitación</th>
                         <th>Precio por noche</th>
                         <th>Descripción</th>
+                        <th>Estado</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -27,12 +28,13 @@ const TableRooms = ({ ...props }) => {
                         data.map((room, i) => (
                             <tr key={`Room-${i}`}>
                                 <td>{room.numeroHabitacion}</td>
-                                <td>{room.tipoHabitacion}</td>
+                                <td>{room.tipoHabitacion.nombre}</td>
                                 <td>{room.precioPorNoche}</td>
                                 <td>{room.descripcion}</td>
+                                <td>{room.estado}</td>
                                 <td>
                                     <div className="d-flex justify-content-end mx-1 my-1">
-                                        <Link to={`/hotelsettings/extraservice/${room.id}`}>
+                                        <Link to={`/hotelsettings/editroom/${room.id}`}>
                                             <ButtonIconTable icon='mdi mdi-pencil' color='warning' />
                                         </Link>
                                         <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(room.id, room.nombre) }} />

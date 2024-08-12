@@ -5,10 +5,18 @@ export const OBTENER_HABITACIONES = gql`
         obtenerHabitaciones{
             id
             numeroHabitacion
-            tipoHabitacion
+            tipoHabitacion{
+                id
+                nombre
+                descripcion
+                precioBase
+            }
             precioPorNoche
             descripcion
-            comodidades
+            comodidades {
+                id
+                nombre
+            }
             estado
         }
     }
