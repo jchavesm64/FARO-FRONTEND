@@ -6,8 +6,8 @@ import { Link } from 'react-router-dom';
 const TableRooms = ({ ...props }) => {
     const { data, onDelete } = props;
 
-    const onClickDelete = async (id, habitacio) => {
-        await onDelete(id, habitacio)
+    const onClickDelete = async (id, numerohabitacion) => {
+        await onDelete(id, numerohabitacion)
     }
     return (
 
@@ -37,7 +37,7 @@ const TableRooms = ({ ...props }) => {
                                         <Link to={`/hotelsettings/editroom/${room.id}`}>
                                             <ButtonIconTable icon='mdi mdi-pencil' color='warning' />
                                         </Link>
-                                        <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(room.id, room.nombre) }} />
+                                        <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(room.id, room.numeroHabitacion) }} />
                                     </div>
                                 </td>
                             </tr>

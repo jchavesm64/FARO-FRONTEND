@@ -16,6 +16,7 @@ export const OBTENER_HABITACIONES = gql`
             comodidades {
                 id
                 nombre
+                descripcion
             }
             estado
         }
@@ -25,12 +26,21 @@ export const OBTENER_HABITACIONES = gql`
 export const OBTENER_HABITACION_BY_ID = gql` 
     query obtenerHabitacionById($id:ID){
         obtenerHabitacionById(id:$id){
-            id
+               id
             numeroHabitacion
-            tipoHabitacion
+            tipoHabitacion{
+                id
+                nombre
+                descripcion
+                precioBase
+            }
             precioPorNoche
             descripcion
-            comodidades
+            comodidades {
+                id
+                nombre
+                descripcion
+            }
             estado
         }
     }

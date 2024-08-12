@@ -21,13 +21,12 @@ const NewRoom = () => {
     const [insertar] = useMutation(SAVE_HABITACION)
 
     const [numberRoom, setNumberRoom] = useState('');
-    const [typeRoom, setTypeRoom] = useState(null);// Se agrega un valor seleccionado
+    const [typeRoom, setTypeRoom] = useState(null);
     const [price, setPrice] = useState(0);
     const [description, setDescription] = useState('');
     const [amenities, setAmenites] = useState(null);
     const [amenitiesList, setAmenitiesList] = useState([]);
     const [stateRoom, setStateRoom] = useState(null);
-
 
     const stateRooms = [
         {
@@ -117,7 +116,6 @@ const NewRoom = () => {
                 comodidades: amenitiesList.map(a => a.id),
                 estado: stateRoom.value
             }
-            debugger
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
             const { estado, message } = data.insertarHabitacion;
             if (estado) {

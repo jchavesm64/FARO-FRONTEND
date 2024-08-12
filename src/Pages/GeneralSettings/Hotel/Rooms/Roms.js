@@ -17,10 +17,10 @@ const Rooms = ({ ...props }) => {
     const { data: habitaciones } = useQuery(OBTENER_HABITACIONES, { pollInterval: 1000 });
     const [desactivar] = useMutation(DELETE_HABITACION);
 
-    const onDeleteRooms = (id, nombre) => {
+    const onDeleteRooms = (id, numerohabitacion) => {
         Swal.fire({
             title: "Eliminar habitación",
-            text: `¿Está seguro de eliminar la habitación ${nombre}?`,
+            text: `¿Está seguro de eliminar la habitación ${numerohabitacion}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#0BB197",
