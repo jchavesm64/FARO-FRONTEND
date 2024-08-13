@@ -48,6 +48,7 @@ import CleaningJobs from "../Pages/CleaningJobs/CleaningJobs";
 
 import ReceptionHome from "../Pages/Reception/ReceptionHome";
 import AvailabilityNewBooking from "../Pages/Reception/Availability/AvailabilityNewBooking"
+import NewBooking from "../Pages/Reception/Availability/NewBooking";
 
 import TaxManagement from "../Pages/TaxManagement/TaxManagement";
 import NewTaxManagement from "../Pages/TaxManagement/NewTaxManagement";
@@ -89,9 +90,10 @@ import EditTypeRoom from "../Pages/GeneralSettings/Hotel/TypeRoom/EditTypeRoom";
 import ExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/ExtraService";
 import NewExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/NewExtraService";
 import EditExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/EditExtraService";
+import EditRoom from '../Pages/GeneralSettings/Hotel/Rooms/EditRoom'
 import Rooms from "../Pages/GeneralSettings/Hotel/Rooms/Roms";
 import NewRoom from "../Pages/GeneralSettings/Hotel/Rooms/NewRoom";
-import EditRoom from '../Pages/GeneralSettings/Hotel/Rooms/EditRoom'
+
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -145,6 +147,7 @@ const authProtectedRoutes = [
 
   { path: "/reception", component: <ReceptionHome /> },
   { path: "/reception/availability", component: <AvailabilityNewBooking /> },
+  { path: "/reception/availability/newbooking", component: <NewBooking /> },
 
   { path: "/cleaningjobs", component: <CleaningJobs /> },
   { path: "/editcleaningjob/:id", component: <EditCleaningJobContainer /> },
