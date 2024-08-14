@@ -6,6 +6,7 @@ import { OBTENER_CLIENTES } from '../../../services/ClienteService';
 import Autosuggest from 'react-autosuggest'
 import { Link } from 'react-router-dom';
 import { OBTENER_HABITACIONES_DISPONIBLES } from '../../../services/HabitacionesService';
+import ListInfo from '../../../components/Common/ListInfo';
 
 const NewBooking = ({ ...props }) => {
     document.title = "Nueva Reserva | FARO";
@@ -18,9 +19,12 @@ const NewBooking = ({ ...props }) => {
     const [customers, setCustomers] = useState([])
     const [bookingDate] = useState(`${new Date().getFullYear()}-${(new Date().getMonth() + 1) > 10 ? (new Date().getMonth() + 1) : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() > 10 ? new Date().getDate() : '0' + new Date().getDate()}`)
 
+    const [checkIn, setCheckIn] = useState('');
+    const [checkOut, setCheckOut] = useState('');
+
     const [disableSave, setDisableSave] = useState(true);
     const [hoveredIndex, setHoveredIndex] = useState(null);
-    const [roomsAvailable] = useState(data_RoomsAvailable.obteberHabitacionesDisponibles);
+    //const [roomsAvailable] = useState(data_RoomsAvailable.obteberHabitacionesDisponibles);
 
 
     function getFilteredByKey(key, value) {
@@ -157,9 +161,56 @@ const NewBooking = ({ ...props }) => {
                                 <CardBody className="text-muted">
                                     <h5 className="mb-2">{customer.nombre}</h5>
                                     <p className="mb-2 fw-bold">Identificación: <span className='fw-normal'>{customer.codigo}</span></p>
+                                    <p className="mb-2 fw-bold">País: <span className='fw-normal'>{customer.pais}</span></p>
                                     <p className="mb-2 fw-bold">Fecha de reserva: <span className='fw-normal'>{bookingDate}</span></p>
                                 </CardBody>
                             </Card>
+                            <div className="col-md-4 col-sm-12">
+                                <Card className="p-2">
+                                    <CardBody>
+                                        <Row>
+                                            <div className="col mb-2">
+                                                Clientes
+                                            </div>
+                                        </Row>
+                                        <div className="row row-cols-lg-auto g-3 align-items-center">
+                                            <div className="col-12 mb-1">
+
+                                            </div>
+                                            <div className="col-12 mb-1">
+                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { }}>
+                                                    Agregar
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <Row>
+                                        </Row>
+                                    </CardBody>
+                                </Card>
+                            </div>
+                            <Row>
+                                <div className="col-md-4 col-sm-12 mb-3">
+                                    <label htmlFor="purchaseOrderDate" className="form-label">Fecha de Entrada</label>
+                                    <input
+                                        className="form-control"
+                                        type="date"
+                                        id="purchaseOrderDate"
+                                        value={checkIn}
+                                        onChange={(e) => { setCheckIn(e.target.value) }}
+
+                                    />
+                                </div>
+                                <div className="col-md-4 col-sm-12 mb-3">
+                                    <label htmlFor="purchaseOrderDate" className="form-label">Fecha de Salida</label>
+                                    <input
+                                        className="form-control"
+                                        type="date"
+                                        id="purchaseOrderDate"
+                                        value={checkOut}
+                                        onChange={(e) => { setCheckOut(e.target.value) }}
+                                    />
+                                </div>
+                            </Row>
                         </div>
                     ) : filter === '' && (<label>Debe buscar un cliente</label>)}
                 </Container>
