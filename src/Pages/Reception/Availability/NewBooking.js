@@ -3,29 +3,33 @@ import { Card, CardBody, Container, Row } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
+import Autosuggest from 'react-autosuggest'
+import { Link } from 'react-router-dom';
+import { OBTENER_HABITACIONES_DISPONIBLES } from '../../../services/HabitacionesService';
 
 const NewBooking = ({ ...props }) => {
     document.title = "Nueva Reserva | FARO";
 
     const [filter, setFilter] = useState('')
-    const { loading: load_clientes, error: error_clientes, data: data_clientes } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 })
+    const { data: data_clientes } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 });
+    const { data: data_RoomsAvailable } = useQuery(OBTENER_HABITACIONES_DISPONIBLES, { pollInterval: 1000 });
 
     const [customer, setCustomer] = useState(null)
     const [customers, setCustomers] = useState([])
+    const [bookingDate] = useState(`${new Date().getFullYear()}-${(new Date().getMonth() + 1) > 10 ? (new Date().getMonth() + 1) : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() > 10 ? new Date().getDate() : '0' + new Date().getDate()}`)
 
     const [disableSave, setDisableSave] = useState(true);
+    const [hoveredIndex, setHoveredIndex] = useState(null);
+    const [roomsAvailable] = useState(data_RoomsAvailable.obteberHabitacionesDisponibles);
+
 
     function getFilteredByKey(key, value) {
-        const valType = key.tipo.toLowerCase()
         const valName = key.nombre.toLowerCase()
         const valCode = key.codigo.toLowerCase()
-        const valCountry = key.pais.toLowerCase()
         const val = value.toLowerCase()
-        const valEmail = key.correos?.some(correo => correo.email.includes(val));
-        const valPhone = key.telefonos?.some(telefono => telefono.telefono.includes(val));
 
 
-        if (valType.includes(val) || valName.includes(val) || valCode.includes(val) || valCountry.includes(val) || valEmail || valPhone) {
+        if (valName.includes(val) || valCode.includes(val)) {
             return key
         }
 
@@ -45,23 +49,31 @@ const NewBooking = ({ ...props }) => {
         }
         return []
     }
+
     const handleInputChange = (e) => {
         if (e.target.value !== '') {
             setFilter(e.target.value)
             setCustomers(getData())
             return
+        } else {
+            setFilter('')
+            setCustomers([])
         }
-        setFilter('')
-        setCustomer([])
 
+    }
+
+    const selectClient = (c) => {
+        setCustomer(c)
+        setFilter('')
+        setCustomers([])
+    }
+
+    const searchClient = () => {
+        setFilter('')
+        setCustomer(getData())
     }
 
     const onClickSave = async () => { }
-
-    const searchClient = () => {
-        setCustomer(getData())
-    }
-    console.log(customers)
     return (
         <React.Fragment>
             <div className="page-content">
@@ -89,7 +101,7 @@ const NewBooking = ({ ...props }) => {
                                 value={filter}
                                 onChange={handleInputChange}
                                 type="search"
-                                placeholder="Escribe el tipo, nombre, identificación, país, correo o teléfono del cliente" />
+                                placeholder="Escribe el nombre o identificación del cliente" />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <button type="button" className="btn btn-primary waves-effect waves-light" onClick={() => searchClient()}>
@@ -97,25 +109,59 @@ const NewBooking = ({ ...props }) => {
                                 <i className="ri-search-line align-middle ms-2"></i>
                             </button>
                         </div>
-                        <div >
-                            {customers.length > 0 && (
-                                <ul className="list-group position-absolute w-100" style={{ zIndex: 1000 }}>
-                                    {customers.map((customer) => (
-                                        <li
-                                            key={customer.id}
-                                            onClick={() => setCustomer(customer)}
-                                            className='ist-group-item list-group-item-action cursor-pointer'
-                                            style={{ backgroundColor: '#fff', listStyleType: 'none' }}
-                                        >
-                                            {customer.nombre}
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-
 
                     </Row>
+                    <Row>
+                        {customers.length > 0 ? (
+
+                            <ul className="list-group form-control ontent-scroll p-3 mb-3 border" style={{ zIndex: 1000, maxHeight: '300px', overflowY: 'auto' }}>
+                                {customers.map((customer, index) => (
+                                    <li
+                                        key={customer.id}
+                                        onClick={() => selectClient(customer)}
+                                        className='ist-group-item list-group-item-action rounded p-2'
+                                        style={{
+                                            backgroundColor: hoveredIndex === index ? '#0BB197' : '#fff',
+                                            listStyleType: 'none',
+                                            cursor: 'pointer',
+                                        }}
+                                        onMouseEnter={() => setHoveredIndex(index)}
+                                        onMouseLeave={() => setHoveredIndex(null)}
+                                    >
+                                        {customer.nombre}
+                                    </li>
+                                ))}
+                            </ul>
+
+                        ) : filter !== '' && (
+
+                            <div className="col-md-3 col-sm-12 mb-3">
+                                <label>No existe el cliente, ¿Desea crear uno?</label>
+                                <Link to="/hotelsettings/newamenities">
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary waves-effect waves-light"
+                                        style={{ width: '100%' }}
+                                    >
+                                        Nuevo cliente{" "}
+                                        <i className="mdi mdi-plus align-middle ms-2"></i>
+                                    </button>
+                                </Link>
+                            </div>
+                        )}
+
+                    </Row>
+                    {customer ? (
+                        <div>
+                            <Card>
+                                <CardBody className="text-muted">
+                                    <h5 className="mb-2">{customer.nombre}</h5>
+                                    <p className="mb-2 fw-bold">Identificación: <span className='fw-normal'>{customer.codigo}</span></p>
+                                    <p className="mb-2 fw-bold">Fecha de reserva: <span className='fw-normal'>{bookingDate}</span></p>
+                                </CardBody>
+                            </Card>
+                        </div>
+                    ) : filter === '' && (<label>Debe buscar un cliente</label>)}
                 </Container>
             </div>
         </React.Fragment>
