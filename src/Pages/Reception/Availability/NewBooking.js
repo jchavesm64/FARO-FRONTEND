@@ -1,19 +1,17 @@
 import React, { useState } from 'react'
-import { Card, CardBody, Container, Row } from 'reactstrap';
+import { Button, Card, CardBody, CardTitle, Container, Row } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
-import Autosuggest from 'react-autosuggest'
 import { Link } from 'react-router-dom';
-import { OBTENER_HABITACIONES_DISPONIBLES } from '../../../services/HabitacionesService';
-import ListInfo from '../../../components/Common/ListInfo';
+import { OBTENER_HABITACIONES, OBTENER_HABITACIONES_DISPONIBLES } from '../../../services/HabitacionesService';
 
 const NewBooking = ({ ...props }) => {
     document.title = "Nueva Reserva | FARO";
 
     const [filter, setFilter] = useState('')
     const { data: data_clientes } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 });
-    const { data: data_RoomsAvailable } = useQuery(OBTENER_HABITACIONES_DISPONIBLES, { pollInterval: 1000 });
+    const { loading: loading_Rooms, error: error_Rooms, data: data_RoomsAvailable } = useQuery(OBTENER_HABITACIONES_DISPONIBLES, { pollInterval: 1000 });
 
     const [customer, setCustomer] = useState(null)
     const [customers, setCustomers] = useState([])
@@ -24,8 +22,17 @@ const NewBooking = ({ ...props }) => {
 
     const [disableSave, setDisableSave] = useState(true);
     const [hoveredIndex, setHoveredIndex] = useState(null);
-    //const [roomsAvailable] = useState(data_RoomsAvailable.obteberHabitacionesDisponibles);
 
+    const getRooms = () => {
+
+        if (data_RoomsAvailable) {
+            if (data_RoomsAvailable.obteberHabitacionesDisponibles) {
+                return [data_RoomsAvailable.obteberHabitacionesDisponibles]
+            }
+        }
+        return []
+    }
+    const [roomsAvailable] = useState(getRooms());
 
     function getFilteredByKey(key, value) {
         const valName = key.nombre.toLowerCase()
@@ -39,6 +46,8 @@ const NewBooking = ({ ...props }) => {
 
         return null
     }
+
+    console.log(roomsAvailable)
 
     const getData = () => {
         if (data_clientes) {
@@ -170,7 +179,38 @@ const NewBooking = ({ ...props }) => {
                                     <CardBody>
                                         <Row>
                                             <div className="col mb-2">
-                                                Clientes
+                                                Habitaciones
+                                            </div>
+                                        </Row>
+                                        <div className="d-flex flex-wrap justify-content-around m-0 ">
+                                            {roomsAvailable.map(habitacion => (
+                                                <Button key={habitacion.id} className="mb-2" style={{ width: '14rem', height: '14rem' }}
+                                                    color="primary"
+                                                    onClick={() => { }}>
+                                                    <CardBody
+
+                                                    >
+                                                        <CardTitle tag="h5">Habitación {habitacion.numeroHabitacion}</CardTitle>
+                                                        <p>Tipo: {habitacion.tipoHabitacion.nombre}</p>
+                                                        <p>Precio por Noche: ${habitacion.precioPorNoche}</p>
+                                                        <p>Descripción: {habitacion.descripcion}</p>
+                                                        <p>Estado: {habitacion.estado}</p>
+
+                                                    </CardBody>
+                                                </Button>
+                                            ))}
+                                        </div>
+                                        <Row>
+                                        </Row>
+                                    </CardBody>
+                                </Card>
+                            </div>
+                            <div className="col-md-4 col-sm-12">
+                                <Card className="p-2">
+                                    <CardBody>
+                                        <Row>
+                                            <div className="col mb-2">
+                                                Huéspedes
                                             </div>
                                         </Row>
                                         <div className="row row-cols-lg-auto g-3 align-items-center">

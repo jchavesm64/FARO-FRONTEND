@@ -46,7 +46,7 @@ export const OBTENER_HABITACION_BY_ID = gql`
     }
 `;
 export const OBTENER_HABITACIONES_DISPONIBLES = gql` 
-    query obteberHabitacionesDisponibles{
+   query obteberHabitacionesDisponibles{
         obteberHabitacionesDisponibles{
             id
             numeroHabitacion
