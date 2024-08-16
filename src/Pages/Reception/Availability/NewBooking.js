@@ -23,6 +23,7 @@ const NewBooking = ({ ...props }) => {
     const [checkOut, setCheckOut] = useState('');
 
     const [disableSave, setDisableSave] = useState(true);
+    const [disableSearch, setDisableSearch] = useState(true);
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const [roomsAvailable, setRoomsAvailable] = useState(null);
@@ -48,9 +49,29 @@ const NewBooking = ({ ...props }) => {
             return [];
         }
 
+        const getAmountTypeRooms = () => {
+            if (typeRooms) {
+                let data = []
+                typeRooms.forEach(type => {
+                    if (type) {
+                        if (roomsAvailable) {
+                            const lengthRoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre);
+                            data.push({ 'data': lengthRoomAvailable.length, 'nombre': type.nombre });
+                        } else {
+                            data.push({ 'data': 0, 'nombre': type.nombre });
+                        }
+                    }
+                })
+                return data;
+            }
+        };
+
         setRoomsAvailable(getRooms());
         setTypeRooms(getTypeRooms());
-    }, [dataRoomsAvailable, dataTypeRooms]);
+        setAmountTypeRooms(getAmountTypeRooms())
+
+    }, [dataRoomsAvailable, dataTypeRooms, roomsAvailable, typeRooms]);
+
 
     function getFilteredByKey(key, value) {
         const valName = key.nombre.toLowerCase()
@@ -102,28 +123,9 @@ const NewBooking = ({ ...props }) => {
         setCustomer(getData())
     }
 
-    useEffect(() => {
-        const filterforTypeRoom = () => {
-
-            typeRooms.forEach(types => {
-                const lengthRoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === types);
-                setAmountTypeRooms(lengthRoomAvailable.map(type => (
-                    [
-                        {
-                            "length": lengthRoomAvailable.length,
-                            "type": type.tipoHabitacion.nombre
-                        }
-                    ]
-                )))
-            })
-
-        }
-        
-    }, [typeRooms, roomsAvailable])
-    //no funciona
 
 
-    
+    console.log(amountTypeRooms)
 
     const onClickSave = async () => { }
     return (
@@ -156,7 +158,7 @@ const NewBooking = ({ ...props }) => {
                                 placeholder="Escribe el nombre o identificación del cliente" />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
-                            <button type="button" className="btn btn-primary waves-effect waves-light" onClick={() => searchClient()}>
+                            <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSearch} onClick={() => searchClient()}>
                                 Buscar{" "}
                                 <i className="ri-search-line align-middle ms-2"></i>
                             </button>
@@ -232,7 +234,6 @@ const NewBooking = ({ ...props }) => {
                                             onChange={(e) => { setCheckOut(e.target.value) }}
                                         />
                                     </div>
-
                                 </Card>
                             </Row>
                             <Card className="m-2">
@@ -242,7 +243,7 @@ const NewBooking = ({ ...props }) => {
                                     </h3>
                                 </Row>
                                 {typeRooms.map(type => (
-                                    <Card className="m-2 p-1 bg-light col-md-8">
+                                    <Card key={`${type.nombre}-type`} className="m-2 p-1 bg-light col-md-8">
                                         <CardBody >
                                             <Row className="flex" style={{ alignItems: 'flex-end' }}>
                                                 <div className="col-md-2 mb-3">
