@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Card, CardBody, CardTitle, Container, Row } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { useQuery } from '@apollo/client';
@@ -24,15 +24,17 @@ const NewBooking = ({ ...props }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const getRooms = () => {
-
         if (data_RoomsAvailable) {
-            if (data_RoomsAvailable.obteberHabitacionesDisponibles) {
-                return [data_RoomsAvailable.obteberHabitacionesDisponibles]
+
+            if (data_RoomsAvailable.obtenerHabitacionesDisponibles) {
+                return data_RoomsAvailable.obtenerHabitacionesDisponibles
             }
         }
         return []
     }
-    const [roomsAvailable] = useState(getRooms());
+    const [roomsAvailable, setRoomsAvailable] = useState(null);
+
+    useEffect(() => { setRoomsAvailable(getRooms()) })
 
     function getFilteredByKey(key, value) {
         const valName = key.nombre.toLowerCase()
@@ -47,8 +49,6 @@ const NewBooking = ({ ...props }) => {
         return null
     }
 
-    console.log(roomsAvailable)
-
     const getData = () => {
         if (data_clientes) {
             if (data_clientes.obtenerClientes) {
@@ -62,6 +62,9 @@ const NewBooking = ({ ...props }) => {
         }
         return []
     }
+
+
+    console.log('data', roomsAvailable);
 
     const handleInputChange = (e) => {
         if (e.target.value !== '') {
@@ -184,20 +187,20 @@ const NewBooking = ({ ...props }) => {
                                         </Row>
                                         <div className="d-flex flex-wrap justify-content-around m-0 ">
                                             {roomsAvailable.map(habitacion => (
-                                                <Button key={habitacion.id} className="mb-2" style={{ width: '14rem', height: '14rem' }}
-                                                    color="primary"
-                                                    onClick={() => { }}>
-                                                    <CardBody
+                                                <Row>
+                                                    <Button key={habitacion.id} className="mb-2" style={{ width: '14rem', height: '14rem' }}
+                                                        color="primary"
+                                                        onClick={() => { }}>
+                                                        <CardBody>
+                                                            <CardTitle tag="h5">Habitación {habitacion.numeroHabitacion}</CardTitle>
+                                                            <p>Tipo: {habitacion.tipoHabitacion.nombre}</p>
+                                                            <p>Precio por Noche: ${habitacion.precioPorNoche}</p>
+                                                            <p>Descripción: {habitacion.descripcion}</p>
+                                                            <p>Estado: {habitacion.estado}</p>
 
-                                                    >
-                                                        <CardTitle tag="h5">Habitación {habitacion.numeroHabitacion}</CardTitle>
-                                                        <p>Tipo: {habitacion.tipoHabitacion.nombre}</p>
-                                                        <p>Precio por Noche: ${habitacion.precioPorNoche}</p>
-                                                        <p>Descripción: {habitacion.descripcion}</p>
-                                                        <p>Estado: {habitacion.estado}</p>
-
-                                                    </CardBody>
-                                                </Button>
+                                                        </CardBody>
+                                                    </Button>
+                                                </Row>
                                             ))}
                                         </div>
                                         <Row>

@@ -95,7 +95,6 @@ import Rooms from "../Pages/GeneralSettings/Hotel/Rooms/Roms";
 import NewRoom from "../Pages/GeneralSettings/Hotel/Rooms/NewRoom";
 
 
-import HabitacionesDisponibles from "../Pages/Reception/Availability/test";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -197,7 +196,6 @@ const authProtectedRoutes = [
   { path: "/hotelsettings/rooms", component: <Rooms /> },
   { path: "/hotelsettings/newroom", component: <NewRoom /> },
   { path: "/hotelsettings/editroom/:id", component: <EditRoom /> },
-  { path: "/hotelsettings/test", component: <HabitacionesDisponibles /> },
 
   {
     path: "/",
