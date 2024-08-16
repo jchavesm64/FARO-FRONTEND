@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Card, CardBody, CardTitle, Container, Row } from 'reactstrap';
+import { Card, CardBody, Container, Row } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
 import { Link } from 'react-router-dom';
-import { OBTENER_HABITACIONES, OBTENER_HABITACIONES_DISPONIBLES } from '../../../services/HabitacionesService';
+import { OBTENER_HABITACIONES_DISPONIBLES } from '../../../services/HabitacionesService';
+import { OBTENER_TIPOSHABITACION } from '../../../services/TipoHabitacionService';
 
 const NewBooking = ({ ...props }) => {
     document.title = "Nueva Reserva | FARO";
 
     const [filter, setFilter] = useState('')
-    const { data: data_clientes } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 });
-    const { loading: loading_Rooms, error: error_Rooms, data: data_RoomsAvailable } = useQuery(OBTENER_HABITACIONES_DISPONIBLES, { pollInterval: 1000 });
+    const { data: dataCustomer } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 });
+    const { data: dataRoomsAvailable } = useQuery(OBTENER_HABITACIONES_DISPONIBLES, { pollInterval: 1000 });
+    const { data: dataTypeRooms } = useQuery(OBTENER_TIPOSHABITACION, { pollInterval: 1000 });
 
     const [customer, setCustomer] = useState(null)
     const [customers, setCustomers] = useState([])
@@ -23,18 +25,32 @@ const NewBooking = ({ ...props }) => {
     const [disableSave, setDisableSave] = useState(true);
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
-    const getRooms = () => {
-        if (data_RoomsAvailable) {
-
-            if (data_RoomsAvailable.obtenerHabitacionesDisponibles) {
-                return data_RoomsAvailable.obtenerHabitacionesDisponibles
-            }
-        }
-        return []
-    }
     const [roomsAvailable, setRoomsAvailable] = useState(null);
+    const [typeRooms, setTypeRooms] = useState(null);
+    const [amountTypeRooms, setAmountTypeRooms] = useState([])
 
-    useEffect(() => { setRoomsAvailable(getRooms()) })
+    useEffect(() => {
+        const getRooms = () => {
+            if (dataRoomsAvailable) {
+                if (dataRoomsAvailable.obtenerHabitacionesDisponibles) {
+                    return dataRoomsAvailable.obtenerHabitacionesDisponibles;
+                }
+            }
+            return [];
+        }
+
+        const getTypeRooms = () => {
+            if (dataTypeRooms) {
+                if (dataTypeRooms.obtenerTiposHabitaciones) {
+                    return dataTypeRooms.obtenerTiposHabitaciones;
+                }
+            }
+            return [];
+        }
+
+        setRoomsAvailable(getRooms());
+        setTypeRooms(getTypeRooms());
+    }, [dataRoomsAvailable, dataTypeRooms]);
 
     function getFilteredByKey(key, value) {
         const valName = key.nombre.toLowerCase()
@@ -50,9 +66,9 @@ const NewBooking = ({ ...props }) => {
     }
 
     const getData = () => {
-        if (data_clientes) {
-            if (data_clientes.obtenerClientes) {
-                return data_clientes.obtenerClientes.filter((value, index) => {
+        if (dataCustomer) {
+            if (dataCustomer.obtenerClientes) {
+                return dataCustomer.obtenerClientes.filter((value) => {
                     if (filter !== "") {
                         return getFilteredByKey(value, filter);
                     }
@@ -62,9 +78,6 @@ const NewBooking = ({ ...props }) => {
         }
         return []
     }
-
-
-    console.log('data', roomsAvailable);
 
     const handleInputChange = (e) => {
         if (e.target.value !== '') {
@@ -88,6 +101,29 @@ const NewBooking = ({ ...props }) => {
         setFilter('')
         setCustomer(getData())
     }
+
+    useEffect(() => {
+        const filterforTypeRoom = () => {
+
+            typeRooms.forEach(types => {
+                const lengthRoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === types);
+                setAmountTypeRooms(lengthRoomAvailable.map(type => (
+                    [
+                        {
+                            "length": lengthRoomAvailable.length,
+                            "type": type.tipoHabitacion.nombre
+                        }
+                    ]
+                )))
+            })
+
+        }
+        
+    }, [typeRooms, roomsAvailable])
+    //no funciona
+
+
+    
 
     const onClickSave = async () => { }
     return (
@@ -129,7 +165,6 @@ const NewBooking = ({ ...props }) => {
                     </Row>
                     <Row>
                         {customers.length > 0 ? (
-
                             <ul className="list-group form-control ontent-scroll p-3 mb-3 border" style={{ zIndex: 1000, maxHeight: '300px', overflowY: 'auto' }}>
                                 {customers.map((customer, index) => (
                                     <li
@@ -150,7 +185,6 @@ const NewBooking = ({ ...props }) => {
                             </ul>
 
                         ) : filter !== '' && (
-
                             <div className="col-md-3 col-sm-12 mb-3">
                                 <label>No existe el cliente, ¿Desea crear uno?</label>
                                 <Link to="/hotelsettings/newamenities">
@@ -165,95 +199,70 @@ const NewBooking = ({ ...props }) => {
                                 </Link>
                             </div>
                         )}
-
                     </Row>
                     {customer ? (
-                        <div>
-                            <Card>
-                                <CardBody className="text-muted">
-                                    <h5 className="mb-2">{customer.nombre}</h5>
-                                    <p className="mb-2 fw-bold">Identificación: <span className='fw-normal'>{customer.codigo}</span></p>
-                                    <p className="mb-2 fw-bold">País: <span className='fw-normal'>{customer.pais}</span></p>
-                                    <p className="mb-2 fw-bold">Fecha de reserva: <span className='fw-normal'>{bookingDate}</span></p>
-                                </CardBody>
-                            </Card>
-                            <div className="col-md-4 col-sm-12">
-                                <Card className="p-2">
-                                    <CardBody>
-                                        <Row>
-                                            <div className="col mb-2">
-                                                Habitaciones
-                                            </div>
-                                        </Row>
-                                        <div className="d-flex flex-wrap justify-content-around m-0 ">
-                                            {roomsAvailable.map(habitacion => (
-                                                <Row>
-                                                    <Button key={habitacion.id} className="mb-2" style={{ width: '14rem', height: '14rem' }}
-                                                        color="primary"
-                                                        onClick={() => { }}>
-                                                        <CardBody>
-                                                            <CardTitle tag="h5">Habitación {habitacion.numeroHabitacion}</CardTitle>
-                                                            <p>Tipo: {habitacion.tipoHabitacion.nombre}</p>
-                                                            <p>Precio por Noche: ${habitacion.precioPorNoche}</p>
-                                                            <p>Descripción: {habitacion.descripcion}</p>
-                                                            <p>Estado: {habitacion.estado}</p>
-
-                                                        </CardBody>
-                                                    </Button>
-                                                </Row>
-                                            ))}
-                                        </div>
-                                        <Row>
-                                        </Row>
+                        <div className='mt-1'>
+                            <Row className="m-1 col-md-7 d-flex flex-row flex-nowrap">
+                                <Card className="m-2 col-md-10">
+                                    <CardBody className="text-muted">
+                                        <h4 className="mb-2">{customer.nombre}</h4>
+                                        <p className="mb-2 fw-bold">Identificación: <span className='fw-normal'>{customer.codigo}</span></p>
+                                        <p className="mb-2 fw-bold">País: <span className='fw-normal'>{customer.pais}</span></p>
+                                        <p className="mb-2 fw-bold">Fecha de reserva: <span className='fw-normal'>{bookingDate}</span></p>
                                     </CardBody>
                                 </Card>
-                            </div>
-                            <div className="col-md-4 col-sm-12">
-                                <Card className="p-2">
-                                    <CardBody>
-                                        <Row>
-                                            <div className="col mb-2">
-                                                Huéspedes
-                                            </div>
-                                        </Row>
-                                        <div className="row row-cols-lg-auto g-3 align-items-center">
-                                            <div className="col-12 mb-1">
+                                <Card className="m-2 p-2 col-md-10">
+                                    <div className="p-1 col-md-8">
+                                        <label htmlFor="checkInDate" className="form-label">Fecha de Entrada</label>
+                                        <input
+                                            className="form-control"
+                                            type="date"
+                                            id="checkInDate"
+                                            value={checkIn}
+                                            onChange={(e) => { setCheckIn(e.target.value) }}
+                                        />
+                                    </div>
+                                    <div className="p-1 col-md-8">
+                                        <label htmlFor="checkOutDate" className="form-label">Fecha de Salida</label>
+                                        <input
+                                            className="form-control"
+                                            type="date"
+                                            id="checkOutDate"
+                                            value={checkOut}
+                                            onChange={(e) => { setCheckOut(e.target.value) }}
+                                        />
+                                    </div>
 
-                                            </div>
-                                            <div className="col-12 mb-1">
-                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { }}>
-                                                    Agregar
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <Row>
-                                        </Row>
-                                    </CardBody>
                                 </Card>
-                            </div>
-                            <Row>
-                                <div className="col-md-4 col-sm-12 mb-3">
-                                    <label htmlFor="purchaseOrderDate" className="form-label">Fecha de Entrada</label>
-                                    <input
-                                        className="form-control"
-                                        type="date"
-                                        id="purchaseOrderDate"
-                                        value={checkIn}
-                                        onChange={(e) => { setCheckIn(e.target.value) }}
-
-                                    />
-                                </div>
-                                <div className="col-md-4 col-sm-12 mb-3">
-                                    <label htmlFor="purchaseOrderDate" className="form-label">Fecha de Salida</label>
-                                    <input
-                                        className="form-control"
-                                        type="date"
-                                        id="purchaseOrderDate"
-                                        value={checkOut}
-                                        onChange={(e) => { setCheckOut(e.target.value) }}
-                                    />
-                                </div>
                             </Row>
+                            <Card className="m-2">
+                                <Row className="m-2">
+                                    <h3 className=" col mb-2">
+                                        Tipo de Habitaciones
+                                    </h3>
+                                </Row>
+                                {typeRooms.map(type => (
+                                    <Card className="m-2 p-1 bg-light col-md-8">
+                                        <CardBody >
+                                            <Row className="flex" style={{ alignItems: 'flex-end' }}>
+                                                <div className="col-md-2 mb-3">
+                                                    <span className="logo-lg">
+                                                        <img src="/static/media/faro-light.f23d16523144109283f2.png" alt="logo-light" height="24" />
+                                                    </span>
+                                                </div>
+                                                <div className="col-md-4 col-sm-12 ">
+                                                    <span>{type.nombre}</span><br />
+                                                    <span>{type.precioBase}</span><br />
+                                                    <span>{type.descripcion}</span>
+                                                </div>
+
+
+
+                                            </Row>
+                                        </CardBody>
+                                    </Card>
+                                ))}
+                            </Card>
                         </div>
                     ) : filter === '' && (<label>Debe buscar un cliente</label>)}
                 </Container>
