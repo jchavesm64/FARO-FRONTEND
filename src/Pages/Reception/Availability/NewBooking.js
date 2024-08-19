@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Card, CardBody, Container, Row } from 'reactstrap';
+import { Button, Card, CardBody, Container, InputGroup, Row, Input } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
@@ -22,13 +22,16 @@ const NewBooking = ({ ...props }) => {
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
 
-    const [disableSave, setDisableSave] = useState(true);
+    //const [disableSave, setDisableSave] = useState(true);
     const [disableSearch, setDisableSearch] = useState(true);
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const [roomsAvailable, setRoomsAvailable] = useState(null);
     const [typeRooms, setTypeRooms] = useState(null);
     const [amountTypeRooms, setAmountTypeRooms] = useState([])
+    const [rooms, setRooms] = useState([])
+    const [booking, setBooking] = useState(null)
+
 
     useEffect(() => {
         const getRooms = () => {
@@ -56,9 +59,9 @@ const NewBooking = ({ ...props }) => {
                     if (type) {
                         if (roomsAvailable) {
                             const lengthRoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre);
-                            data.push({ 'data': lengthRoomAvailable.length, 'nombre': type.nombre });
+                            data.push({ 'lengthAvailable': lengthRoomAvailable.length, 'type': type, 'amountBooking': 0 });
                         } else {
-                            data.push({ 'data': 0, 'nombre': type.nombre });
+                            data.push({ 'lengthAvailable': 0, 'type': type, 'amountBooking': 0 });
                         }
                     }
                 })
@@ -86,7 +89,7 @@ const NewBooking = ({ ...props }) => {
         return null
     }
 
-    const getData = () => {
+    const getDataCustomer = () => {
         if (dataCustomer) {
             if (dataCustomer.obtenerClientes) {
                 return dataCustomer.obtenerClientes.filter((value) => {
@@ -103,7 +106,7 @@ const NewBooking = ({ ...props }) => {
     const handleInputChange = (e) => {
         if (e.target.value !== '') {
             setFilter(e.target.value)
-            setCustomers(getData())
+            setCustomers(getDataCustomer())
             return
         } else {
             setFilter('')
@@ -120,12 +123,49 @@ const NewBooking = ({ ...props }) => {
 
     const searchClient = () => {
         setFilter('')
-        setCustomer(getData())
+        setCustomer(getDataCustomer())
     }
 
+    const handleIncrease = (e, index) => {
+        if (amountTypeRooms[index].amountBooking < amountTypeRooms[index].lengthAvailable) {
+            const updatedRooms = [...amountTypeRooms];
+            updatedRooms[index].amountBooking += 1;
+            setAmountTypeRooms(updatedRooms);
+        }
+    };
 
+    const handleDecrease = (e, index) => {
+        if (amountTypeRooms[index].amountBooking > 0) {
+            const updatedRooms = [...amountTypeRooms];
+            updatedRooms[index].amountBooking -= 1;
+            setAmountTypeRooms(updatedRooms);
+        }
+    };
 
-    console.log(amountTypeRooms)
+    const handleChange = (e, index) => {
+        const { value } = e.target;
+        if (!isNaN(value) && value !== '') {
+            const updatedRooms = [...amountTypeRooms];
+            updatedRooms[index].amountBooking = parseInt(value, 10);
+            setAmountTypeRooms(updatedRooms);
+        }
+    };
+
+    const handleBlur = (e, index) => {
+        const { value } = e.target;
+        const updatedRooms = [...amountTypeRooms];
+
+        if (value === '' || parseInt(value, 10) < 1) {
+            updatedRooms[index].amountBooking = 1;
+            setAmountTypeRooms(updatedRooms);
+        }
+    };
+
+    const totalBooking = (type) => {
+        return type.amountBooking * type.type.precioBase
+    }
+
+    console.log(amountTypeRooms);
 
     const onClickSave = async () => { }
     return (
@@ -133,16 +173,9 @@ const NewBooking = ({ ...props }) => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Nueva Reserva" breadcrumbItem="Reservas" breadcrumbItemUrl='/reception/availability' />
-                    <Row>
-                        <div className="col mb-3 text-end">
-                            <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
-                                Guardar{" "}
-                                <i className="ri-save-line align-middle ms-2"></i>
-                            </button>
-                        </div>
-                    </Row>
+
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
-                        <div className="col-md-10 mb-3">
+                        <div className="col-md-10 mb-1">
                             <label
                                 htmlFor="search-input"
                                 className="col-md-2 col-form-label"
@@ -157,7 +190,7 @@ const NewBooking = ({ ...props }) => {
                                 type="search"
                                 placeholder="Escribe el nombre o identificación del cliente" />
                         </div>
-                        <div className="col-md-2 col-sm-12 mb-3">
+                        <div className="col-md-2 col-sm-12 mb-1">
                             <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSearch} onClick={() => searchClient()}>
                                 Buscar{" "}
                                 <i className="ri-search-line align-middle ms-2"></i>
@@ -204,8 +237,8 @@ const NewBooking = ({ ...props }) => {
                     </Row>
                     {customer ? (
                         <div className='mt-1'>
-                            <Row className="m-1 col-md-7 d-flex flex-row flex-nowrap">
-                                <Card className="m-2 col-md-10">
+                            <Row className="m-2 col-md-7 d-flex flex-row flex-nowrap">
+                                <Card className="m-1 col-md-10">
                                     <CardBody className="text-muted">
                                         <h4 className="mb-2">{customer.nombre}</h4>
                                         <p className="mb-2 fw-bold">Identificación: <span className='fw-normal'>{customer.codigo}</span></p>
@@ -213,7 +246,7 @@ const NewBooking = ({ ...props }) => {
                                         <p className="mb-2 fw-bold">Fecha de reserva: <span className='fw-normal'>{bookingDate}</span></p>
                                     </CardBody>
                                 </Card>
-                                <Card className="m-2 p-2 col-md-10">
+                                <Card className="m-1 p-2 col-md-10">
                                     <div className="p-1 col-md-8">
                                         <label htmlFor="checkInDate" className="form-label">Fecha de Entrada</label>
                                         <input
@@ -236,33 +269,87 @@ const NewBooking = ({ ...props }) => {
                                     </div>
                                 </Card>
                             </Row>
-                            <Card className="m-2">
-                                <Row className="m-2">
-                                    <h3 className=" col mb-2">
-                                        Tipo de Habitaciones
-                                    </h3>
-                                </Row>
-                                {typeRooms.map(type => (
-                                    <Card key={`${type.nombre}-type`} className="m-2 p-1 bg-light col-md-8">
-                                        <CardBody >
-                                            <Row className="flex" style={{ alignItems: 'flex-end' }}>
-                                                <div className="col-md-2 mb-3">
-                                                    <span className="logo-lg">
-                                                        <img src="/static/media/faro-light.f23d16523144109283f2.png" alt="logo-light" height="24" />
-                                                    </span>
+                            <Card className="m-2 p-2 d-flex flex-row justify-content-center">
+                                <div className='col-md-7 d-flex flex-column align-items-center'>
+                                    <Row className="m-2">
+                                        <h3 className=" col mb-2">
+                                            Tipo de Habitaciones
+                                        </h3>
+                                    </Row>
+                                    {amountTypeRooms.map((type, index) => (
+                                        <Card key={`${type.type.nombre}-type`} className="m-2 p-1 bg-light col-md-12">
+                                            <CardBody className="p-2">
+                                                <Row className="d-flex align-items-center" >
+                                                    <div className="col-md-2 mb-3">
+                                                        <span className="logo-lg">
+                                                            <img src="/static/media/faro-light.f23d16523144109283f2.png" alt="logo-light" height="24" />
+                                                        </span>
+                                                    </div>
+                                                    <div className="col-md-7 col-sm-12 ">
+                                                        <p>Typo Habitación: <span>{type.type.nombre}</span></p>
+                                                        <p>Precion por noche: $<span>{type.type.precioBase}</span></p>
+                                                        <p>Decripción: <span>{type.type.descripcion}</span></p>
+                                                    </div>
+
+                                                    <div className="col-md-3 col-sm-12 d-flex flex-column align-items-center justify-content-end"  >
+                                                        <InputGroup style={{ maxWidth: '7rem' }}>
+                                                            <Button color="primary" onClick={(e) => handleDecrease(e, index)} disabled={type.amountBooking === 0}>
+                                                                -
+                                                            </Button>
+                                                            <Input
+                                                                type="text"
+                                                                value={type.amountBooking}
+                                                                onChange={(e) => handleChange(e, index)}
+                                                                onBlur={(e) => handleBlur(e, index)}
+                                                                className="text-center"
+                                                            />
+                                                            <Button color="primary" onClick={(e) => handleIncrease(e, index)} disabled={type.amountBooking === type.lengthAvailable}>
+                                                                +
+                                                            </Button>
+                                                        </InputGroup>
+                                                        <p>Disponibles: {type.lengthAvailable - type.amountBooking}</p>
+                                                    </div>
+
+                                                </Row>
+
+                                            </CardBody>
+                                        </Card>
+                                    ))}
+                                </div>
+                                <Card className='col-md-4 bg-light m-2 p-2'>
+                                    <div className="col-md-12">
+                                        <h3 className="text-center mb-4 mt-4"> Resumen</h3>
+
+                                        <Card className="col-md-12 bg-tertiary rounded">
+                                            {amountTypeRooms.map((type) => (
+                                                <div className="bg-secondary col-md-12">
+                                                    {type.amountBooking !== 0 && (
+                                                        <div className="m-1 text-light d-flex justify-content-around">
+                                                            <p className="m-0 w-25 h-25 overflow-auto">{type.type.nombre}</p>
+                                                            <div className="col-md-4 d-flex justify-content-around">
+                                                                <p className="m-0">X{type.amountBooking}</p>
+                                                                <p className="m-0 w-1 h-1 overflow-auto">${totalBooking(type)}</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div className="col-md-4 col-sm-12 ">
-                                                    <span>{type.nombre}</span><br />
-                                                    <span>{type.precioBase}</span><br />
-                                                    <span>{type.descripcion}</span>
+                                            ))}
+                                        </Card>
+                                        <Card>
+                                            <div>
+                                                <div className="p-3">
+                                                    <p className=" text-uppercase fs-3 fw-bold">Total:</p>
                                                 </div>
 
+                                                <div>
 
+                                                </div>
 
-                                            </Row>
-                                        </CardBody>
-                                    </Card>
-                                ))}
+                                            </div>
+                                        </Card>
+
+                                    </div>
+                                </Card>
                             </Card>
                         </div>
                     ) : filter === '' && (<label>Debe buscar un cliente</label>)}
