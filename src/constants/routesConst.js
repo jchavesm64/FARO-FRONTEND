@@ -206,7 +206,7 @@ export const sidebarRoutes = [
             { sublabel: "Mantenimiento", link: "/invoice/maintenance" },
             { sublabel: "Notas de crédito", link: "/invoice/credit/notes" },
             { sublabel: "Notas de débito", link: "/invoice/debit/notes" },
-            { sublabel: "Facturas Emitidas", link: "/invoice/issued" },
+            { sublabel: "Documentos Emitidas", link: "/invoice/issued" },
             { sublabel: "Parámetros", link: "/invoice/parameters" },
             { sublabel: "Compañía", link: "/invoice/companies" },
         ],

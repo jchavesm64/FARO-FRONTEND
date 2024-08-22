@@ -26,7 +26,7 @@ const TableInvoicesParameters = ({ ...props }) => {
                             <tr key={`invoicesParameters-${i}`}>
                                 <td>{invoice.type}</td>
                                 <td>{invoice.value}</td>
-                                <td><ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={()=>console.log("edit")} /></td>
+                                <td></td>
                             </tr>
                         ))
                     }

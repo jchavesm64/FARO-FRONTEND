@@ -73,6 +73,7 @@ export const OBTENER_FACTURAS_EMITIDAS = gql`
                     InformacionReferencia
                 }
             }
+            items
         }
     }
 `;

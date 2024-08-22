@@ -15,6 +15,8 @@ const InvoiceMaintenance = ({ ...props }) => {
 
     document.title = "Mantenimiento | FARO";
 
+    console.log("START")
+
     const { data: dataCurrencyTypes} = useQuery(OBTENER_FACTURAS_PARAMETROS_BY_TYPE, { variables: { type: 'currencyTypes' }, pollInterval: 1000 })
 
     const { data: dataPaymentMethods} = useQuery(OBTENER_FACTURAS_PARAMETROS_BY_TYPE, { variables: { type: 'paymentMethods' }, pollInterval: 1000 })
@@ -26,6 +28,8 @@ const InvoiceMaintenance = ({ ...props }) => {
     const { data: dataMateriasPrimas} = useQuery(OBTENER_TODAS_MATERIAS_PRIMAS, { pollInterval: 1000 })
 
     const { data: dataAllClientes} = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 })
+
+    console.log(dataAllClientes)
 
     useEffect(() => {
         if (dataCurrencyTypes) {
@@ -91,6 +95,9 @@ const InvoiceMaintenance = ({ ...props }) => {
     const onChangeTipoFactura = (option) => {
          setSelectedTipoFactura(option);
     };
+
+    const [selectedClaveFactura, setSelectedClaveFactura] = useState(null);
+
     const [tipoFacturas, setTipoFacturas] = useState([]);
 
     const [modal, setModal] = useState(false);
@@ -107,12 +114,13 @@ const InvoiceMaintenance = ({ ...props }) => {
 
     const [clienteFacturar, setClienteFacturar] = useState(false);
 
+
     function getFilteredByClienteCedula(key, value) {
-        const valCedula = key.codigo
+        const valCedula = key
         const val = value
 
 
-        if (valCedula.includes(val)) {
+        if (valCedula.codigo.includes(val) || valCedula.nombre.toLowerCase().includes(val.toLowerCase())) {
             return key
         }
 
@@ -136,11 +144,11 @@ const InvoiceMaintenance = ({ ...props }) => {
     const dataClientes = getDataClientes();
 
     function getFilteredByCodigoCabys(key, value) {
-        const valCodigoCabys = key.codigoCabys
+        const valCodigoCabys = key
         const val = value
 
 
-        if (valCodigoCabys.includes(val)) {
+        if (valCodigoCabys.codigoCabys.includes(val) || valCodigoCabys.descripcion.toLowerCase().includes(val.toLowerCase())) {
             return key
         }
 
@@ -219,6 +227,87 @@ const InvoiceMaintenance = ({ ...props }) => {
 
     }, [articulosLista]);
 
+
+    useEffect(() => {
+        if (props.data){
+            if (dataAllClientes && dataDocumentTypes && dataSaleConditions && dataPaymentMethods && dataCurrencyTypes && clienteFacturar === false && selectedTipoFactura === null && selectedCondicionVenta === null && selectedMetodoPago === null && selectedTipoMoneda === null){
+                if (props.data.articulosLista){
+                    console.log(props.data.articulosLista)
+                    setArticulosLista(props.data.articulosLista)
+                }
+                
+                if (props.data.clave){
+                    setSelectedClaveFactura(props.data.clave)
+                }
+                
+                if (props.data.clienteFacturar){
+                    dataAllClientes.obtenerClientes.map((value, index) => {
+                        if (value.codigo === props.data.clienteFacturar){
+                            setClienteFacturar(value)
+                        }
+        
+                        return null;
+                    });
+                }
+        
+                if (props.data.selectedTipoFactura){
+                    dataDocumentTypes.obtenerFacturasParametrosByType.map((value, index) => {
+                        if (value.id === props.data.selectedTipoFactura){
+                            setSelectedTipoFactura({
+                                value: value.id,
+                                label: value.value
+                            })
+                        }
+        
+                        return null;
+                    });
+                }
+        
+                if (props.data.selectedCondicionVenta){
+                    dataSaleConditions.obtenerFacturasParametrosByType.map((value, index) => {
+                        if (value.id === props.data.selectedCondicionVenta){
+                            setSelectedCondicionVenta({
+                                value: value.id,
+                                label: value.value
+                            })
+                        }
+        
+                        return null;
+                    });
+                }
+        
+                if (props.data.selectedMetodoPago){
+                    dataPaymentMethods.obtenerFacturasParametrosByType.map((value, index) => {
+                        if (value.id === props.data.selectedMetodoPago){
+                            setSelectedMetodoPago({
+                                value: value.id,
+                                label: value.value
+                            })
+                        }
+        
+                        return null;
+                    });
+                }
+        
+                if (props.data.selectedTipoMoneda){
+                    dataCurrencyTypes.obtenerFacturasParametrosByType.map((value, index) => {
+                        if (value.id === props.data.selectedTipoMoneda){
+                            setSelectedTipoMoneda({
+                                value: value.id,
+                                label: value.value
+                            })
+                        }
+        
+                        return null;
+                    });
+                }
+            }
+        }
+    
+        
+    }, [props, dataAllClientes, dataDocumentTypes, dataSaleConditions, dataPaymentMethods, dataCurrencyTypes, clienteFacturar, selectedTipoFactura, selectedCondicionVenta, selectedMetodoPago, selectedTipoMoneda]);
+
+    
     const toEmit = () => {
         Swal.fire({
           title: "Emitir factura",
@@ -243,7 +332,14 @@ const InvoiceMaintenance = ({ ...props }) => {
                     "sale_condition": selectedCondicionVenta.value,
                     "payment_method": selectedMetodoPago.value,
                     "currency_type": selectedTipoMoneda.value,
-                    "items": articulosLista
+                    "items": articulosLista,
+                    "info_referency": selectedClaveFactura ? {
+                        "TipoDoc": "07",
+                        "Numero": selectedClaveFactura,
+                        "FechaEmision": props.data ? props.data.fecha : null,
+                        "Codigo": "01",
+                        "Razon": props.data ? props.data.razon : null
+                    } : null
                 });
 
                 const requestOptions = {
@@ -308,38 +404,62 @@ const InvoiceMaintenance = ({ ...props }) => {
                     <Breadcrumbs title="Mantenimiento" />
                     <Row className="justify-content-between">
                         <div className="col-md-5 mb-3" >
+                            {selectedClaveFactura ?
+                                <>
+                                    <Row>
+                                        <label className="form-label">Clave Factura</label>
+                                    </Row>
+                                    <Row>
+                                        <div className="col-md-12 mb-3">
+                                            <input readOnly={true} className="form-control" type="text" value={selectedClaveFactura}/>
+                                        </div>
+                                    </Row>
+                                </>
+                                :
+                                null
+                            }
                             <Row>
                                 <label className="form-label">Cliente (F5)</label>
                             </Row>
                             <Row>
-                                <div className="col-md-4 mb-3">
-                                    <input readOnly={true} className="form-control" type="text" value={clienteFacturar ? `${clienteFacturar.nombre} - ${clienteFacturar.codigo}` : "..."}/>
-                                </div>
-                                <div className="col-md-7 mb-3">
-                                    <Row className="d-flex">
-                                        <div className="col-12 mb-3" onChange={(e) => { setClienteCedula(e.target.value) }} value={clienteCedula}>
-                                            <input className="form-control" type="number" placeholder="Cliente Cédula"/>
+                                {props.data && props.data.clienteFacturar ?
+                                    <>
+                                        <div className="col-md-12 mb-3">
+                                            <input readOnly={true} className="form-control" type="text" value={clienteFacturar ? `${clienteFacturar.nombre} - ${clienteFacturar.codigo}` : "..."}/>
                                         </div>
-                                    </Row>
-                                </div>
-                                <div className="col-md-1 mb-3">
-                                    <button type="button" className="btn btn-rounded btn-info waves-effect waves-light me-3" onClick={()=>toggleClientes()} disabled={clienteCedula.length > 0 ? false : true}>
-                                        <i className="mdi mdi-magnify"></i>
-                                    </button>
-                                </div>
+                                    </>
+                                    :
+                                    <>
+                                        <div className="col-md-4 mb-3">
+                                            <input readOnly={true} className="form-control" type="text" value={clienteFacturar ? `${clienteFacturar.nombre} - ${clienteFacturar.codigo}` : "..."}/>
+                                        </div>
+                                        <div className="col-md-6 mb-3">
+                                            <Row className="d-flex">
+                                                <div className="col-12 mb-3" onChange={(e) => { setClienteCedula(e.target.value) }} value={clienteCedula}>
+                                                    <input className="form-control" type="text" placeholder="Cliente Cédula o Nombre"/>
+                                                </div>
+                                            </Row>
+                                        </div>
+                                        <div className="col-md-2 mb-3">
+                                            <button type="button" className="btn btn-rounded btn-info waves-effect waves-light me-3" onClick={()=>toggleClientes()} disabled={clienteCedula.length > 0 ? false : true}>
+                                                <i className="mdi mdi-magnify"></i>
+                                            </button>
+                                        </div>
+                                    </>
+                                }
                             </Row>
                             <Row>
                                 <label className="form-label">Codigo de Barras (F2)</label>
                             </Row>
                             <Row>
-                                <div className="col-md-11 mb-2">
+                                <div className="col-md-10 mb-2">
                                     <Row className="d-flex">
                                         <div className="col-12 mb-3" onChange={(e) => { setCodigoArticulo(e.target.value) }} value={codigoArticulo}>
-                                            <input className="form-control" type="number" placeholder="Código del Articulo"/>
+                                            <input className="form-control" type="text" placeholder="Código del Articulo o Nombre"/>
                                         </div>
                                     </Row>
                                 </div>
-                                <div className="col-md-1 mb-3">
+                                <div className="col-md-2 mb-3">
                                     <button type="button" className="btn btn-rounded btn-info waves-effect waves-light me-3" onClick={()=>toggle()} disabled={codigoArticulo.length > 0 ? false : true}>
                                         <i className="mdi mdi-magnify"></i>
                                     </button>
@@ -390,6 +510,7 @@ const InvoiceMaintenance = ({ ...props }) => {
                                         classNamePrefix="select2-selection"
                                         isSearchable={true}
                                         menuPosition="fixed"
+                                        isDisabled={props.data && props.data.selectedTipoFactura ? true : false}
                                     />
                                 </div>
                             </Row>
@@ -414,28 +535,24 @@ const InvoiceMaintenance = ({ ...props }) => {
                                 </div>
                             </Row>
                             <Row>
-                                <label className="form-label">Forma de Pago</label>
-                            </Row>
-                            <Row>
                                 <div className="col-md-6 mb-3">
-                                    <Row>
-                                        {/* <div className="col-md-2 mb-3">
-                                            <input className="form-control" type="number"/>
-                                        </div> */}
-                                        <div className="col-md-12 mb-3">
-                                            <Select
-                                                id="condicion_venta"
-                                                value={selectedMetodoPago}
-                                                onChange={(e) => {
-                                                    onChangeMetodoPago(e);
-                                                }}
-                                                options={metodoPagos}
-                                                classNamePrefix="select2-selection"
-                                                isSearchable={true}
-                                                menuPosition="fixed"
-                                            />
-                                        </div>
-                                    </Row>
+                                    <label className="form-label">Forma de Pago</label>
+                                    {/* <div className="col-md-2 mb-3">
+                                        <input className="form-control" type="number"/>
+                                    </div> */}
+                                    <div className="col-md-12 mb-3">
+                                        <Select
+                                            id="condicion_venta"
+                                            value={selectedMetodoPago}
+                                            onChange={(e) => {
+                                                onChangeMetodoPago(e);
+                                            }}
+                                            options={metodoPagos}
+                                            classNamePrefix="select2-selection"
+                                            isSearchable={true}
+                                            menuPosition="fixed"
+                                        />
+                                    </div>
                                 </div>
                             </Row>
                             <Row>

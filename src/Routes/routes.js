@@ -80,6 +80,8 @@ import NewLocation from "../Pages/GeneralSettings/Locations/NewLocation";
 import InvoiceMaintenance from "../Pages/Invoices/Maintenance";
 import InvoiceIssued from "../Pages/Invoices/Issued";
 import InvoiceParameters from "../Pages/Invoices/Parameters";
+import InvoiceCreditNote from "../Pages/Invoices/CreditNote";
+import InvoiceCompany from "../Pages/Invoices/Company";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -167,11 +169,11 @@ const authProtectedRoutes = [
   { path: "/newlocation", component: <NewLocation /> },
 
   { path: "/invoice/maintenance", component: <InvoiceMaintenance /> },
-  { path: "/invoice/credit/notes", component: <InvoiceMaintenance /> },
+  { path: "/invoice/credit/notes", component: <InvoiceCreditNote /> },
   { path: "/invoice/debit/notes", component: <InvoiceMaintenance /> },
   { path: "/invoice/issued", component: <InvoiceIssued /> },
   { path: "/invoice/parameters", component: <InvoiceParameters /> },
-  { path: "/invoice/companies", component: <InvoiceMaintenance /> },
+  { path: "/invoice/companies", component: <InvoiceCompany /> },
 
   {
     path: "/",
