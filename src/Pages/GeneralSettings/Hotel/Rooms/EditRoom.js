@@ -59,7 +59,6 @@ const EditRoom = () => {
 
     useEffect(() => {
         if (dataRoom) {
-            console.log(dataRoom)
             setNumberRoom(dataRoom.obtenerHabitacionById.numeroHabitacion);
             setTypeRoom({ value: dataRoom.obtenerHabitacionById.tipoHabitacion, label: dataRoom.obtenerHabitacionById.tipoHabitacion.nombre });
             setPrice(dataRoom.obtenerHabitacionById.precioPorNoche);
@@ -117,8 +116,8 @@ const EditRoom = () => {
     }
 
     const eliminarAmenities = (nombre) => {
-        setAmenitiesList([amenitiesList.find(a => a.nombre !== nombre)])
-        console.log([amenitiesList.find(a => a.nombre !== nombre)])
+        
+        setAmenitiesList(amenitiesList.filter(a => a.nombre !== nombre))
     }
 
     const [disableSave, setDisableSave] = useState(true);

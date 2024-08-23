@@ -32,8 +32,7 @@ const NewExtraService = () => {
                 precio: price,
                 estado: "ACTIVO"
             }
-
-            debugger
+            
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' })
             const { estado, message } = data.insertarServicio;
             if (estado) {

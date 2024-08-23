@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Card, CardBody, Container, InputGroup, Row, Input } from 'reactstrap';
+import { Button, Card, CardBody, Container, InputGroup, Row, Input, FormGroup, Label } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
 import { Link } from 'react-router-dom';
 import { OBTENER_HABITACIONES_DISPONIBLES } from '../../../services/HabitacionesService';
 import { OBTENER_TIPOSHABITACION } from '../../../services/TipoHabitacionService';
+import { OBTENER_SERVICIO } from '../../../services/ServiciosExtraService';
+import Select from "react-select";
+import ListInfo from '../../../components/Common/ListInfo';
+import { infoAlert } from '../../../helpers/alert';
 
 const NewBooking = ({ ...props }) => {
     document.title = "Nueva Reserva | FARO";
@@ -14,6 +18,7 @@ const NewBooking = ({ ...props }) => {
     const { data: dataCustomer } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 });
     const { data: dataRoomsAvailable } = useQuery(OBTENER_HABITACIONES_DISPONIBLES, { pollInterval: 1000 });
     const { data: dataTypeRooms } = useQuery(OBTENER_TIPOSHABITACION, { pollInterval: 1000 });
+    const { data: services } = useQuery(OBTENER_SERVICIO, { pollInterval: 1000 });
 
     const [customer, setCustomer] = useState(null)
     const [customers, setCustomers] = useState([])
@@ -25,23 +30,28 @@ const NewBooking = ({ ...props }) => {
     //const [disableSave, setDisableSave] = useState(true);
     const [disableSearch, setDisableSearch] = useState(true);
     const [hoveredIndex, setHoveredIndex] = useState(null);
+    const [serviceBooking, setServiceBooking] = useState(false);
+    const [serviceRoom, setServiceRoom] = useState(false);
 
     const [roomsAvailable, setRoomsAvailable] = useState(null);
     const [typeRooms, setTypeRooms] = useState(null);
     const [amountTypeRooms, setAmountTypeRooms] = useState([])
-    const [rooms, setRooms] = useState([])
-    const [booking, setBooking] = useState(null)
+    const [roomsBooking, setRoomsBooking] = useState([])
+    const [typeServices, setTypeServices] = useState([])
+    const [Services, setServices] = useState([])
+    const [extraService, setExtraService] = useState([])
+
 
 
     useEffect(() => {
-        const getRooms = () => {
+        const getRoomsAvailable = () => {
             if (dataRoomsAvailable) {
                 if (dataRoomsAvailable.obtenerHabitacionesDisponibles) {
                     return dataRoomsAvailable.obtenerHabitacionesDisponibles;
                 }
             }
             return [];
-        }
+        };
 
         const getTypeRooms = () => {
             if (dataTypeRooms) {
@@ -50,7 +60,7 @@ const NewBooking = ({ ...props }) => {
                 }
             }
             return [];
-        }
+        };
 
         const getAmountTypeRooms = () => {
             if (typeRooms) {
@@ -58,10 +68,8 @@ const NewBooking = ({ ...props }) => {
                 typeRooms.forEach(type => {
                     if (type) {
                         if (roomsAvailable) {
-                            const lengthRoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre);
-                            data.push({ 'lengthAvailable': lengthRoomAvailable.length, 'type': type, 'amountBooking': 0 });
-                        } else {
-                            data.push({ 'lengthAvailable': 0, 'type': type, 'amountBooking': 0 });
+                            const RoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre);
+                            data.push({ 'lengthAvailable': RoomAvailable.length, 'type': type, 'amountBooking': 0, 'rooms': RoomAvailable });
                         }
                     }
                 })
@@ -69,11 +77,22 @@ const NewBooking = ({ ...props }) => {
             }
         };
 
-        setRoomsAvailable(getRooms());
+        const getServices = () => {
+
+            if (services) {
+                if (services.obtenerServicios) {
+                    return services.obtenerServicios;
+                }
+            }
+            return [];
+        };
+
+        setRoomsAvailable(getRoomsAvailable());
         setTypeRooms(getTypeRooms());
         setAmountTypeRooms(getAmountTypeRooms())
+        setTypeServices(getServices())
 
-    }, [dataRoomsAvailable, dataTypeRooms, roomsAvailable, typeRooms]);
+    }, [dataRoomsAvailable, dataTypeRooms, roomsAvailable, typeRooms, services]);
 
 
     function getFilteredByKey(key, value) {
@@ -127,18 +146,30 @@ const NewBooking = ({ ...props }) => {
     }
 
     const handleIncrease = (e, index) => {
+
         if (amountTypeRooms[index].amountBooking < amountTypeRooms[index].lengthAvailable) {
             const updatedRooms = [...amountTypeRooms];
             updatedRooms[index].amountBooking += 1;
+            const newExtractedRooms = [...roomsBooking, updatedRooms[index].rooms.shift()];
             setAmountTypeRooms(updatedRooms);
+            setRoomsBooking(newExtractedRooms)
+
         }
     };
 
     const handleDecrease = (e, index) => {
         if (amountTypeRooms[index].amountBooking > 0) {
             const updatedRooms = [...amountTypeRooms];
+            const updatedRoomsBooking = [...roomsBooking];
             updatedRooms[index].amountBooking -= 1;
+
+            if (updatedRoomsBooking.length > 0) {
+                const roomToReturn = updatedRoomsBooking.pop();
+                updatedRooms[index].rooms.push(roomToReturn);
+            }
+
             setAmountTypeRooms(updatedRooms);
+            setRoomsBooking(updatedRoomsBooking);
         }
     };
 
@@ -165,9 +196,59 @@ const NewBooking = ({ ...props }) => {
         return type.amountBooking * type.type.precioBase
     }
 
-    console.log(amountTypeRooms);
+    const handleChangeServiceBooking = () => {
+
+        setServiceBooking(!serviceBooking);
+    };
+
+    const handleChangeServiceRoom = () => {
+
+        setServiceRoom(!serviceRoom);
+    };
+
+    const handleService = (a) => {
+        setServices(a);
+    }
+
+    const getServices = () => {
+
+        const data = []
+        if (services?.obtenerServicios) {
+            services?.obtenerServicios.forEach((item) => {
+                data.push({
+                    "value": item,
+                    "label": item.nombre
+                });
+            });
+        }
+        return data;
+    }
+
+    const addExtraService = () => {
+        if (Services) {
+            const exist = extraService.find(e => e.id === Services.value.id)
+            if (exist) {
+                infoAlert('Oops', 'Ya existe este servicio para esta reservación', 'warning', 3000, 'top-end')
+                setServices(null)
+                return
+            }
+
+            setExtraService([...extraService, Services.value])
+            setServices(null)
+
+        } else {
+            infoAlert('Oops', 'No ha seleccionado un servicio', 'error', 3000, 'top-end')
+        }
+    }
+
+    const eliminarService = (nombre) => {
+
+        setExtraService(extraService.filter(a => a.nombre !== nombre))
+    }
 
     const onClickSave = async () => { }
+
+    console.log(roomsBooking)
     return (
         <React.Fragment>
             <div className="page-content">
@@ -272,7 +353,7 @@ const NewBooking = ({ ...props }) => {
                             <Card className="m-2 p-2 d-flex flex-row justify-content-center">
                                 <div className='col-md-7 d-flex flex-column align-items-center'>
                                     <Row className="m-2">
-                                        <h3 className=" col mb-2">
+                                        <h3 className="col mb-2">
                                             Tipo de Habitaciones
                                         </h3>
                                     </Row>
@@ -316,40 +397,155 @@ const NewBooking = ({ ...props }) => {
                                         </Card>
                                     ))}
                                 </div>
-                                <Card className='col-md-4 bg-light m-2 p-2'>
+                                <Card className='col-md-4 bg-light m-2 p-2 '>
                                     <div className="col-md-12">
-                                        <h3 className="text-center mb-4 mt-4"> Resumen</h3>
+                                        <h3 key='summary' className="text-center mb-4 mt-4">Resumen</h3>
 
-                                        <Card className="col-md-12 bg-tertiary rounded">
+                                        <Card className="col-md-12 bg-tertiary rounded p-3" style={{ height: '300px', overflowY: 'auto' }}>
+
                                             {amountTypeRooms.map((type) => (
                                                 <div className="bg-secondary col-md-12">
                                                     {type.amountBooking !== 0 && (
-                                                        <div className="m-1 text-light d-flex justify-content-around">
-                                                            <p className="m-0 w-25 h-25 overflow-auto">{type.type.nombre}</p>
+                                                        <div key={type.type.nombre} className="m-1 text-light d-flex justify-content-around">
+                                                            <p className="m-0 w-25 h-25 ">{type.type.nombre}</p>
                                                             <div className="col-md-4 d-flex justify-content-around">
                                                                 <p className="m-0">X{type.amountBooking}</p>
-                                                                <p className="m-0 w-1 h-1 overflow-auto">${totalBooking(type)}</p>
+                                                                <p className="m-0 w-1 h-1 ">${totalBooking(type)}</p>
                                                             </div>
                                                         </div>
                                                     )}
                                                 </div>
                                             ))}
+
                                         </Card>
-                                        <Card>
-                                            <div>
-                                                <div className="p-3">
-                                                    <p className=" text-uppercase fs-3 fw-bold">Total:</p>
-                                                </div>
 
-                                                <div>
-
-                                                </div>
-
-                                            </div>
-                                        </Card>
 
                                     </div>
+                                    <Card key='total'>
+                                        <div>
+                                            <div className="p-3">
+                                                <p className=" text-uppercase fs-3 fw-bold">Total:</p>
+                                            </div>
+
+                                            <div>
+
+                                            </div>
+
+                                        </div>
+                                    </Card>
                                 </Card>
+                            </Card>
+                            <Card className="m-2 p-2 ">
+                                <div className='col-md-12 d-flex flex-column align-items-center'>
+                                    <Row className="m-2">
+                                        <h3 className="col mb-2">
+                                            Servicios Adicionales
+                                        </h3>
+                                    </Row>
+                                    <Row className="m-2 p-2 d-flex flex-row col-md-7 justify-content-center">
+                                        <div className="form-check ms-3 mt-2 col-md-4">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                id="isServiceBooking"
+                                                value='serviceBooking'
+                                                readOnly
+                                                checked={serviceBooking}
+                                                onClick={handleChangeServiceBooking}
+                                            />
+                                            <label htmlFor="isSameAsCustomer" className="form-check-label ms-2">Servicios por reserva</label>
+                                        </div>
+                                        <div className="form-check ms-3 mt-2 col-md-4">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                id="isServiceRoom"
+                                                value='serviceRoom'
+                                                readOnly
+                                                checked={serviceRoom}
+                                                onClick={handleChangeServiceRoom}
+                                            />
+                                            <label htmlFor="isSameAsCustomer" className="form-check-label ms-2">Servicios por Habitacion</label>
+                                        </div>
+                                    </Row>
+                                </div>
+                                <div className='col-md-12 d-flex flex-row  justify-content-center'>
+                                    {serviceBooking && (
+                                        <Card className='col-md-5 bg-light m-2 p-2 '>
+                                            <div className="col-md-12">
+                                                <h3 key='summary' className="text-center mb-4 mt-4">Servicios adicionales por reserva</h3>
+                                            </div>
+
+                                            <div className="col-md-12 col-sm-12">
+                                                <Card className="p-2">
+                                                    <CardBody>
+                                                        <div className="row row-cols-lg-auto g-3 align-items-center">
+                                                            <div className="col-xl-8 col-md-12">
+                                                                <Select
+                                                                    value={Services}
+                                                                    onChange={(e) => {
+                                                                        handleService(e);
+                                                                    }}
+                                                                    options={getServices()}
+                                                                    placeholder="Servicios"
+                                                                    classNamePrefix="select2-selection"
+                                                                />
+                                                            </div>
+                                                            <div className="col-12 mb-1">
+                                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraService() }}>
+                                                                    Agregar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <Row>
+                                                            <ListInfo data={extraService} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={eliminarService} mainKey={'nombre'} secondKey={'precio'} />
+                                                        </Row>
+                                                    </CardBody>
+                                                </Card>
+                                            </div>
+                                        </Card>
+                                    )}
+                                    {serviceRoom && (
+                                        <Card className='col-md-5 bg-light m-2 p-2 '>
+                                            <div className="col-md-12">
+                                                <h3 key='summary' className="text-center mb-4 mt-4">Servicios adicionales por habitación</h3>
+                                            </div>
+
+                                            {roomsBooking.length ? (<div className="col-md-12 col-sm-12">
+                                                <Card className="p-2">
+                                                    <CardBody>
+                                                        <div className="row row-cols-lg-auto g-3 align-items-center">
+                                                            <div className="col-xl-8 col-md-12">
+                                                                <Select
+                                                                    value={Services}
+                                                                    onChange={(e) => {
+                                                                        handleService(e);
+                                                                    }}
+                                                                    options={getServices()}
+                                                                    placeholder="Servicios"
+                                                                    classNamePrefix="select2-selection"
+                                                                />
+                                                            </div>
+                                                            <div className="col-12 mb-1">
+                                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraService() }}>
+                                                                    Agregar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <Row>
+                                                            <ListInfo data={extraService} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={eliminarService} mainKey={'nombre'} secondKey={'precio'} />
+                                                        </Row>
+                                                    </CardBody>
+                                                </Card>
+                                            </div>) : (
+                                                <div className='d-flex justify-content-center'>
+                                                    <h5 className='text-center'>Debe haber seleccionado almenos una habitación para realizar esta acción.</h5>
+                                                </div>
+                                            )}
+                                        </Card>
+                                    )}
+                                </div>
+
                             </Card>
                         </div>
                     ) : filter === '' && (<label>Debe buscar un cliente</label>)}

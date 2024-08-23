@@ -173,7 +173,7 @@ export const hotelsettings = [
     {
         label: "Servicios extra",
         icon: 'mdi mdi-account-star-outline',
-        link: "/hotelsettings/extraservice"
+        link: "/hotelsettings/extraservices"
     },
     {
         label: "Temporada",

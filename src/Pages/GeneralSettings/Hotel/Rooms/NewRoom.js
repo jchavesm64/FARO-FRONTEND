@@ -95,8 +95,7 @@ const NewRoom = () => {
     }
 
     const eliminarAmenities = (nombre) => {
-        setAmenitiesList([amenitiesList.find(a => a.nombre !== nombre)])
-        console.log([amenitiesList.find(a => a.nombre !== nombre)])
+        setAmenitiesList(amenitiesList.filter(a => a.nombre !== nombre))
     }
 
     const [disableSave, setDisableSave] = useState(true);
