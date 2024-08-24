@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Card, CardBody, Container, InputGroup, Row, Input, FormGroup, Label } from 'reactstrap';
+import { Button, Card, CardBody, Container, InputGroup, Row, Input } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
@@ -30,16 +30,28 @@ const NewBooking = ({ ...props }) => {
     //const [disableSave, setDisableSave] = useState(true);
     const [disableSearch, setDisableSearch] = useState(true);
     const [hoveredIndex, setHoveredIndex] = useState(null);
-    const [serviceBooking, setServiceBooking] = useState(false);
-    const [serviceRoom, setServiceRoom] = useState(false);
+    const [serviceBookingCheck, setServiceBookingCheck] = useState(false);
+    const [serviceRoomCheck, setServiceRoomCheck] = useState(false);
 
-    const [roomsAvailable, setRoomsAvailable] = useState(null);
-    const [typeRooms, setTypeRooms] = useState(null);
-    const [amountTypeRooms, setAmountTypeRooms] = useState([])
-    const [roomsBooking, setRoomsBooking] = useState([])
-    const [typeServices, setTypeServices] = useState([])
-    const [Services, setServices] = useState([])
-    const [extraService, setExtraService] = useState([])
+    const [roomsAvailable, setRoomsAvailable] = useState(null);//Habitaciones disponibles
+
+    const [typeRooms, setTypeRooms] = useState([]);//Tipo de habitaciones
+
+    const [amountTypeRooms, setAmountTypeRooms] = useState([]);//Cantidad de habitaciones por tipo 
+
+    const [roomsBooking, setRoomsBooking] = useState([]);//Habitaciones seleccionadas por reserva, esta lista es temporal para para crear la reserva habitación
+
+    const [ServicesBooking, setServicesBooking] = useState([]);//Servicio selecionado para agregar a la reserva en general
+
+    const [ServicesRoom, setServicesRoom] = useState([]);//Servicio selecionado para agregar a la habitación
+
+    const [extraService, setExtraService] = useState([]);//Lista de servicios selecionados para la reserva en general
+
+    const [selectRoom, setSelectRoom] = useState(null);//Habitación seleccionada para agragar servicios extra a la habitación 
+
+    const [extraServiceRoom, setExtraServiceRoom] = useState([]);//Servicios seleccionados para la habitación seleccionada
+
+    const [servicesPerRoom, setServicePerRoom] = useState([]);//lista de servicios por habitación
 
 
 
@@ -76,23 +88,11 @@ const NewBooking = ({ ...props }) => {
                 return data;
             }
         };
-
-        const getServices = () => {
-
-            if (services) {
-                if (services.obtenerServicios) {
-                    return services.obtenerServicios;
-                }
-            }
-            return [];
-        };
-
         setRoomsAvailable(getRoomsAvailable());
         setTypeRooms(getTypeRooms());
         setAmountTypeRooms(getAmountTypeRooms())
-        setTypeServices(getServices())
 
-    }, [dataRoomsAvailable, dataTypeRooms, roomsAvailable, typeRooms, services]);
+    }, [dataRoomsAvailable, dataTypeRooms, roomsAvailable, typeRooms]);
 
 
     function getFilteredByKey(key, value) {
@@ -146,7 +146,6 @@ const NewBooking = ({ ...props }) => {
     }
 
     const handleIncrease = (e, index) => {
-
         if (amountTypeRooms[index].amountBooking < amountTypeRooms[index].lengthAvailable) {
             const updatedRooms = [...amountTypeRooms];
             updatedRooms[index].amountBooking += 1;
@@ -198,16 +197,17 @@ const NewBooking = ({ ...props }) => {
 
     const handleChangeServiceBooking = () => {
 
-        setServiceBooking(!serviceBooking);
+        setServiceBookingCheck(!serviceBookingCheck);
     };
 
     const handleChangeServiceRoom = () => {
 
-        setServiceRoom(!serviceRoom);
+        setServiceRoomCheck(!serviceRoomCheck);
     };
 
-    const handleService = (a) => {
-        setServices(a);
+    const handleService = (a, type) => {
+        if (type === 'general') setServicesBooking(a);
+        if (type === 'room') setServicesRoom(a);
     }
 
     const getServices = () => {
@@ -224,31 +224,77 @@ const NewBooking = ({ ...props }) => {
         return data;
     }
 
-    const addExtraService = () => {
-        if (Services) {
-            const exist = extraService.find(e => e.id === Services.value.id)
+    const addExtraService = (s, extra, type) => {
+        if (s) {
+            const exist = extra.find(e => e.id === s.value.id)
             if (exist) {
                 infoAlert('Oops', 'Ya existe este servicio para esta reservación', 'warning', 3000, 'top-end')
-                setServices(null)
+                if (type === 'general') setServicesBooking(null)
+                if (type === 'room') setServicesRoom(null)
                 return
             }
 
-            setExtraService([...extraService, Services.value])
-            setServices(null)
+            if (type === 'general') {
+                setExtraService([...extraService, s.value])
+                setServicesBooking(null)
+            }
+            if (type === 'room') {
+                setExtraServiceRoom([...extraServiceRoom, s.value])
+                setServicesRoom(null)
+            }
+
 
         } else {
             infoAlert('Oops', 'No ha seleccionado un servicio', 'error', 3000, 'top-end')
         }
     }
 
-    const eliminarService = (nombre) => {
-
+    const eliminarServiceBooking = (nombre) => {
         setExtraService(extraService.filter(a => a.nombre !== nombre))
+
+    }
+    const eliminarServiceRoom = (nombre) => {
+        setExtraServiceRoom(extraServiceRoom.filter(a => a.nombre !== nombre));
+
     }
 
-    const onClickSave = async () => { }
+    const handleRoomSelect = (room) => {
+        setSelectRoom(room);
+        if (servicesPerRoom.length) {
+            const dataService = servicesPerRoom.find(s => s.room.numeroHabitacion === room.numeroHabitacion);
+            setExtraServiceRoom(...extraServiceRoom, dataService.service);
+        }
+    };
 
-    console.log(roomsBooking)
+    const options = typeRooms.map((type) => ({
+        label: type.nombre,
+        options: roomsBooking.filter(roomB => roomB.tipoHabitacion.id === type.id).map((room) => ({
+            label: room.numeroHabitacion,
+            value: room,
+        })),
+    }));
+
+    const addExtraServicePerRoom = async () => {
+        const index = servicesPerRoom.findIndex(r => r.room.numeroHabitacion === selectRoom.numeroHabitacion);
+        if (index !== -1) {
+            setServicePerRoom((prev) => {
+                const updatedServices = [...prev];
+                updatedServices[index] = {
+                    ...updatedServices[index],
+                    service: extraServiceRoom
+                };
+                return updatedServices;
+            });
+        } else {
+            await setServicePerRoom([...servicesPerRoom, { 'room': selectRoom, 'service': extraServiceRoom }])
+        }
+
+        setSelectRoom(null)
+        setExtraServiceRoom([])
+    }
+    
+    //const onClickSave = async () => { }
+
     return (
         <React.Fragment>
             <div className="page-content">
@@ -450,10 +496,10 @@ const NewBooking = ({ ...props }) => {
                                                 id="isServiceBooking"
                                                 value='serviceBooking'
                                                 readOnly
-                                                checked={serviceBooking}
+                                                checked={serviceBookingCheck}
                                                 onClick={handleChangeServiceBooking}
                                             />
-                                            <label htmlFor="isSameAsCustomer" className="form-check-label ms-2">Servicios por reserva</label>
+                                            <label htmlFor="isServiceBooking" className="form-check-label ms-2">Servicios por reserva</label>
                                         </div>
                                         <div className="form-check ms-3 mt-2 col-md-4">
                                             <input
@@ -462,15 +508,15 @@ const NewBooking = ({ ...props }) => {
                                                 id="isServiceRoom"
                                                 value='serviceRoom'
                                                 readOnly
-                                                checked={serviceRoom}
+                                                checked={serviceRoomCheck}
                                                 onClick={handleChangeServiceRoom}
                                             />
-                                            <label htmlFor="isSameAsCustomer" className="form-check-label ms-2">Servicios por Habitacion</label>
+                                            <label htmlFor="isServiceRoom" className="form-check-label ms-2">Servicios por Habitacion</label>
                                         </div>
                                     </Row>
                                 </div>
                                 <div className='col-md-12 d-flex flex-row  justify-content-center'>
-                                    {serviceBooking && (
+                                    {serviceBookingCheck && (
                                         <Card className='col-md-5 bg-light m-2 p-2 '>
                                             <div className="col-md-12">
                                                 <h3 key='summary' className="text-center mb-4 mt-4">Servicios adicionales por reserva</h3>
@@ -480,11 +526,11 @@ const NewBooking = ({ ...props }) => {
                                                 <Card className="p-2">
                                                     <CardBody>
                                                         <div className="row row-cols-lg-auto g-3 align-items-center">
-                                                            <div className="col-xl-8 col-md-12">
+                                                            <div className="col-xl-9 col-md-12 mb-2">
                                                                 <Select
-                                                                    value={Services}
+                                                                    value={ServicesBooking}
                                                                     onChange={(e) => {
-                                                                        handleService(e);
+                                                                        handleService(e, 'general');
                                                                     }}
                                                                     options={getServices()}
                                                                     placeholder="Servicios"
@@ -492,51 +538,72 @@ const NewBooking = ({ ...props }) => {
                                                                 />
                                                             </div>
                                                             <div className="col-12 mb-1">
-                                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraService() }}>
+                                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraService(ServicesBooking, extraService, 'general') }}>
                                                                     Agregar
                                                                 </button>
                                                             </div>
                                                         </div>
                                                         <Row>
-                                                            <ListInfo data={extraService} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={eliminarService} mainKey={'nombre'} secondKey={'precio'} />
+                                                            <ListInfo data={extraService} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={eliminarServiceBooking} mainKey={'nombre'} secondKey={'precio'} />
                                                         </Row>
                                                     </CardBody>
                                                 </Card>
                                             </div>
                                         </Card>
                                     )}
-                                    {serviceRoom && (
+                                    {serviceRoomCheck && (
                                         <Card className='col-md-5 bg-light m-2 p-2 '>
                                             <div className="col-md-12">
                                                 <h3 key='summary' className="text-center mb-4 mt-4">Servicios adicionales por habitación</h3>
                                             </div>
 
                                             {roomsBooking.length ? (<div className="col-md-12 col-sm-12">
-                                                <Card className="p-2">
-                                                    <CardBody>
-                                                        <div className="row row-cols-lg-auto g-3 align-items-center">
-                                                            <div className="col-xl-8 col-md-12">
-                                                                <Select
-                                                                    value={Services}
-                                                                    onChange={(e) => {
-                                                                        handleService(e);
-                                                                    }}
-                                                                    options={getServices()}
-                                                                    placeholder="Servicios"
-                                                                    classNamePrefix="select2-selection"
-                                                                />
+                                                {selectRoom ? (
+                                                    <Card className="p-2">
+                                                        <CardBody>
+                                                            <div className="row row-cols-lg-auto g-3 align-items-center">
+                                                                <div className="col-xl-9 col-md-12 mb-2">
+                                                                    <Select
+                                                                        value={ServicesRoom}
+                                                                        onChange={(e) => {
+                                                                            handleService(e, 'room');
+                                                                        }}
+                                                                        options={getServices()}
+                                                                        placeholder={`Servicios para la habitación ${selectRoom.numeroHabitacion}`}
+                                                                        classNamePrefix="select2-selection"
+                                                                    />
+                                                                </div>
+                                                                <div className="col-12 mb-1">
+                                                                    <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraService(ServicesRoom, extraServiceRoom, 'room') }}>
+                                                                        Agregar
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                            <div className="col-12 mb-1">
-                                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraService() }}>
-                                                                    Agregar
+                                                            <Row>
+                                                                <ListInfo data={extraServiceRoom} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={eliminarServiceRoom} mainKey={'nombre'} secondKey={'precio'} />
+                                                            </Row>
+                                                            <div className="col-12 mt-2">
+                                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraServicePerRoom() }}>
+                                                                    Guardar
                                                                 </button>
                                                             </div>
-                                                        </div>
-                                                        <Row>
-                                                            <ListInfo data={extraService} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={eliminarService} mainKey={'nombre'} secondKey={'precio'} />
-                                                        </Row>
-                                                    </CardBody>
-                                                </Card>
+                                                        </CardBody>
+                                                    </Card>
+                                                ) : (
+                                                    <Card className="p-2">
+                                                        <CardBody>
+                                                            <label htmlFor="roomSelector">Selecciona una habitación:</label>
+                                                            <Select
+                                                                id='roomSelector'
+                                                                placeholder="Selecciona una habitación:"
+                                                                value={selectRoom ? { label: selectRoom.numeroHabitacion, value: selectRoom } : null}
+                                                                options={options}
+                                                                onChange={(selectedOption) => handleRoomSelect(selectedOption ? selectedOption.value : null)}
+                                                                classNamePrefix="select2-selection"
+                                                            />
+                                                        </CardBody>
+                                                    </Card>
+                                                )}
                                             </div>) : (
                                                 <div className='d-flex justify-content-center'>
                                                     <h5 className='text-center'>Debe haber seleccionado almenos una habitación para realizar esta acción.</h5>
