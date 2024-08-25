@@ -53,6 +53,8 @@ const NewBooking = ({ ...props }) => {
 
     const [servicesPerRoom, setServicePerRoom] = useState([]);//lista de servicios por habitación
 
+    const [totalBooking, setTotalBooking] = useState([])
+
 
 
     useEffect(() => {
@@ -151,7 +153,8 @@ const NewBooking = ({ ...props }) => {
             updatedRooms[index].amountBooking += 1;
             const newExtractedRooms = [...roomsBooking, updatedRooms[index].rooms.shift()];
             setAmountTypeRooms(updatedRooms);
-            setRoomsBooking(newExtractedRooms)
+            setRoomsBooking(newExtractedRooms);
+          
 
         }
     };
@@ -191,18 +194,22 @@ const NewBooking = ({ ...props }) => {
         }
     };
 
-    const totalBooking = (type) => {
-        return type.amountBooking * type.type.precioBase
+    const totalPerRoom = (type) => {
+        const total = type.amountBooking * type.type.precioBase;
+
+        return total
     }
 
     const handleChangeServiceBooking = () => {
-
         setServiceBookingCheck(!serviceBookingCheck);
+        setExtraService([])
     };
 
     const handleChangeServiceRoom = () => {
-
         setServiceRoomCheck(!serviceRoomCheck);
+        setExtraServiceRoom([])
+        setServicePerRoom([])
+        setSelectRoom(null)
     };
 
     const handleService = (a, type) => {
@@ -225,6 +232,7 @@ const NewBooking = ({ ...props }) => {
     }
 
     const addExtraService = (s, extra, type) => {
+
         if (s) {
             const exist = extra.find(e => e.id === s.value.id)
             if (exist) {
@@ -236,6 +244,7 @@ const NewBooking = ({ ...props }) => {
 
             if (type === 'general') {
                 setExtraService([...extraService, s.value])
+                //setTotalBooking({ 'type': null, 'price': null });
                 setServicesBooking(null)
             }
             if (type === 'room') {
@@ -253,6 +262,7 @@ const NewBooking = ({ ...props }) => {
         setExtraService(extraService.filter(a => a.nombre !== nombre))
 
     }
+
     const eliminarServiceRoom = (nombre) => {
         setExtraServiceRoom(extraServiceRoom.filter(a => a.nombre !== nombre));
 
@@ -292,8 +302,19 @@ const NewBooking = ({ ...props }) => {
         setSelectRoom(null)
         setExtraServiceRoom([])
     }
-    
+
+    const totalToPayBooking = () => {
+
+    }
     //const onClickSave = async () => { }
+
+
+    /*     console.log('Habitaciones', roomsBooking);
+        console.log('Servicios habitacion', servicesPerRoom);
+        console.log('Servicio general', extraService);
+        console.log('tipo habitacion', amountTypeRooms);
+     */
+
 
     return (
         <React.Fragment>
@@ -446,25 +467,59 @@ const NewBooking = ({ ...props }) => {
                                 <Card className='col-md-4 bg-light m-2 p-2 '>
                                     <div className="col-md-12">
                                         <h3 key='summary' className="text-center mb-4 mt-4">Resumen</h3>
-
                                         <Card className="col-md-12 bg-tertiary rounded p-3" style={{ height: '300px', overflowY: 'auto' }}>
 
-                                            {amountTypeRooms.map((type) => (
-                                                <div className="bg-secondary col-md-12">
-                                                    {type.amountBooking !== 0 && (
-                                                        <div key={type.type.nombre} className="m-1 text-light d-flex justify-content-around">
-                                                            <p className="m-0 w-25 h-25 ">{type.type.nombre}</p>
-                                                            <div className="col-md-4 d-flex justify-content-around">
-                                                                <p className="m-0">X{type.amountBooking}</p>
-                                                                <p className="m-0 w-1 h-1 ">${totalBooking(type)}</p>
+                                            {roomsBooking.length ? (
+                                                <div>
+                                                    <div>
+                                                        <label>Habitaciones</label>
+                                                        {amountTypeRooms.map((type) => (
+                                                            <div className="bg-secondary col-md-12">
+                                                                {type.amountBooking !== 0 && (
+                                                                    <div key={type.type.nombre} className="m-0 text-light d-flex justify-content-between">
+                                                                        <p className="p-1 m-0 w-25 h-25 ">{type.type.nombre}</p>
+                                                                        <div className="col-md-4 d-flex justify-content-between p-1">
+                                                                            <p className="m-0">X{type.amountBooking}</p>
+                                                                            <p className="m-0 w-1 h-1 text-end ">${totalPerRoom(type)}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        </div>
-                                                    )}
+                                                        ))}
+                                                    </div>
+                                                    <div>
+                                                        {extraService.length > 0 && (
+                                                            <div className='mt-2'>
+                                                                <label>Servicios adicionales por reserva</label>
+                                                                <div className="bg-secondary col-md-12">
+                                                                    {extraService.map(s => (
+                                                                        <div key={s.nombre} className="m-0 text-light d-flex justify-content-between p-1">
+                                                                            <p className="m-0 text-nowrap">{s.nombre}</p>
+                                                                            <p className="m-0 text-end">${s.precio}</p>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        {extraServiceRoom.length > 0 && (
+                                                            <div className='mt-2'>
+                                                                <label>Servicios adicionales por habitación</label>
+                                                                <div className="bg-secondary col-md-12">
+                                                                    {extraServiceRoom.map(s => (
+                                                                        <div key={s.nombre} className="m-0 text-light d-flex justify-content-between p-1">
+                                                                            <p className="m-0 text-nowrap">{s.nombre}</p>
+                                                                            <p className="m-0 text-end">${s.precio}</p>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            ))}
-
+                                            ) : (<label>Sin datos que mostrar</label>)}
                                         </Card>
-
 
                                     </div>
                                     <Card key='total'>
@@ -473,7 +528,7 @@ const NewBooking = ({ ...props }) => {
                                                 <p className=" text-uppercase fs-3 fw-bold">Total:</p>
                                             </div>
 
-                                            <div>
+                                            <div className="p-3">
 
                                             </div>
 
@@ -488,32 +543,34 @@ const NewBooking = ({ ...props }) => {
                                             Servicios Adicionales
                                         </h3>
                                     </Row>
-                                    <Row className="m-2 p-2 d-flex flex-row col-md-7 justify-content-center">
-                                        <div className="form-check ms-3 mt-2 col-md-4">
-                                            <input
-                                                className="form-check-input"
-                                                type="checkbox"
-                                                id="isServiceBooking"
-                                                value='serviceBooking'
-                                                readOnly
-                                                checked={serviceBookingCheck}
-                                                onClick={handleChangeServiceBooking}
-                                            />
-                                            <label htmlFor="isServiceBooking" className="form-check-label ms-2">Servicios por reserva</label>
-                                        </div>
-                                        <div className="form-check ms-3 mt-2 col-md-4">
-                                            <input
-                                                className="form-check-input"
-                                                type="checkbox"
-                                                id="isServiceRoom"
-                                                value='serviceRoom'
-                                                readOnly
-                                                checked={serviceRoomCheck}
-                                                onClick={handleChangeServiceRoom}
-                                            />
-                                            <label htmlFor="isServiceRoom" className="form-check-label ms-2">Servicios por Habitacion</label>
-                                        </div>
-                                    </Row>
+                                    {roomsBooking.length ? (
+                                        <Row className="m-2 p-2 d-flex flex-row col-md-7 justify-content-center">
+                                            <div className="form-check ms-3 mt-2 col-md-4">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="checkbox"
+                                                    id="isServiceBooking"
+                                                    value='serviceBooking'
+                                                    readOnly
+                                                    checked={serviceBookingCheck}
+                                                    onClick={handleChangeServiceBooking}
+                                                />
+                                                <label htmlFor="isServiceBooking" className="form-check-label ms-2">Servicios por reserva</label>
+                                            </div>
+                                            <div className="form-check ms-3 mt-2 col-md-4">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="checkbox"
+                                                    id="isServiceRoom"
+                                                    value='serviceRoom'
+                                                    readOnly
+                                                    checked={serviceRoomCheck}
+                                                    onClick={handleChangeServiceRoom}
+                                                />
+                                                <label htmlFor="isServiceRoom" className="form-check-label ms-2">Servicios por Habitacion</label>
+                                            </div>
+                                        </Row>
+                                    ) : (<label>Debe selecionar almenos una habitación</label>)}
                                 </div>
                                 <div className='col-md-12 d-flex flex-row  justify-content-center'>
                                     {serviceBookingCheck && (
