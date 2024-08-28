@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Card, CardBody, Container, InputGroup, Row, Input } from 'reactstrap';
+import { Button, Card, CardBody, Container, InputGroup, Row, Input, Label } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
@@ -10,6 +10,8 @@ import { OBTENER_SERVICIO } from '../../../services/ServiciosExtraService';
 import Select from "react-select";
 import ListInfo from '../../../components/Common/ListInfo';
 import { infoAlert } from '../../../helpers/alert';
+import SpanSubtitleForm from '../../../components/Forms/SpanSubtitleForm';
+import NewCustomer from '../../Customers/NewCustomer';
 
 const NewBooking = ({ ...props }) => {
     document.title = "Nueva Reserva | FARO";
@@ -27,6 +29,8 @@ const NewBooking = ({ ...props }) => {
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
 
+    const [stateBooking, setStateBooking] = useState(false);
+
     //const [disableSave, setDisableSave] = useState(true);
     const [disableSearch, setDisableSearch] = useState(true);
     const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -34,25 +38,15 @@ const NewBooking = ({ ...props }) => {
     const [serviceRoomCheck, setServiceRoomCheck] = useState(false);
 
     const [roomsAvailable, setRoomsAvailable] = useState(null);//Habitaciones disponibles
-
     const [typeRooms, setTypeRooms] = useState([]);//Tipo de habitaciones
-
     const [amountTypeRooms, setAmountTypeRooms] = useState([]);//Cantidad de habitaciones por tipo 
-
     const [roomsBooking, setRoomsBooking] = useState([]);//Habitaciones seleccionadas por reserva, esta lista es temporal para para crear la reserva habitación
-
     const [ServicesBooking, setServicesBooking] = useState([]);//Servicio selecionado para agregar a la reserva en general
-
     const [ServicesRoom, setServicesRoom] = useState([]);//Servicio selecionado para agregar a la habitación
-
     const [extraService, setExtraService] = useState([]);//Lista de servicios selecionados para la reserva en general
-
     const [selectRoom, setSelectRoom] = useState(null);//Habitación seleccionada para agragar servicios extra a la habitación 
-
     const [extraServiceRoom, setExtraServiceRoom] = useState([]);//Servicios seleccionados para la habitación seleccionada
-
     const [servicesPerRoom, setServicePerRoom] = useState([]);//lista de servicios por habitación
-
     const [totalBooking, setTotalBooking] = useState([])
 
 
@@ -106,7 +100,8 @@ const NewBooking = ({ ...props }) => {
         if (valName.includes(val) || valCode.includes(val)) {
             return key
         }
-
+        setStateBooking(true);
+        setCustomer(null)
         return null
     }
 
@@ -120,18 +115,20 @@ const NewBooking = ({ ...props }) => {
                     return value
                 });
             }
+
         }
         return []
     }
 
     const handleInputChange = (e) => {
         if (e.target.value !== '') {
-            setFilter(e.target.value)
-            setCustomers(getDataCustomer())
+            setFilter(e.target.value);
+            setCustomers(getDataCustomer());
             return
         } else {
-            setFilter('')
-            setCustomers([])
+            setFilter('');
+            setCustomers([]);
+            setStateBooking(false)
         }
 
     }
@@ -154,7 +151,20 @@ const NewBooking = ({ ...props }) => {
             const newExtractedRooms = [...roomsBooking, updatedRooms[index].rooms.shift()];
             setAmountTypeRooms(updatedRooms);
             setRoomsBooking(newExtractedRooms);
-          
+
+            const i = totalBooking.findIndex(t => t.typeName === amountTypeRooms[index].type.nombre);
+            if (i !== -1) {
+                setTotalBooking((prev) => {
+                    const updatedTotal = [...prev];
+                    updatedTotal[i] = {
+                        ...updatedTotal[i],
+                        price: amountTypeRooms[index].amountBooking * amountTypeRooms[index].type.precioBase
+                    };
+                    return updatedTotal;
+                });
+            } else {
+                setTotalBooking([...totalBooking, { 'typeName': amountTypeRooms[index].type.nombre, 'price': amountTypeRooms[index].amountBooking * amountTypeRooms[index].type.precioBase }]);
+            }
 
         }
     };
@@ -172,6 +182,21 @@ const NewBooking = ({ ...props }) => {
 
             setAmountTypeRooms(updatedRooms);
             setRoomsBooking(updatedRoomsBooking);
+
+            const i = totalBooking.findIndex(t => t.typeName === amountTypeRooms[index].type.nombre);
+            if (i !== -1) {
+                setTotalBooking((prev) => {
+                    const updatedTotal = [...prev];
+                    updatedTotal[i] = {
+                        ...updatedTotal[i],
+                        price: amountTypeRooms[index].amountBooking * amountTypeRooms[index].type.precioBase
+                    };
+                    return updatedTotal;
+                });
+            } else {
+
+                setTotalBooking([...totalBooking, { 'typeName': amountTypeRooms[index].type.nombre, 'price': amountTypeRooms[index].amountBooking * amountTypeRooms[index].type.precioBase }]);
+            }
         }
     };
 
@@ -232,31 +257,31 @@ const NewBooking = ({ ...props }) => {
     }
 
     const addExtraService = (s, extra, type) => {
-
-        if (s) {
-            const exist = extra.find(e => e.id === s.value.id)
-            if (exist) {
-                infoAlert('Oops', 'Ya existe este servicio para esta reservación', 'warning', 3000, 'top-end')
-                if (type === 'general') setServicesBooking(null)
-                if (type === 'room') setServicesRoom(null)
-                return
-            }
-
-            if (type === 'general') {
-                setExtraService([...extraService, s.value])
-                //setTotalBooking({ 'type': null, 'price': null });
-                setServicesBooking(null)
-            }
-            if (type === 'room') {
-                setExtraServiceRoom([...extraServiceRoom, s.value])
-                setServicesRoom(null)
-            }
-
-
-        } else {
-            infoAlert('Oops', 'No ha seleccionado un servicio', 'error', 3000, 'top-end')
+        if (!s) {
+            infoAlert('Oops', 'No ha seleccionado un servicio', 'error', 3000, 'top-end');
+            return;
         }
-    }
+
+        const exist = extra.find(e => e.id === s.value.id);
+        if (exist) {
+            infoAlert('Oops', 'Ya existe este servicio para esta reservación', 'warning', 3000, 'top-end');
+            if (type === 'general') setServicesBooking(null);
+            if (type === 'room') setServicesRoom(null);
+            return;
+        }
+
+        const updatedService = [...extra, s.value];
+        if (type === 'general') {
+            setExtraService(updatedService);
+            setServicesBooking(null);
+        } else if (type === 'room') {
+            setExtraServiceRoom(updatedService);
+            setServicesRoom(null);
+        }
+
+        setTotalBooking([...totalBooking, { 'typeName': s.label, 'price': s.value.precio }]);
+    };
+
 
     const eliminarServiceBooking = (nombre) => {
         setExtraService(extraService.filter(a => a.nombre !== nombre))
@@ -272,9 +297,12 @@ const NewBooking = ({ ...props }) => {
         setSelectRoom(room);
         if (servicesPerRoom.length) {
             const dataService = servicesPerRoom.find(s => s.room.numeroHabitacion === room.numeroHabitacion);
-            setExtraServiceRoom(...extraServiceRoom, dataService.service);
+            if (dataService) {
+                setExtraServiceRoom([...extraServiceRoom, dataService.service]);
+            }
         }
     };
+
 
     const options = typeRooms.map((type) => ({
         label: type.nombre,
@@ -284,36 +312,44 @@ const NewBooking = ({ ...props }) => {
         })),
     }));
 
-    const addExtraServicePerRoom = async () => {
-        const index = servicesPerRoom.findIndex(r => r.room.numeroHabitacion === selectRoom.numeroHabitacion);
-        if (index !== -1) {
-            setServicePerRoom((prev) => {
-                const updatedServices = [...prev];
-                updatedServices[index] = {
-                    ...updatedServices[index],
-                    service: extraServiceRoom
-                };
-                return updatedServices;
-            });
-        } else {
-            await setServicePerRoom([...servicesPerRoom, { 'room': selectRoom, 'service': extraServiceRoom }])
-        }
+    const addExtraServicePerRoom = () => {
+        setServicePerRoom((prev) => {
+            const index = prev.findIndex(r => r.room.numeroHabitacion === selectRoom.numeroHabitacion);
 
-        setSelectRoom(null)
-        setExtraServiceRoom([])
+            if (index !== -1) {
+                return prev.map((item, i) =>
+                    i === index
+                        ? { ...item, service: extraServiceRoom }
+                        : item
+                );
+            } else {
+                return [...prev, { room: selectRoom, service: extraServiceRoom }];
+            }
+        });
+
+        // Limpia los estados
+        setSelectRoom(null);
+        setExtraServiceRoom([]);
+    };
+
+
+    const addNewCustomer = (data) => {
+        setCustomer(data);
+        setFilter('');
     }
 
-    const totalToPayBooking = () => {
+    /*  */
 
-    }
+
+
     //const onClickSave = async () => { }
 
 
-    /*     console.log('Habitaciones', roomsBooking);
-        console.log('Servicios habitacion', servicesPerRoom);
-        console.log('Servicio general', extraService);
-        console.log('tipo habitacion', amountTypeRooms);
-     */
+    /*console.log('Servicios habitacion', servicesPerRoom);
+    console.log('TotalHabitaciones', totalBooking);
+ console.log('Servicio general', extraService);
+ console.log('tipo habitacion', amountTypeRooms);
+*/
 
 
     return (
@@ -368,18 +404,13 @@ const NewBooking = ({ ...props }) => {
                             </ul>
 
                         ) : filter !== '' && (
-                            <div className="col-md-3 col-sm-12 mb-3">
-                                <label>No existe el cliente, ¿Desea crear uno?</label>
-                                <Link to="/hotelsettings/newamenities">
-                                    <button
-                                        type="button"
-                                        className="btn btn-primary waves-effect waves-light"
-                                        style={{ width: '100%' }}
-                                    >
-                                        Nuevo cliente{" "}
-                                        <i className="mdi mdi-plus align-middle ms-2"></i>
-                                    </button>
-                                </Link>
+                            <div className="col-md-12 col-sm-12 mb-3">
+                                <label>No existe el cliente, ¿Desea agregar uno?</label>
+                                <Card className='col-xl-12 col-md-12'>
+                                    <CardBody>
+                                        <NewCustomer props={{ addNewCustomer, stateBooking }} />
+                                    </CardBody>
+                                </Card>
                             </div>
                         )}
                     </Row>
@@ -471,65 +502,78 @@ const NewBooking = ({ ...props }) => {
 
                                             {roomsBooking.length ? (
                                                 <div>
-                                                    <div>
+                                                    <div >
                                                         <label>Habitaciones</label>
-                                                        {amountTypeRooms.map((type) => (
-                                                            <div className="bg-secondary col-md-12">
-                                                                {type.amountBooking !== 0 && (
-                                                                    <div key={type.type.nombre} className="m-0 text-light d-flex justify-content-between">
-                                                                        <p className="p-1 m-0 w-25 h-25 ">{type.type.nombre}</p>
-                                                                        <div className="col-md-4 d-flex justify-content-between p-1">
-                                                                            <p className="m-0">X{type.amountBooking}</p>
-                                                                            <p className="m-0 w-1 h-1 text-end ">${totalPerRoom(type)}</p>
+                                                        <div className='border border-secondary rounded p-1'>
+                                                            {amountTypeRooms.map((type) => (
+                                                                <div key={`row${type.type.nombre}`} className="bg-secondary col-md-11 m-3 mb-0 mt-0">
+                                                                    {type.amountBooking !== 0 && (
+                                                                        <div key={`data${type.type.nombre}`} className="text-light d-flex justify-content-between">
+                                                                            <p className="p-1 m-0 text-nowrap">{type.type.nombre}</p>
+                                                                            <div className="col-md-4 d-flex justify-content-between p-1">
+                                                                                <p className="m-0">X{type.amountBooking}</p>
+                                                                                <p className="m-0 w-1 h-1 text-end ">${totalPerRoom(type)}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        ))}
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                     <div>
                                                         {extraService.length > 0 && (
                                                             <div className='mt-2'>
                                                                 <label>Servicios adicionales por reserva</label>
-                                                                <div className="bg-secondary col-md-12">
-                                                                    {extraService.map(s => (
-                                                                        <div key={s.nombre} className="m-0 text-light d-flex justify-content-between p-1">
-                                                                            <p className="m-0 text-nowrap">{s.nombre}</p>
-                                                                            <p className="m-0 text-end">${s.precio}</p>
-                                                                        </div>
-                                                                    ))}
+                                                                <div className='border border-secondary rounded p-1'>
+                                                                    <div className="bg-secondary col-md-11 m-3">
+                                                                        {extraService.map(s => (
+                                                                            <div key={s.nombre} className="m-0 text-light d-flex justify-content-between p-1">
+                                                                                <p className="m-0 text-nowrap">{s.nombre}</p>
+                                                                                <p className="m-0 text-end">${s.precio}</p>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div>
-                                                        {extraServiceRoom.length > 0 && (
+                                                        {servicesPerRoom.length > 0 && (
                                                             <div className='mt-2'>
                                                                 <label>Servicios adicionales por habitación</label>
-                                                                <div className="bg-secondary col-md-12">
-                                                                    {extraServiceRoom.map(s => (
-                                                                        <div key={s.nombre} className="m-0 text-light d-flex justify-content-between p-1">
-                                                                            <p className="m-0 text-nowrap">{s.nombre}</p>
-                                                                            <p className="m-0 text-end">${s.precio}</p>
+                                                                {servicesPerRoom.map(r => (
+                                                                    <div className='border border-secondary rounded mb-1'>
+                                                                        <label className='m-1'>{r.room.numeroHabitacion}</label>
+                                                                        <div className="bg-secondary col-md-11 m-3">
+                                                                            {r.service.map(s => (
+                                                                                <div key={`room${s.nombre}`} className="m-0 text-light d-flex justify-content-between p-1">
+                                                                                    <p className="m-0 text-nowrap">{s.nombre}</p>
+                                                                                    <p className="m-0 text-end">${s.precio}</p>
+                                                                                </div>
+                                                                            ))}
                                                                         </div>
-                                                                    ))}
-                                                                </div>
+                                                                    </div>
+                                                                ))}
                                                             </div>
                                                         )}
                                                     </div>
                                                 </div>
-                                            ) : (<label>Sin datos que mostrar</label>)}
+                                            ) : (
+                                                <div className='d-flex justify-content-center align-items-center' style={{ height: '100vh' }}>
+                                                    <label>Sin datos que mostrar</label>
+                                                </div>
+                                            )}
                                         </Card>
 
                                     </div>
-                                    <Card key='total'>
-                                        <div>
+                                    <Card key='total' className='col-md-12 d-flex align-items-center'>
+                                        <div className='col-md-11 d-flex justify-content-between p-1'>
                                             <div className="p-3">
-                                                <p className=" text-uppercase fs-3 fw-bold">Total:</p>
+                                                <p className=" text-uppercase fs-1 fw-bold">Total:</p>
                                             </div>
 
                                             <div className="p-3">
-
+                                                <p className=" text-uppercase fs-1 fw-bold">$ {totalBooking.reduce((sum, item) => sum + item.price, 0)}</p>
                                             </div>
 
                                         </div>
@@ -544,7 +588,7 @@ const NewBooking = ({ ...props }) => {
                                         </h3>
                                     </Row>
                                     {roomsBooking.length ? (
-                                        <Row className="m-2 p-2 d-flex flex-row col-md-7 justify-content-center">
+                                        <Row className="m-2 p-2 d-flex flex-row col-md-7 col-xl-7 justify-content-center">
                                             <div className="form-check ms-3 mt-2 col-md-4">
                                                 <input
                                                     className="form-check-input"

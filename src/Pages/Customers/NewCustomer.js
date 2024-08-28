@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 const NewCustomer = (props) => {
     document.title = "Clientes | FARO";
+    console.log(props)
 
     const navigate = useNavigate();
 
@@ -272,8 +273,14 @@ const NewCustomer = (props) => {
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
             const { estado, message } = data.insertarCliente;
             if (estado) {
-                infoAlert('Excelente', message, 'success', 3000, 'top-end')
-                navigate('/customers');
+                infoAlert('Excelente', message, 'success', 3000, 'top-end');
+                debugger
+                if (props.props.stateBooking) {
+                    props.props.addNewCustomer(input)
+                } else {
+
+                    navigate('/customers');
+                }
             } else {
                 infoAlert('Oops', message, 'error', 3000, 'top-end')
             }
