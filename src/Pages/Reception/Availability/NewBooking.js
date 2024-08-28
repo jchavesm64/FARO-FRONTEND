@@ -243,7 +243,6 @@ const NewBooking = ({ ...props }) => {
     }
 
     const getServices = () => {
-
         const data = []
         if (services?.obtenerServicios) {
             services?.obtenerServicios.forEach((item) => {
@@ -253,6 +252,13 @@ const NewBooking = ({ ...props }) => {
                 });
             });
         }
+        return data;
+    }
+
+    const getServicesPerRoom = () => {
+        const extra = extraService.map(item => item.id);
+        const data = getServices().filter(item => !extra.includes(item.value.id));
+
         return data;
     }
 
@@ -338,19 +344,6 @@ const NewBooking = ({ ...props }) => {
         setFilter('');
     }
 
-    /*  */
-
-
-
-    //const onClickSave = async () => { }
-
-
-    /*console.log('Servicios habitacion', servicesPerRoom);
-    console.log('TotalHabitaciones', totalBooking);
- console.log('Servicio general', extraService);
- console.log('tipo habitacion', amountTypeRooms);
-*/
-
 
     return (
         <React.Fragment>
@@ -359,13 +352,10 @@ const NewBooking = ({ ...props }) => {
                     <Breadcrumbs title="Nueva Reserva" breadcrumbItem="Reservas" breadcrumbItemUrl='/reception/availability' />
 
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
-                        <div className="col-md-10 mb-1">
-                            <label
-                                htmlFor="search-input"
-                                className="col-md-2 col-form-label"
-                            >
+                        <div className="col-md-12 mb-1">
+                            <SpanSubtitleForm>
                                 Busca el cliente
-                            </label>
+                            </SpanSubtitleForm>
                             <input
                                 className="form-control"
                                 id="search-input"
@@ -374,12 +364,7 @@ const NewBooking = ({ ...props }) => {
                                 type="search"
                                 placeholder="Escribe el nombre o identificación del cliente" />
                         </div>
-                        <div className="col-md-2 col-sm-12 mb-1">
-                            <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSearch} onClick={() => searchClient()}>
-                                Buscar{" "}
-                                <i className="ri-search-line align-middle ms-2"></i>
-                            </button>
-                        </div>
+
 
                     </Row>
                     <Row>
@@ -669,7 +654,7 @@ const NewBooking = ({ ...props }) => {
                                                                         onChange={(e) => {
                                                                             handleService(e, 'room');
                                                                         }}
-                                                                        options={getServices()}
+                                                                        options={getServicesPerRoom()}
                                                                         placeholder={`Servicios para la habitación ${selectRoom.numeroHabitacion}`}
                                                                         classNamePrefix="select2-selection"
                                                                     />
