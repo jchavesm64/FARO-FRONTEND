@@ -13,7 +13,7 @@ export default function ReceptionHome() {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Disponivilidad y nuevas reservas" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
+                    <Breadcrumbs title="Disponibilidad y nuevas reservas" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
 
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">

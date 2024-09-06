@@ -117,7 +117,7 @@ export const restaurantRoutes = [
 
 export const receptionRoutes = [
     {
-        label: "Disponivilidad y Nueva reserva",
+        label: "Disponibilidad y Nueva reserva",
         icon: 'mdi mdi-calendar-plus',
         link: "/reception/availability"
     },

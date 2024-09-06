@@ -115,6 +115,7 @@ const NewRoom = () => {
                 comodidades: amenitiesList.map(a => a.id),
                 estado: stateRoom.value
             }
+            debugger
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
             const { estado, message } = data.insertarHabitacion;
             if (estado) {

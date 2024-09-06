@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Card, CardBody, Container, InputGroup, Row, Input, Label } from 'reactstrap';
+import { Button, Card, CardBody, Container, InputGroup, Row, Input } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
-import { Link } from 'react-router-dom';
 import { OBTENER_HABITACIONES_DISPONIBLES } from '../../../services/HabitacionesService';
 import { OBTENER_TIPOSHABITACION } from '../../../services/TipoHabitacionService';
 import { OBTENER_SERVICIO } from '../../../services/ServiciosExtraService';
@@ -12,6 +11,7 @@ import ListInfo from '../../../components/Common/ListInfo';
 import { infoAlert } from '../../../helpers/alert';
 import SpanSubtitleForm from '../../../components/Forms/SpanSubtitleForm';
 import NewCustomer from '../../Customers/NewCustomer';
+import { SAVE_RESERVA } from '../../../services/ReservaService';
 
 const NewBooking = ({ ...props }) => {
     document.title = "Nueva Reserva | FARO";
@@ -22,17 +22,19 @@ const NewBooking = ({ ...props }) => {
     const { data: dataTypeRooms } = useQuery(OBTENER_TIPOSHABITACION, { pollInterval: 1000 });
     const { data: services } = useQuery(OBTENER_SERVICIO, { pollInterval: 1000 });
 
+    const [insertar] = useMutation(SAVE_RESERVA);
+
     const [customer, setCustomer] = useState(null)
     const [customers, setCustomers] = useState([])
-    const [bookingDate] = useState(`${new Date().getFullYear()}-${(new Date().getMonth() + 1) > 10 ? (new Date().getMonth() + 1) : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() > 10 ? new Date().getDate() : '0' + new Date().getDate()}`)
+    const [bookingDate] = useState(`${new Date().getFullYear()}-${(new Date().getMonth() + 1) > 10 ? (new Date().getMonth() + 1) : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() > 10 ? new Date().getDate() : '0' + new Date().getDate()}`);
+    const [amountPeople, setAmountPeople] = useState(0);
 
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
 
     const [stateBooking, setStateBooking] = useState(false);
 
-    //const [disableSave, setDisableSave] = useState(true);
-    const [disableSearch, setDisableSearch] = useState(true);
+    const [disableSave, setDisableSave] = useState(false);
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [serviceBookingCheck, setServiceBookingCheck] = useState(false);
     const [serviceRoomCheck, setServiceRoomCheck] = useState(false);
@@ -47,8 +49,9 @@ const NewBooking = ({ ...props }) => {
     const [selectRoom, setSelectRoom] = useState(null);//Habitación seleccionada para agragar servicios extra a la habitación 
     const [extraServiceRoom, setExtraServiceRoom] = useState([]);//Servicios seleccionados para la habitación seleccionada
     const [servicesPerRoom, setServicePerRoom] = useState([]);//lista de servicios por habitación
-    const [totalBooking, setTotalBooking] = useState([])
+    const [totalBooking, setTotalBooking] = useState([]);
 
+    const [total, setTotal] = useState(0);
 
 
     useEffect(() => {
@@ -263,7 +266,8 @@ const NewBooking = ({ ...props }) => {
     }
 
     const addExtraService = (s, extra, type) => {
-        if (!s) {
+
+        if (s.length === 0) {
             infoAlert('Oops', 'No ha seleccionado un servicio', 'error', 3000, 'top-end');
             return;
         }
@@ -344,6 +348,46 @@ const NewBooking = ({ ...props }) => {
         setFilter('');
     }
 
+    useEffect(() => {
+        setTotal(totalBooking.reduce((sum, item) => sum + item.price, 0))
+    }, [totalBooking])
+
+    const onClickSave = async () => {
+        try {
+            //setDisableSave(true);
+            const input = {
+                cliente: customer ? customer.id : null,
+                fechaReserva: bookingDate,
+                numeroPersonas: amountPeople,
+                total: total,
+                serviciosGrupal: extraService.length > 0 ? extraService.map(service => service.id) : null,
+                estado: 'Pendiente'
+            }
+
+            const bookingRoom = {
+                habitaciones: roomsBooking.length > 0 ? roomsBooking.map(room => room.id) : null,
+                fechaEntrada: checkIn,
+                fechaSalida: checkOut,
+                serviciosExtra: servicesPerRoom.length > 0 ? servicesPerRoom.map(service => service.id) : null
+            }
+
+
+            const { data } = await insertar({ variables: { input, bookingRoom }, errorPolicy: 'all' });
+            const { estado, message } = data.insertarReserva;
+            console.log(data)
+            if (estado) {
+                infoAlert('Excelente', message, 'success', 3000, 'top-end')
+                //navigate(`/product/movements/${stockType}/${productName}/${productId}`)
+            } else {
+                infoAlert('Oops', message, 'error', 3000, 'top-end')
+            }
+            console.log(bookingRoom);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
 
     return (
         <React.Fragment>
@@ -402,17 +446,17 @@ const NewBooking = ({ ...props }) => {
                     {customer ? (
                         <div className='mt-1'>
                             <Row className="m-2 col-md-7 d-flex flex-row flex-nowrap">
-                                <Card className="m-1 col-md-10">
-                                    <CardBody className="text-muted">
-                                        <h4 className="mb-2">{customer.nombre}</h4>
-                                        <p className="mb-2 fw-bold">Identificación: <span className='fw-normal'>{customer.codigo}</span></p>
-                                        <p className="mb-2 fw-bold">País: <span className='fw-normal'>{customer.pais}</span></p>
-                                        <p className="mb-2 fw-bold">Fecha de reserva: <span className='fw-normal'>{bookingDate}</span></p>
+                                <Card className="m-1 p-3 col-md-10">
+                                    <CardBody className="text-muted d-flex flex-column justify-content-center">
+                                        <h2 className="mb-2">{customer.nombre}</h2>
+                                        <p className="mb-2 fw-bold fs-5">Identificación: <span className='fw-normal'>{customer.codigo}</span></p>
+                                        <p className="mb-2 fw-bold fs-5">País: <span className='fw-normal'>{customer.pais}</span></p>
+                                        <p className="mb-2 fw-bold fs-5">Fecha de reserva: <span className='fw-normal'>{bookingDate}</span></p>
                                     </CardBody>
                                 </Card>
                                 <Card className="m-1 p-2 col-md-10">
                                     <div className="p-1 col-md-8">
-                                        <label htmlFor="checkInDate" className="form-label">Fecha de Entrada</label>
+                                        <label htmlFor="checkInDate" className="form-label fs-5">Fecha de Entrada</label>
                                         <input
                                             className="form-control"
                                             type="date"
@@ -422,13 +466,24 @@ const NewBooking = ({ ...props }) => {
                                         />
                                     </div>
                                     <div className="p-1 col-md-8">
-                                        <label htmlFor="checkOutDate" className="form-label">Fecha de Salida</label>
+                                        <label htmlFor="checkOutDate" className="form-label fs-5">Fecha de Salida</label>
                                         <input
                                             className="form-control"
                                             type="date"
                                             id="checkOutDate"
                                             value={checkOut}
                                             onChange={(e) => { setCheckOut(e.target.value) }}
+                                        />
+                                    </div>
+                                    <div className="p-1 col-md-8">
+                                        <label htmlFor="checkOutDate" className="form-label fs-5">Cantidad de personas</label>
+                                        <input
+                                            className="form-control"
+                                            type="number"
+                                            id="checkOutDate"
+                                            value={amountPeople}
+                                            onChange={(e) => { setAmountPeople(e.target.value) }}
+                                            min='0'
                                         />
                                     </div>
                                 </Card>
@@ -558,7 +613,7 @@ const NewBooking = ({ ...props }) => {
                                             </div>
 
                                             <div className="p-3">
-                                                <p className=" text-uppercase fs-1 fw-bold">$ {totalBooking.reduce((sum, item) => sum + item.price, 0)}</p>
+                                                <p className=" text-uppercase fs-1 fw-bold">$ {total}</p>
                                             </div>
 
                                         </div>
@@ -698,7 +753,15 @@ const NewBooking = ({ ...props }) => {
                                         </Card>
                                     )}
                                 </div>
+                            </Card>
 
+                            <Card className="m-2 p-2 d-flex justify-content-center" style={{ height: '15vh' }}>
+                                <div className='d-flex flex-row justify-content-end '>
+                                    <button type="button" className="btn btn-primary waves-effect waves-light text-uppercase fs-3 fw-bold" style={{ width: '30%', height: '10vh' }} disabled={disableSave} onClick={() => onClickSave()}>
+                                        Reservar{" "}
+                                        <i className="ri-save-line align-middle ms-2"></i>
+                                    </button>
+                                </div>
                             </Card>
                         </div>
                     ) : filter === '' && (<label>Debe buscar un cliente</label>)}
