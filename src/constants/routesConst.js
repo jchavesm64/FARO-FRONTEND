@@ -184,6 +184,11 @@ export const hotelsettings = [
         label: "Administrar Paquetes",
         icon: 'mdi mdi-clipboard-plus-outline',
         link: "/hotelsettings/hotelpackages"
+    },
+    {
+        label: "Tours",
+        icon: 'mdi mdi-compass-outline',
+        link: "/hotelsettings/tours"
     }
 ]
 
@@ -300,6 +305,7 @@ export const sidebarRoutes = [
             { sublabel: "Tipo de proveeduría", link: "/suppliertype" },
             { sublabel: "Ubicaciones", link: "/locations" },
             { sublabel: "Impuestos", link: "/taxmanagement" },
+            { sublabel: "Hotel", link: "/hotelsettings" },
         ],
     },
 ]

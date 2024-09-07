@@ -96,7 +96,7 @@ import NewRoom from "../Pages/GeneralSettings/Hotel/Rooms/NewRoom";
 import Season from "../Pages/GeneralSettings/Hotel/Season/Season";
 import NewSeason from "../Pages/GeneralSettings/Hotel/Season/NewSeason";
 import EditSeason from "../Pages/GeneralSettings/Hotel/Season/EditSeason";
-
+import AdminPackages from "../Pages/GeneralSettings/Hotel/AdminPackage/AdminPackage";
 
 
 const authProtectedRoutes = [
@@ -202,6 +202,7 @@ const authProtectedRoutes = [
   { path: "/hotelsettings/season", component: <Season /> },
   { path: "/hotelsettings/newseason", component: <NewSeason /> },
   { path: "/hotelsettings/editseason/:id", component: <EditSeason /> },
+  { path: "/hotelsettings/hotelpackages", component: <AdminPackages /> },
 
   {
     path: "/",
