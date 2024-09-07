@@ -178,12 +178,12 @@ export const hotelsettings = [
     {
         label: "Temporada",
         icon: 'mdi mdi-home-outline',
-        link: "/hotelsettings/inhouse"
+        link: "/hotelsettings/season"
     },
     {
         label: "Administrar Paquetes",
         icon: 'mdi mdi-clipboard-plus-outline',
-        link: "/hotelsettings/externalservice"
+        link: "/hotelsettings/hotelpackages"
     }
 ]
 

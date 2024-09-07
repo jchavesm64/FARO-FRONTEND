@@ -24,6 +24,7 @@ import TableTypeRoom from '../../Pages/GeneralSettings/Hotel/TypeRoom/TableTypeR
 import TableAmenities from '../../Pages/GeneralSettings/Hotel/Amenities/TableAmenities'
 import TableExtraService from '../../Pages/GeneralSettings/Hotel/ExtraService/TableExtraService'
 import TableRooms from '../../Pages/GeneralSettings/Hotel/Rooms/TableRooms';
+import TableSeason from '../../Pages/GeneralSettings/Hotel/Season/TableSeason';
 
 const DataList = ({ ...props }) => {
     const { data, type, displayLength, onDelete } = props;
@@ -157,6 +158,10 @@ const DataList = ({ ...props }) => {
                 {
                     type === 'rooms' &&
                     <TableRooms {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'season' &&
+                    <TableSeason {...props} data={datos} onDelete={onDelete} />
                 }
             </div>
             {(data.length > displayLength) &&

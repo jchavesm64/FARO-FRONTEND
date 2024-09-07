@@ -142,11 +142,6 @@ const NewBooking = ({ ...props }) => {
         setCustomers([])
     }
 
-    const searchClient = () => {
-        setFilter('')
-        setCustomer(getDataCustomer())
-    }
-
     const handleIncrease = (e, index) => {
         if (amountTypeRooms[index].amountBooking < amountTypeRooms[index].lengthAvailable) {
             const updatedRooms = [...amountTypeRooms];
@@ -292,7 +287,6 @@ const NewBooking = ({ ...props }) => {
         setTotalBooking([...totalBooking, { 'typeName': s.label, 'price': s.value.precio }]);
     };
 
-
     const eliminarServiceBooking = (nombre) => {
         setExtraService(extraService.filter(a => a.nombre !== nombre))
 
@@ -312,7 +306,6 @@ const NewBooking = ({ ...props }) => {
             }
         }
     };
-
 
     const options = typeRooms.map((type) => ({
         label: type.nombre,
@@ -342,7 +335,6 @@ const NewBooking = ({ ...props }) => {
         setExtraServiceRoom([]);
     };
 
-
     const addNewCustomer = (data) => {
         setCustomer(data);
         setFilter('');
@@ -352,9 +344,26 @@ const NewBooking = ({ ...props }) => {
         setTotal(totalBooking.reduce((sum, item) => sum + item.price, 0))
     }, [totalBooking])
 
+    useEffect(() => {
+        setDisableSave(customer === '' || bookingDate === '' || total <= 0 || amountPeople <= 0 || (servicesPerRoom.length === 0 && roomsBooking === 0) || checkIn === '' || checkOut === '')
+    }, [customer, bookingDate, amountPeople, total, extraService, servicesPerRoom, roomsBooking, checkIn, checkOut])
+
+    const restartData = () => {
+        setCustomer(null);
+        setAmountPeople(0);
+        setTotal(0);
+        setExtraService([]);
+        setServicePerRoom([]);
+        setRoomsBooking([]);
+        setCheckIn('');
+        setCheckOut('');
+
+
+    }
+
     const onClickSave = async () => {
         try {
-            //setDisableSave(true);
+            setDisableSave(true);
             const input = {
                 cliente: customer ? customer.id : null,
                 fechaReserva: bookingDate,
@@ -365,29 +374,25 @@ const NewBooking = ({ ...props }) => {
             }
 
             const bookingRoom = {
-                habitaciones: roomsBooking.length > 0 ? roomsBooking.map(room => room.id) : null,
+                habitaciones: servicesPerRoom.length > 0 ?
+                    servicesPerRoom.map(item => ({ roomId: item.room.id, serviceIds: item.service.map(service => service.id) })) :
+                    roomsBooking.map(item => ({ roomId: item.id, serviceIds: null })),
                 fechaEntrada: checkIn,
-                fechaSalida: checkOut,
-                serviciosExtra: servicesPerRoom.length > 0 ? servicesPerRoom.map(service => service.id) : null
+                fechaSalida: checkOut
             }
-
 
             const { data } = await insertar({ variables: { input, bookingRoom }, errorPolicy: 'all' });
             const { estado, message } = data.insertarReserva;
-            console.log(data)
             if (estado) {
-                infoAlert('Excelente', message, 'success', 3000, 'top-end')
-                //navigate(`/product/movements/${stockType}/${productName}/${productId}`)
+                infoAlert('Excelente', message, 'success', 3000, 'top-end');
+                restartData();
             } else {
-                infoAlert('Oops', message, 'error', 3000, 'top-end')
+                infoAlert('Oops', message, 'error', 3000, 'top-end');
             }
-            console.log(bookingRoom);
         } catch (error) {
             console.log(error)
         }
     }
-
-
 
     return (
         <React.Fragment>
@@ -453,6 +458,9 @@ const NewBooking = ({ ...props }) => {
                                         <p className="mb-2 fw-bold fs-5">País: <span className='fw-normal'>{customer.pais}</span></p>
                                         <p className="mb-2 fw-bold fs-5">Fecha de reserva: <span className='fw-normal'>{bookingDate}</span></p>
                                     </CardBody>
+                                    <div>
+                                        tipo de reserva
+                                    </div>
                                 </Card>
                                 <Card className="m-1 p-2 col-md-10">
                                     <div className="p-1 col-md-8">
@@ -463,6 +471,7 @@ const NewBooking = ({ ...props }) => {
                                             id="checkInDate"
                                             value={checkIn}
                                             onChange={(e) => { setCheckIn(e.target.value) }}
+                                            min={new Date().toISOString().split('T')[0]}
                                         />
                                     </div>
                                     <div className="p-1 col-md-8">
@@ -472,7 +481,9 @@ const NewBooking = ({ ...props }) => {
                                             type="date"
                                             id="checkOutDate"
                                             value={checkOut}
+                                            disabled={checkIn === ''}
                                             onChange={(e) => { setCheckOut(e.target.value) }}
+                                            min={checkIn ? new Date(new Date(checkIn).setDate(new Date(checkIn).getDate() + 1)).toISOString().split('T')[0] : ''}
                                         />
                                     </div>
                                     <div className="p-1 col-md-8">

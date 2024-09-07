@@ -93,6 +93,9 @@ import EditExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/EditEx
 import EditRoom from '../Pages/GeneralSettings/Hotel/Rooms/EditRoom'
 import Rooms from "../Pages/GeneralSettings/Hotel/Rooms/Roms";
 import NewRoom from "../Pages/GeneralSettings/Hotel/Rooms/NewRoom";
+import Season from "../Pages/GeneralSettings/Hotel/Season/Season";
+import NewSeason from "../Pages/GeneralSettings/Hotel/Season/NewSeason";
+import EditSeason from "../Pages/GeneralSettings/Hotel/Season/EditSeason";
 
 
 
@@ -196,6 +199,9 @@ const authProtectedRoutes = [
   { path: "/hotelsettings/rooms", component: <Rooms /> },
   { path: "/hotelsettings/newroom", component: <NewRoom /> },
   { path: "/hotelsettings/editroom/:id", component: <EditRoom /> },
+  { path: "/hotelsettings/season", component: <Season /> },
+  { path: "/hotelsettings/newseason", component: <NewSeason /> },
+  { path: "/hotelsettings/editseason/:id", component: <EditSeason /> },
 
   {
     path: "/",
