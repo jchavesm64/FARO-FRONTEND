@@ -97,7 +97,10 @@ import Season from "../Pages/GeneralSettings/Hotel/Season/Season";
 import NewSeason from "../Pages/GeneralSettings/Hotel/Season/NewSeason";
 import EditSeason from "../Pages/GeneralSettings/Hotel/Season/EditSeason";
 import AdminPackages from "../Pages/GeneralSettings/Hotel/AdminPackage/AdminPackage";
-
+import Tour from "../Pages/GeneralSettings/Hotel/Tours/Tours";
+import NewTour from "../Pages/GeneralSettings/Hotel/Tours/NewTour";
+import EditTour from "../Pages/GeneralSettings/Hotel/Tours/EditTour";
+import NewPackage from "../Pages/GeneralSettings/Hotel/AdminPackage/NewPackage";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -203,6 +206,11 @@ const authProtectedRoutes = [
   { path: "/hotelsettings/newseason", component: <NewSeason /> },
   { path: "/hotelsettings/editseason/:id", component: <EditSeason /> },
   { path: "/hotelsettings/hotelpackages", component: <AdminPackages /> },
+  { path: "/hotelsettings/tours", component: <Tour /> },
+  { path: "/hotelsettings/newtour", component: <NewTour /> },
+  { path: "/hotelsettings/edittour/:id", component: <EditTour /> },
+  { path: "/hotelsettings/newpackage", component: <NewPackage /> },
+
 
   {
     path: "/",

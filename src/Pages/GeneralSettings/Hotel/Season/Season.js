@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import DataList from "../../../../components/Common/DataList";
 import { OBTENER_TEMPORADAS } from "../../../../services/TemporadaService";
 import { useQuery } from "@apollo/client";
-import Swal from "sweetalert2";
 
 const Season = ({ ...props }) => {
     document.title = "Temporada | FARO";

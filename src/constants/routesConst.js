@@ -181,14 +181,14 @@ export const hotelsettings = [
         link: "/hotelsettings/season"
     },
     {
-        label: "Administrar Paquetes",
-        icon: 'mdi mdi-clipboard-plus-outline',
-        link: "/hotelsettings/hotelpackages"
-    },
-    {
         label: "Tours",
         icon: 'mdi mdi-compass-outline',
         link: "/hotelsettings/tours"
+    },
+    {
+        label: "Administrar Paquetes",
+        icon: 'mdi mdi-clipboard-plus-outline',
+        link: "/hotelsettings/hotelpackages"
     }
 ]
 

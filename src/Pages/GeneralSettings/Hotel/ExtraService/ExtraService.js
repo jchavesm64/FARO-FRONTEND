@@ -34,7 +34,7 @@ const ExtraService = ({ ...props }) => {
                 if (estado) {
                     infoAlert('Servicio eliminado', message, 'success', 3000, 'top-end')
                 } else {
-                    infoAlert('Eliminar habitación eliminado', message, 'error', 3000, 'top-end')
+                    infoAlert('Error eliminar habitación', message, 'error', 3000, 'top-end')
                 }
             }
         });

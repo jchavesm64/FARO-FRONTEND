@@ -30,9 +30,9 @@ const NewTypeRom = () => {
                 nombre: name,
                 descripcion: description,
                 precioBase: basePrice,
-                estado: "ACTIVO"
+                estado: "Activo"
             }
-            
+
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' })
             const { estado, message } = data.insertarTipoHabitacion;
             if (estado) {

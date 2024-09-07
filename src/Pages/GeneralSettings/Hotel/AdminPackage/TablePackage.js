@@ -25,19 +25,18 @@ const TablePackage = ({ ...props }) => {
                 </thead>
                 <tbody>
                     {
-                        data.map((season, i) => (
-                            <tr key={`Season-${i}`}>
-                                <td>{season.nombre}</td>
-                                <td>{season.fechaInicio}</td>
-                                <td>{season.fechaFin}</td>
-                                <td>{season.precio}</td>
-                                <td>{season.descripcion}</td>
+                        data.map((adminPackage, i) => (
+                            <tr key={`adminPackage-${i}`}>
+                                <td>{adminPackage.tipo}</td>
+                                <td>{adminPackage.precio}</td>
+                                <td>{adminPackage.estado}</td>
+                                <td>{adminPackage.descripcion}</td>
                                 <td>
                                     <div className="d-flex justify-content-end mx-1 my-1">
-                                        <Link to={`/hotelsettings/editseason/${season.id}`}>
+                                        <Link to={`/hotelsettings/editpac/${adminPackage.id}`}>
                                             <ButtonIconTable icon='mdi mdi-pencil' color='warning' />
                                         </Link>
-
+                                        <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(adminPackage.id, adminPackage.nombre) }} />
                                     </div>
                                 </td>
                             </tr>

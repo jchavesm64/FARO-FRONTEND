@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardBody, Container, Label, Row } from "reactstrap";
+import { Container,  Row } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
-import SpanSubtitleForm from "../../../../components/Forms/SpanSubtitleForm";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@apollo/client";
 import Select from "react-select";
@@ -11,10 +10,10 @@ import { infoAlert } from "../../../../helpers/alert";
 const NewSeason = () => {
     document.title = "Temporada | FARO";
 
+    
     const navigate = useNavigate();
     const [insertar] = useMutation(SAVE_TEMPORADA);
     const { data: season } = useQuery(OBTENER_TEMPORADAS, { pollInterval: 1000 });
-
 
     const [disableSave, setDisableSave] = useState(true);
     const [typeSeason, setTypeSeason] = useState(null);
@@ -101,7 +100,7 @@ const NewSeason = () => {
             setDisableSave(false)
 
         } catch (error) {
-            infoAlert('Oops', 'Ocurrió un error inesperado al guardar la habitación', 'error', 3000, 'top-end')
+            infoAlert('Oops', 'Ocurrió un error inesperado al guardar la temporada', 'error', 3000, 'top-end')
             setDisableSave(false)
         }
     };
