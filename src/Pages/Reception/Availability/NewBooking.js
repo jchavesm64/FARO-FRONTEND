@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Card, CardBody, Container, InputGroup, Row, Input } from 'reactstrap';
+import { Button, Card, CardBody, Container, InputGroup, Row, Input, ButtonGroup, Col } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { useMutation, useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
@@ -12,6 +12,7 @@ import { infoAlert } from '../../../helpers/alert';
 import SpanSubtitleForm from '../../../components/Forms/SpanSubtitleForm';
 import NewCustomer from '../../Customers/NewCustomer';
 import { SAVE_RESERVA } from '../../../services/ReservaService';
+import { OBTENER_PAQUETES } from '../../../services/PaquetesService';
 
 const NewBooking = ({ ...props }) => {
     document.title = "Nueva Reserva | FARO";
@@ -21,6 +22,7 @@ const NewBooking = ({ ...props }) => {
     const { data: dataRoomsAvailable } = useQuery(OBTENER_HABITACIONES_DISPONIBLES, { pollInterval: 1000 });
     const { data: dataTypeRooms } = useQuery(OBTENER_TIPOSHABITACION, { pollInterval: 1000 });
     const { data: services } = useQuery(OBTENER_SERVICIO, { pollInterval: 1000 });
+    const { data: packages } = useQuery(OBTENER_PAQUETES, { pollInterval: 1000 });
 
     const [insertar] = useMutation(SAVE_RESERVA);
 
@@ -38,6 +40,11 @@ const NewBooking = ({ ...props }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [serviceBookingCheck, setServiceBookingCheck] = useState(false);
     const [serviceRoomCheck, setServiceRoomCheck] = useState(false);
+    const [packageBookingCheck, setPackageBookingCheck] = useState(false);
+    const [typeBooking, setTypeBooking] = useState(null);
+
+    const [packageBooking, setPackageBooking] = useState(null);
+    const [packageBookingList, setPackageBookingList] = useState([]);
 
     const [roomsAvailable, setRoomsAvailable] = useState(null);//Habitaciones disponibles
     const [typeRooms, setTypeRooms] = useState([]);//Tipo de habitaciones
@@ -53,6 +60,7 @@ const NewBooking = ({ ...props }) => {
 
     const [total, setTotal] = useState(0);
 
+    const typesBooking = ['Individual', 'Grupales', 'Bloqueo'];
 
     useEffect(() => {
         const getRoomsAvailable = () => {
@@ -93,6 +101,9 @@ const NewBooking = ({ ...props }) => {
 
     }, [dataRoomsAvailable, dataTypeRooms, roomsAvailable, typeRooms]);
 
+    const handleTypeBookingChange = (type) => {
+        setTypeBooking(type);
+    };
 
     function getFilteredByKey(key, value) {
         const valName = key.nombre.toLowerCase()
@@ -223,6 +234,11 @@ const NewBooking = ({ ...props }) => {
         return total
     }
 
+    const handleChangePackageBooking = () => {
+        setPackageBookingCheck(!packageBookingCheck);
+
+    };
+
     const handleChangeServiceBooking = () => {
         setServiceBookingCheck(!serviceBookingCheck);
         setExtraService([])
@@ -238,6 +254,10 @@ const NewBooking = ({ ...props }) => {
     const handleService = (a, type) => {
         if (type === 'general') setServicesBooking(a);
         if (type === 'room') setServicesRoom(a);
+    }
+    const handlePackage = (a) => {
+        setPackageBooking(a);
+        packageBookingList([]);
     }
 
     const getServices = () => {
@@ -286,6 +306,7 @@ const NewBooking = ({ ...props }) => {
 
         setTotalBooking([...totalBooking, { 'typeName': s.label, 'price': s.value.precio }]);
     };
+
 
     const eliminarServiceBooking = (nombre) => {
         setExtraService(extraService.filter(a => a.nombre !== nombre))
@@ -340,6 +361,35 @@ const NewBooking = ({ ...props }) => {
         setFilter('');
     }
 
+    const getPackage = () => {
+        const data = []
+        if (packages?.obtenerPaquetes) {
+            packages.obtenerPaquetes.forEach((item) => {
+                data.push({
+                    "value": item,
+                    "label": item.nombre
+                });
+            });
+        }
+        return data;
+    };
+
+    const addPackage = () => {
+        if (packageBooking) {
+            const exist = packageBookingList.find(e => e.id === packageBooking.value.id)
+            if (exist) {
+                infoAlert('Oops', 'Ya existe esta comodidad en la habitación', 'warning', 3000, 'top-end')
+                setPackageBooking(null)
+                return
+            }
+
+            setPackageBookingList([...packageBookingList, packageBooking.value])
+            setPackageBooking(null)
+
+        } else {
+            infoAlert('Oops', 'No ha seleccionado una comodida', 'error', 3000, 'top-end')
+        }
+    }
     useEffect(() => {
         setTotal(totalBooking.reduce((sum, item) => sum + item.price, 0))
     }, [totalBooking])
@@ -458,9 +508,25 @@ const NewBooking = ({ ...props }) => {
                                         <p className="mb-2 fw-bold fs-5">País: <span className='fw-normal'>{customer.pais}</span></p>
                                         <p className="mb-2 fw-bold fs-5">Fecha de reserva: <span className='fw-normal'>{bookingDate}</span></p>
                                     </CardBody>
-                                    <div>
-                                        tipo de reserva
-                                    </div>
+                                    <Row>
+                                        <label htmlFor="checkInDate" className="m-2 fw-bold fs-5 ">Tipo de reserva</label>
+                                        <Col>
+                                            <ButtonGroup>
+                                                {typesBooking.map((type, index) => (
+                                                    <Button
+                                                        key={index}
+                                                        color="primary"
+                                                        outline
+                                                        onClick={() => handleTypeBookingChange(type)}
+                                                        active={typeBooking === type}
+                                                        className='m-1 fw-bold fs-5'
+                                                    >
+                                                        {type}
+                                                    </Button>
+                                                ))}
+                                            </ButtonGroup>
+                                        </Col>
+                                    </Row>
                                 </Card>
                                 <Card className="m-1 p-2 col-md-10">
                                     <div className="p-1 col-md-8">
@@ -499,6 +565,66 @@ const NewBooking = ({ ...props }) => {
                                     </div>
                                 </Card>
                             </Row>
+                            <Card>
+                                <div className='col-md-12 d-flex flex-column align-items-center'>
+                                    <Row className="mt-3">
+                                        <h2 >
+                                            Paquetes adicionales
+                                        </h2>
+                                    </Row>
+                                    <Row className="m-2  d-flex flex-row col-md-8 col-xl-7 justify-content-center">
+                                        <div className="form-check  mb-3 col-md-6 d-flex justify-content-center">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                id="isPackageBooking"
+                                                value='packageBooking'
+                                                readOnly
+                                                checked={packageBookingCheck}
+                                                onClick={handleChangePackageBooking}
+                                            />
+                                            <label htmlFor="isPackageBooking" className="form-check-label ms-2 ">¿Desea agregar paquetes a la reserva?</label>
+                                        </div>
+                                    </Row>
+                                    <div className='col-md-12 d-flex flex-row  justify-content-center'>
+                                        {packageBookingCheck && (
+                                            <Card className='col-md-5 bg-light m-2 p-2 '>
+                                                <div className="col-md-12">
+                                                    <h3 key='summary' className="text-center mb-4 mt-4">Paquetes adicionales por reserva</h3>
+                                                </div>
+
+                                                <div className="col-md-12 col-sm-12">
+                                                    <Card className="p-2">
+                                                        <CardBody>
+                                                            <div className="row row-cols-lg-auto g-3 align-items-center">
+                                                                <div className="col-xl-9 col-md-12 mb-2">
+                                                                    <Select
+                                                                        value={packageBooking}
+                                                                        onChange={(e) => {
+                                                                            handlePackage(e);
+                                                                        }}
+                                                                        options={getPackage()}
+                                                                        placeholder="Paquetes"
+                                                                        classNamePrefix="select2-selection"
+                                                                    />
+                                                                </div>
+                                                                <div className="col-12 mb-1">
+                                                                    <button type="submit" className="btn btn-outline-primary" onClick={() => { addPackage() }}>
+                                                                        Agregar
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <Row>
+                                                                <ListInfo data={packageBookingList} headers={['Paquete ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={eliminarServiceBooking} mainKey={'nombre'} secondKey={'precio'} />
+                                                            </Row>
+                                                        </CardBody>
+                                                    </Card>
+                                                </div>
+                                            </Card>
+                                        )}
+                                    </div>
+                                </div>
+                            </Card>
                             <Card className="m-2 p-2 d-flex flex-row justify-content-center">
                                 <div className='col-md-7 d-flex flex-column align-items-center'>
                                     <Row className="m-2">

@@ -19,7 +19,7 @@ const TablePackage = ({ ...props }) => {
                         <th>Nombre</th>
                         <th>precio</th>
                         <th>descripcion</th>
-                        <th></th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -31,7 +31,7 @@ const TablePackage = ({ ...props }) => {
                                 <td>{adminPackage.precio}</td>
                                 <td>{adminPackage.descripcion}</td>
                                 <td>
-                                    <div className="d-flex justify-content-end mx-1 my-1">
+                                    <div className="d-flex justify-content-center mx-1 my-1">
                                         <Link to={`/hotelsettings/editpackage/${adminPackage.id}`}>
                                             <ButtonIconTable icon='mdi mdi-pencil' color='warning' />
                                         </Link>

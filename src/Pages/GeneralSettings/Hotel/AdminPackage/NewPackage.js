@@ -23,7 +23,7 @@ const NewPackage = () => {
     const [disableSave, setDisableSave] = useState(true);
 
     const [typePackage, setTypePackage] = useState(null);
-    const [service, setService] = useState('');
+    const [service, setService] = useState(null);
     const [serviceList, setServiceList] = useState([]);
     const [tour, setTour] = useState(null);
     const [toursList, setToursList] = useState([]);
@@ -373,7 +373,7 @@ const NewPackage = () => {
                             </div>
                         </Col>
                     </Row>
-                   
+
                 </Container>
             </div>
         </React.Fragment>)
