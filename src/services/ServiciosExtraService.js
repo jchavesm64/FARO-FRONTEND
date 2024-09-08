@@ -13,8 +13,8 @@ export const OBTENER_SERVICIO = gql`
 `;
 
 export const OBTENER_SERVICIO_BY_ID = gql` 
-    query obtenerServicioById($id:ID){
-        obtenerServicioById(id:$id){
+    query obtenerServicio($id:ID){
+        obtenerServicio(id:$id){
             id
             nombre
             descripcion

@@ -66,6 +66,8 @@ const ExtraService = ({ ...props }) => {
     }
 
     const data = getData();
+
+    console.log(data)
     return (
         <React.Fragment>
             <div className="page-content">

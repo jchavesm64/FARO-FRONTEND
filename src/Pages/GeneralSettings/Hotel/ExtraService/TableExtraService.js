@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 const TableTypeRoom = ({ ...props }) => {
     const { data, onDelete } = props;
 
+    console.log(data)
     const onClickDelete = async (id, nombre) => {
         await onDelete(id, nombre)
     }
@@ -29,7 +30,7 @@ const TableTypeRoom = ({ ...props }) => {
                                 <td>{services.precio}</td>
                                 <td>
                                     <div className="d-flex justify-content-end mx-1 my-1">
-                                        <Link to={`/hotelsettings/extraservice/${services.id}`}>
+                                        <Link to={`/hotelsettings/editextraservice/${services.id}`}>
                                             <ButtonIconTable icon='mdi mdi-pencil' color='warning' />
                                         </Link>
                                         <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(services.id, services.nombre) }} />

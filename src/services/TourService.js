@@ -26,7 +26,7 @@ export const OBTENER_TOUR = gql`
     }
 `;
 
-export const SAVA_TOUR = gql`
+export const SAVE_TOUR = gql`
     mutation insertarTour($input:TourInput){
         insertarTour(input:$input){
             estado

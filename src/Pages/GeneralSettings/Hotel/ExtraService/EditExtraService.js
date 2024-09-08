@@ -29,9 +29,9 @@ const EditExtraService = () => {
 
     useEffect(() => {
         if (data_extraservice) {
-            setName(data_extraservice.obtenerServicioById.nombre)
-            setDescripcion(data_extraservice.obtenerServicioById.descripcion)
-            setPrice(data_extraservice.obtenerServicioById.precio)
+            setName(data_extraservice.obtenerServicio.nombre)
+            setDescripcion(data_extraservice.obtenerServicio.descripcion)
+            setPrice(data_extraservice.obtenerServicio.precio)
         }
     }, [data_extraservice])
 

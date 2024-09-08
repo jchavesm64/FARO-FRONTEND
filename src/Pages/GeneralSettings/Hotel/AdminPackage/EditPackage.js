@@ -7,18 +7,21 @@ import { useMutation, useQuery } from "@apollo/client";
 import { OBTENER_TOURS } from "../../../../services/TourService";
 import { infoAlert } from "../../../../helpers/alert";
 import { OBTENER_SERVICIO } from "../../../../services/ServiciosExtraService";
-import { useNavigate } from "react-router-dom";
-import { SAVE_PAQUETE } from "../../../../services/PaquetesService";
+import { useNavigate, useParams } from "react-router-dom";
+import { OBTENER_PAQUETE, UPDATE_PAQUETE } from "../../../../services/PaquetesService";
 import { OBTENER_TEMPORADAS } from "../../../../services/TemporadaService";
 
-const NewPackage = () => {
+const EditPackage = () => {
     document.title = "Administrador de paquetes | FARO";
 
     const navigate = useNavigate();
+    const { id } = useParams();
+
     const { data: Tours } = useQuery(OBTENER_TOURS, { pollInterval: 1000 });
     const { data: services } = useQuery(OBTENER_SERVICIO, { pollInterval: 1000 });
     const { data: seasons } = useQuery(OBTENER_TEMPORADAS, { pollInterval: 1000 });
-    const [insertar] = useMutation(SAVE_PAQUETE);
+    const { loading: loading_paquete, error: error_paquete, data: data_paquete, startPolling, stopPolling } = useQuery(OBTENER_PAQUETE, { variables: { id: id }, pollInterval: 1000 });
+    const [actualizar] = useMutation(UPDATE_PAQUETE);
 
     const [disableSave, setDisableSave] = useState(true);
 
@@ -32,6 +35,13 @@ const NewPackage = () => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState(0);
+
+    useEffect(() => {
+        startPolling(1000)
+        return () => {
+            stopPolling()
+        }
+    }, [startPolling, stopPolling])
 
     const typePackages = [
         {
@@ -67,6 +77,23 @@ const NewPackage = () => {
             value: 'Negocios'
         }
     ];
+
+    useEffect(() => {
+        if (data_paquete) {
+            console.log(data_paquete)
+            setName(data_paquete.obtenerPaquete.nombre);
+            setDescription(data_paquete.obtenerPaquete.descripcion);
+            setToursList(data_paquete.obtenerPaquete.tours);
+            setServiceList(data_paquete.obtenerPaquete.servicios);
+            setSeasonList(data_paquete.obtenerPaquete.temporadas)
+            setPrice(data_paquete.obtenerPaquete.precio);
+            setTypePackage(
+                {
+                    label: data_paquete.obtenerPaquete.tipo,
+                    value: data_paquete.obtenerPaquete.tipo
+                });
+        }
+    }, [data_paquete])
 
     const getTours = () => {
         const data = [];
@@ -109,7 +136,7 @@ const NewPackage = () => {
     const getServices = () => {
         const data = []
         if (services?.obtenerServicios) {
-            services.obtenerServicios.forEach((item) => {
+            services?.obtenerServicios.forEach((item) => {
                 data.push({
                     "value": item,
                     "label": item.nombre
@@ -205,14 +232,13 @@ const NewPackage = () => {
                 nombre: name,
                 servicios: serviceList.map(s => s.id),
                 tours: toursList.map(t => t.id),
-                temporadas: seasonList.map(s => s.id),
                 descripcion: description,
                 precio: price,
                 estado: 'Activo'
             };
 
-            const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
-            const { estado, message } = data.insertarPaquete;
+            const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' });
+            const { estado, message } = data.actualizarPaquete;
             if (estado) {
                 infoAlert('Excelente', message, 'success', 3000, 'top-end');
                 cleanData();
@@ -228,12 +254,35 @@ const NewPackage = () => {
         }
     };
 
+    if (loading_paquete) {
+        return (
+            <React.Fragment>
+                <div className="page-content">
+                    <Container fluid={true}>
+                        <Breadcrumbs title="Editar tipo de comodidad" breadcrumbItem="Comodidad" breadcrumbItemUrl='/hotelsettings/amenities' />
+                        <Row>
+                            <div className="col text-center pt-3 pb-3">
+                                <div className="spinner-border" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </Row>
+                    </Container>
+                </div>
+            </React.Fragment>
+        );
+
+    }
+
+    if (error_paquete) {
+        return null
+    }
+
     return (
         <React.Fragment>
-            <div className="page-content ">
+            <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Nuevo paquete" breadcrumbItem="Paquetes" breadcrumbItemUrl='/hotelsettings/hotelpackages' />
-
                     <Row>
                         <div className="col mb-3 text-end">
                             <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
@@ -373,10 +422,9 @@ const NewPackage = () => {
                             </div>
                         </Col>
                     </Row>
-                   
                 </Container>
             </div>
         </React.Fragment>)
 };
 
-export default NewPackage;
+export default EditPackage;

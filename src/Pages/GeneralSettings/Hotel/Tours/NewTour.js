@@ -4,7 +4,7 @@ import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client";
 import Select from "react-select";
-import { SAVA_TOUR } from "../../../../services/TourService";
+import { SAVE_TOUR } from "../../../../services/TourService";
 import { infoAlert } from "../../../../helpers/alert";
 
 
@@ -12,7 +12,7 @@ const NewTour = () => {
     document.title = "Tours | FARO";
 
     const navigate = useNavigate();
-    const [insertar] = useMutation(SAVA_TOUR);
+    const [insertar] = useMutation(SAVE_TOUR);
 
     const [disableSave, setDisableSave] = useState(true);
     const [typeTour, setTypeTour] = useState(null);
@@ -65,7 +65,6 @@ const NewTour = () => {
     const onClickSave = async () => {
         try {
             setDisableSave(true);
-
             const input = {
                 tipo: typeTour.value,
                 nombre: name,
