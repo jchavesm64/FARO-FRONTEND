@@ -77,6 +77,12 @@ import NewAssetMove from "../Pages/AssetsMove/NewAssetMove";
 import NewSupplyType from "../Pages/GeneralSettings/SupplyType/NewSupplyType";
 import NewLocation from "../Pages/GeneralSettings/Locations/NewLocation";
 
+import InvoiceMaintenance from "../Pages/Invoices/Maintenance";
+import InvoiceIssued from "../Pages/Invoices/Issued";
+import InvoiceParameters from "../Pages/Invoices/Parameters";
+import InvoiceCreditNote from "../Pages/Invoices/CreditNote";
+import InvoiceCompany from "../Pages/Invoices/Company";
+
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
   { path: "/profile", component: <UserProfile /> },
@@ -161,6 +167,13 @@ const authProtectedRoutes = [
   { path: "/locations", component: <Location /> },
   { path: "/editlocation/:id", component: <EditLocation /> },
   { path: "/newlocation", component: <NewLocation /> },
+
+  { path: "/invoice/maintenance", component: <InvoiceMaintenance /> },
+  { path: "/invoice/credit/notes", component: <InvoiceCreditNote /> },
+  { path: "/invoice/debit/notes", component: <InvoiceMaintenance /> },
+  { path: "/invoice/issued", component: <InvoiceIssued /> },
+  { path: "/invoice/parameters", component: <InvoiceParameters /> },
+  { path: "/invoice/companies", component: <InvoiceCompany /> },
 
   {
     path: "/",

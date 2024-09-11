@@ -200,6 +200,18 @@ export const sidebarRoutes = [
         ],
     },
     {
+        label: "Facturación Electronica",
+        icon: "fas fa-soap",
+        subItem: [
+            { sublabel: "Mantenimiento", link: "/invoice/maintenance" },
+            { sublabel: "Notas de crédito", link: "/invoice/credit/notes" },
+            { sublabel: "Notas de débito", link: "/invoice/debit/notes" },
+            { sublabel: "Documentos Emitidas", link: "/invoice/issued" },
+            { sublabel: "Parámetros", link: "/invoice/parameters" },
+            { sublabel: "Compañía", link: "/invoice/companies" },
+        ],
+    },
+    {
         label: "Configuración",
         isMainMenu: true,
     },
