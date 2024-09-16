@@ -47,7 +47,7 @@ const NewSeason = () => {
     ];
 
     const validatePriceForPriceTypeRoom = (obj) => {
-        return !Object.values(obj).some(item => item.price !== 0);
+        return Object.values(obj).some(item => item.price !== 0);
     };
 
     console.log(priceTypeRoom)
@@ -215,8 +215,8 @@ const NewSeason = () => {
                                 <label htmlFor="lableTypeRoom" className="form-label" >Precio por tipo de Habitación</label>
                                 {typeRooms.map(type => (
                                     <div id={`id${type.nombre}`} className="col-md-6 col-sm-12 m-1">
-                                        <label id={`label${type.nombre}`} htmlFor={type.name} className="form-label" >{type.nombre}</label>
-                                        <input className="form-control" type="number" id={type.name} disabled={!typeSeason} value={priceTypeRoom[type.name]?.price} onChange={(e) => handlePriceChange(e, type.nombre)} />
+                                        <label id={`label${type.nombre}`} htmlFor={type.nombre} className="form-label" >{type.nombre}</label>
+                                        <input className="form-control" type="number" id={type.nombre} disabled={!typeSeason} value={priceTypeRoom[type.nombre]?.price} onChange={(e) => handlePriceChange(e, type.nombre)} />
                                     </div>
                                 ))}
 

@@ -67,7 +67,7 @@ const AdminPackages = ({ ...props }) => {
 
     const data = getData();
 
-    console.log(paquetes)
+    console.log()
     return (
         <React.Fragment>
             <div className="page-content">

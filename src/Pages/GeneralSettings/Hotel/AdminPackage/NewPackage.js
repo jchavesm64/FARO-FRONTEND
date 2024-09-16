@@ -223,6 +223,19 @@ const NewPackage = () => {
                     <Row>
                         <Col className="col-md-4">
                             <div className="col-md-12 col-sm-12 m-2">
+                                <label htmlFor="season" className="form-label">* Temporada</label>
+                                <Select
+                                    id="season"
+                                    value={season}
+                                    onChange={(e) => {
+                                        handleSeason(e);
+                                    }}
+                                    options={getSeasons()}
+                                    placeholder="Temporadas"
+                                    classNamePrefix="select2-selection"
+                                />
+                            </div>
+                            <div className="col-md-12 col-sm-12 m-2">
                                 <label htmlFor="package" className="form-label">* Tipo de paquete</label>
                                 <Select
                                     id="package"
@@ -271,7 +284,6 @@ const NewPackage = () => {
                                     </CardBody>
                                 </Card>
                             </div>
-
                         </Col>
                         <Col className="col-md-4">
                             <div className="col-md-12 col-sm-12 m-2">
@@ -316,26 +328,13 @@ const NewPackage = () => {
                                 </Card>
                             </div>
                         </Col>
-                        <Col className="col-md-4">
-                            <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="season" className="form-label">* Temporadas</label>
-                                <Select
-                                    id="season"
-                                    value={season}
-                                    onChange={(e) => {
-                                        handleSeason(e);
-                                    }}
-                                    options={getSeasons()}
-                                    placeholder="Temporadas"
-                                    classNamePrefix="select2-selection"
-                                />
-                            </div>
-                        </Col>
+
                     </Row>
 
                 </Container>
             </div>
-        </React.Fragment>)
+        </React.Fragment>
+    )
 };
 
 export default NewPackage;

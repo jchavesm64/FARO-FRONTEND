@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 const TableSeason = ({ ...props }) => {
     const { data } = props;
 
-    
+
     return (
 
         <div className="table-responsive mb-3">
@@ -16,7 +16,6 @@ const TableSeason = ({ ...props }) => {
                         <th>Nombre</th>
                         <th>Fecha inicio</th>
                         <th>Fecha fin</th>
-                        <th>Precio</th>
                         <th>Descripción</th>
                         <th></th>
                     </tr>
@@ -28,7 +27,6 @@ const TableSeason = ({ ...props }) => {
                                 <td>{season.nombre}</td>
                                 <td>{season.fechaInicio}</td>
                                 <td>{season.fechaFin}</td>
-                                <td>{season.precio}</td>
                                 <td>{season.descripcion}</td>
                                 <td>
                                     <div className="d-flex justify-content-end mx-1 my-1">

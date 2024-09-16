@@ -85,7 +85,10 @@ const EditPackage = () => {
             setDescription(data_paquete.obtenerPaquete.descripcion);
             setToursList(data_paquete.obtenerPaquete.tours);
             setServiceList(data_paquete.obtenerPaquete.servicios);
-            setSeasonList(data_paquete.obtenerPaquete.temporadas)
+            setSeason({
+                label: data_paquete.obtenerPaquete.temporadas.nombre,
+                value: data_paquete.obtenerPaquete.temporadas
+            });
             setPrice(data_paquete.obtenerPaquete.precio);
             setTypePackage(
                 {
@@ -188,30 +191,10 @@ const EditPackage = () => {
         setSeason(a);
     };
 
-    const addSeason = () => {
-        if (season) {
-            const exist = seasonList.find(e => e.id === season.value.id)
-            if (exist) {
-                infoAlert('Oops', 'Ya existe esta comodidad en la habitación', 'warning', 3000, 'top-end')
-                setSeason(null)
-                return
-            }
-
-            setSeasonList([...seasonList, season.value])
-            setSeason(null)
-
-        } else {
-            infoAlert('Oops', 'No ha seleccionado una comodida', 'error', 3000, 'top-end')
-        }
-    };
-
-    const eliminarSeason = (nombre) => {
-        setSeasonList(seasonList.filter(a => a.nombre !== nombre))
-    }
 
     useEffect(() => {
-        setDisableSave(!typePackage || price <= 0 || name === '' || (toursList.length === 0 && serviceList.length === 0) || seasonList.length === 0)
-    }, [typePackage, price, name, toursList, serviceList, seasonList])
+        setDisableSave(!typePackage || price <= 0 || name === '' || (toursList.length === 0 && serviceList.length === 0) || !season)
+    }, [typePackage, price, name, toursList, serviceList, season])
 
     const cleanData = () => {
         setTypePackage(null);
@@ -232,6 +215,7 @@ const EditPackage = () => {
                 nombre: name,
                 servicios: serviceList.map(s => s.id),
                 tours: toursList.map(t => t.id),
+                temporadas: season.value.id,
                 descripcion: description,
                 precio: price,
                 estado: 'Activo'
@@ -280,9 +264,10 @@ const EditPackage = () => {
 
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className="page-content ">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Nuevo paquete" breadcrumbItem="Paquetes" breadcrumbItemUrl='/hotelsettings/hotelpackages' />
+                    <Breadcrumbs title="Editar paquete" breadcrumbItem="Paquetes" breadcrumbItemUrl='/hotelsettings/hotelpackages' />
+
                     <Row>
                         <div className="col mb-3 text-end">
                             <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
@@ -294,9 +279,22 @@ const EditPackage = () => {
                     <Row>
                         <Col className="col-md-4">
                             <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="supplier" className="form-label">* Tipo de paquete</label>
+                                <label htmlFor="season" className="form-label">* Temporada</label>
                                 <Select
-                                    id="supplier"
+                                    id="season"
+                                    value={season}
+                                    onChange={(e) => {
+                                        handleSeason(e);
+                                    }}
+                                    options={getSeasons()}
+                                    placeholder="Temporadas"
+                                    classNamePrefix="select2-selection"
+                                />
+                            </div>
+                            <div className="col-md-12 col-sm-12 m-2">
+                                <label htmlFor="package" className="form-label">* Tipo de paquete</label>
+                                <Select
+                                    id="package"
                                     value={typePackage}
                                     onChange={(e) => {
                                         setTypePackage(e);
@@ -306,21 +304,21 @@ const EditPackage = () => {
                                 />
                             </div>
                             <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="voucherNumber" className="form-label" >Nombre del paquete</label>
-                                <input className="form-control" type="text" id="voucherNumber" value={name} onChange={(e) => { setName(e.target.value) }} />
+                                <label htmlFor="name" className="form-label" >* Nombre del paquete</label>
+                                <input className="form-control" type="text" id="name" value={name} onChange={(e) => { setName(e.target.value) }} />
                             </div>
-
                             <div className="col-md-12 col-sm-12 m-1 p-0 mt-4">
                                 <Card className="p-0">
                                     <CardBody>
                                         <Row>
                                             <div className="col mb-2">
-                                                <label htmlFor="supplier" className="form-label">Servicios</label>
+                                                <label htmlFor="service" className="form-label">* Servicios</label>
                                             </div>
                                         </Row>
                                         <div className="row row-cols-lg-auto g-3 align-items-center">
                                             <div className="col-xl-9 col-md-12 mb-2">
                                                 <Select
+                                                    id="service"
                                                     value={service}
                                                     onChange={(e) => {
                                                         handleService(e);
@@ -342,29 +340,28 @@ const EditPackage = () => {
                                     </CardBody>
                                 </Card>
                             </div>
-
                         </Col>
                         <Col className="col-md-4">
                             <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="voucherNumber" className="form-label" >Precio por paquete</label>
-                                <input className="form-control" type="number" id="voucherNumber" min="0" value={price} onChange={(e) => { setPrice(e.target.value) }} />
+                                <label htmlFor="price" className="form-label" >* Precio por paquete</label>
+                                <input className="form-control" type="number" id="price" min="0" value={price} onChange={(e) => { setPrice(e.target.value) }} />
                             </div>
                             <div className="col-md-12 col-sm-12 m-2">
                                 <label htmlFor="descripcion" className="form-label">Descripción</label>
                                 <textarea className="form-control" type="text" id="descripcion" value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
                             </div>
-
                             <div className="col-md-12 col-sm-12 m-1 p-0 ">
                                 <Card className="p-0">
                                     <CardBody >
                                         <Row>
                                             <div className="col mb-2">
-                                                <label htmlFor="supplier" className="form-label">Tours</label>
+                                                <label htmlFor="tour" className="form-label">* Tours</label>
                                             </div>
                                         </Row>
                                         <div className="row row-cols-lg-auto g-3 align-items-center">
                                             <div className="col-xl-9 col-md-12 mb-2">
                                                 <Select
+                                                    id="tour"
                                                     value={tour}
                                                     onChange={(e) => {
                                                         handleTours(e);
@@ -387,44 +384,13 @@ const EditPackage = () => {
                                 </Card>
                             </div>
                         </Col>
-                        <Col className="col-md-4">
-                            <div className="col-md-12 col-sm-12 m-1 p-0">
-                                <Card className="p-0">
-                                    <CardBody>
-                                        <Row>
-                                            <div className="col mb-2">
-                                                <label htmlFor="supplier" className="form-label">Temporadas</label>
-                                            </div>
-                                        </Row>
-                                        <div className="row row-cols-lg-auto g-3 align-items-center">
-                                            <div className="col-xl-9 col-md-12 mb-2">
-                                                <Select
-                                                    value={season}
-                                                    onChange={(e) => {
-                                                        handleSeason(e);
-                                                    }}
-                                                    options={getSeasons()}
-                                                    placeholder="Temporadas"
-                                                    classNamePrefix="select2-selection"
-                                                />
-                                            </div>
-                                            <div className="col-12 mb-1">
-                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addSeason() }}>
-                                                    Agregar
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <Row>
-                                            <ListInfo data={seasonList} headers={['Servicio', 'Descripción']} keys={['nombre', 'descripcion']} enableEdit={false} enableDelete={true} actionDelete={eliminarSeason} mainKey={'nombre'} secondKey={'descripcion'} />
-                                        </Row>
-                                    </CardBody>
-                                </Card>
-                            </div>
-                        </Col>
+
                     </Row>
+
                 </Container>
             </div>
-        </React.Fragment>)
+        </React.Fragment>
+    )
 };
 
 export default EditPackage;
