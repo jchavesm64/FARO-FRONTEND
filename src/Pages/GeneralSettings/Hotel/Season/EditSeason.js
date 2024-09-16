@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row } from "reactstrap";
+import { Col, Container, Row } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
@@ -7,6 +7,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { OBTENER_TEMPORADA, OBTENER_TEMPORADAS, UPDATE_TEMPORADA } from "../../../../services/TemporadaService";
 import { infoAlert } from "../../../../helpers/alert";
 import { convertDate } from "../../../../helpers/helpers";
+import { OBTENER_TIPOSHABITACION } from "../../../../services/TipoHabitacionService";
 
 const EditSeason = () => {
     document.title = "Temporada | FARO";
@@ -15,6 +16,7 @@ const EditSeason = () => {
     const { id } = useParams();
     const { loading: loadingSeason, error: errorSeason, data: dataSeason, startPolling, stopPolling } = useQuery(OBTENER_TEMPORADA, { variables: { id: id }, pollInterval: 1000 });
     const { data: season } = useQuery(OBTENER_TEMPORADAS, { pollInterval: 1000 });
+    const { data: typeRoom } = useQuery(OBTENER_TIPOSHABITACION, { pollInterval: 1000 });
     const [actualizar] = useMutation(UPDATE_TEMPORADA);
 
     useEffect(() => {
@@ -23,6 +25,9 @@ const EditSeason = () => {
             stopPolling()
         }
     }, [startPolling, stopPolling]);
+
+    const [typeRooms, setTypeRooms] = useState([]);
+    const [priceTypeRoom, setPriceTypeRoom] = useState({});
 
     const [disableSave, setDisableSave] = useState(true);
     const [typeSeason, setTypeSeason] = useState(null);
@@ -50,24 +55,37 @@ const EditSeason = () => {
         }
     ];
 
-
+    const validatePriceForPriceTypeRoom = (obj) => {
+        return Object.values(obj).some(item => item.price !== 0);
+    };
 
     useEffect(() => {
         if (dataSeason) {
-            console.log(convertDate(dataSeason.obtenerTemporadaById.fechaFin));
             setTypeSeason({ value: dataSeason.obtenerTemporadaById.tipo, label: dataSeason.obtenerTemporadaById.nombre });
             setPrice(dataSeason.obtenerTemporadaById.precio);
             setDescription(dataSeason.obtenerTemporadaById.descripcion);
             setDateStart(convertDate(dataSeason.obtenerTemporadaById.fechaInicio));
             setDateEnd(convertDate(dataSeason.obtenerTemporadaById.fechaFin));
 
-
+            setPriceTypeRoom(dataSeason.obtenerTemporadaById.tiposHabitacion);
         }
-    }, [dataSeason])
+    }, [dataSeason]);
 
     useEffect(() => {
-        setDisableSave(!typeSeason || price <= 0 || dateStart === '' || dateEnd === '')
-    }, [typeSeason, price, dateStart, dateEnd])
+        const getTypeRooms = () => {
+            if (typeRoom) {
+                if (typeRoom.obtenerTiposHabitaciones) {
+                    return typeRoom.obtenerTiposHabitaciones;
+                }
+            }
+            return [];
+        };
+        setTypeRooms(getTypeRooms())
+    }, [typeRoom]);
+
+    useEffect(() => {
+        setDisableSave(!(typeSeason && dateStart && dateEnd && validatePriceForPriceTypeRoom(priceTypeRoom)));
+    }, [typeSeason, dateStart, dateEnd, priceTypeRoom]);
 
     const getSeason = () => {
         if (season) {
@@ -91,6 +109,17 @@ const EditSeason = () => {
         setDescription('');
     };
 
+    const handlePriceChange = (e, typeName) => {
+        const value = Number(e.target.value);
+        setPriceTypeRoom(prevState => ({
+            ...prevState,
+            [typeName]: {
+                ...prevState[typeName],
+                price: value
+            }
+        }));
+    };
+
     const onClickSave = async () => {
         try {
             setDisableSave(true);
@@ -109,6 +138,7 @@ const EditSeason = () => {
                 tipo: typeSeason.value,
                 nombre: typeSeason.label,
                 precio: price,
+                tiposHabitacion: priceTypeRoom,
                 descripcion: description
             };
             debugger
@@ -128,6 +158,8 @@ const EditSeason = () => {
             setDisableSave(false)
         }
     };
+
+    console.log(priceTypeRoom)
 
     if (loadingSeason) {
         return (
@@ -155,9 +187,9 @@ const EditSeason = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Editar temporada" breadcrumbItem="temporada" breadcrumbItemUrl='/hotelsettings/season' />
+                    <Breadcrumbs title="Editar Temporada" breadcrumbItem="Temporada" breadcrumbItemUrl='/hotelsettings/season' />
                     <Row>
-                        <div className="col mb-3 text-end">
+                        <div className="col mb-0 text-end">
                             <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
                                 Guardar{" "}
                                 <i className="ri-save-line align-middle ms-2"></i>
@@ -165,55 +197,67 @@ const EditSeason = () => {
                         </div>
                     </Row>
                     <Row>
-                        <div className="col-md-10 d-flex">
-                            <div className="col-md-4 col-sm-12 m-2">
-                                <label htmlFor="supplier" className="form-label">* Tipo de temporada</label>
-                                <Select
-                                    id="supplier"
-                                    value={typeSeason}
-                                    onChange={(e) => {
-                                        setTypeSeason(e);
-                                    }}
-                                    options={seasonLimit()}
-                                    classNamePrefix="select2-selection"
-                                />
+                        <Col className="col-md-6 d-flex align-content-center flex-wrap">
+                            <div className="col-md-11 d-flex">
+                                <div className="col-md-12 col-sm-12 m-1">
+                                    <label htmlFor="supplier" className="form-label">* Tipo de temporada</label>
+                                    <Select
+                                        id="supplier"
+                                        value={typeSeason}
+                                        onChange={(e) => {
+                                            setTypeSeason(e);
+                                        }}
+                                        options={seasonLimit()}
+                                        classNamePrefix="select2-selection"
+                                    />
+                                </div>
+
                             </div>
-                            <div className="col-md-4 col-sm-12 m-2">
-                                <label htmlFor="voucherNumber" className="form-label" >Precio por temporada</label>
-                                <input className="form-control" type="number" id="voucherNumber" disabled={!typeSeason} value={price} onChange={(e) => { setPrice(e.target.value) }} />
+                            <div className="col-md-11 d-flex ">
+                                <div className="col-md-6 m-1">
+                                    <label htmlFor="checkInDate" className="form-label ">Fecha de Inicio</label>
+                                    <input
+                                        className="form-control"
+                                        type="date"
+                                        id="checkInDate"
+                                        value={dateStart}
+                                        disabled={!typeSeason}
+                                        onChange={(e) => { setDateStart(e.target.value) }}
+                                    />
+                                </div>
+                                <div className=" col-md-6 m-1">
+                                    <label htmlFor="checkOutDate" className="form-label ">Fecha de Fin</label>
+                                    <input
+                                        className="form-control"
+                                        type="date"
+                                        id="checkOutDate"
+                                        value={dateEnd}
+                                        disabled={dateStart === '' || !typeSeason}
+                                        onChange={(e) => { setDateEnd(e.target.value) }}
+                                        min={dateStart ? new Date(new Date(dateStart).setDate(new Date(dateStart).getDate() + 1)).toISOString().split('T')[0] : ''}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        <div className="col-md-10 d-flex ">
-                            <div className="col-md-4 m-2">
-                                <label htmlFor="checkInDate" className="form-label ">Fecha de Inicio</label>
-                                <input
-                                    className="form-control"
-                                    type="date"
-                                    id="checkInDate"
-                                    value={dateStart}
-                                    disabled={!typeSeason}
-                                    onChange={(e) => { setDateStart(e.target.value) }}
-                                />
-                            </div>
-                            <div className=" col-md-4 m-2">
-                                <label htmlFor="checkOutDate" className="form-label ">Fecha de Fin</label>
-                                <input
-                                    className="form-control"
-                                    type="date"
-                                    id="checkOutDate"
-                                    value={dateEnd}
-                                    disabled={dateStart === '' || !typeSeason}
-                                    onChange={(e) => { setDateEnd(e.target.value) }}
-                                    min={dateStart ? new Date(new Date(dateStart).setDate(new Date(dateStart).getDate() + 1)).toISOString().split('T')[0] : ''}
-                                />
-                            </div>
-                        </div>
-                        <Row>
-                            <div className="col-md-7 m-3">
-                                <label htmlFor="descripcion" className="form-label">Descripción</label>
-                                <textarea className="form-control" type="text" id="descripcion" disabled={!typeSeason} value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
-                            </div>
-                        </Row>
+                            <Row className="col-md-12">
+                                <div className="col-md-12 m-1">
+                                    <label htmlFor="descripcion" className="form-label">Descripción</label>
+                                    <textarea className="form-control" type="text" id="descripcion" disabled={!typeSeason} value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
+                                </div>
+                            </Row>
+                        </Col >
+                        <Col>
+                            <Row className="mt-3">
+                                <label htmlFor="lableTypeRoom" className="form-label" >Precio por tipo de Habitación</label>
+                                {typeRooms.map(type => (
+                                    <div id={`id${type.nombre}`} className="col-md-6 col-sm-12 m-1">
+                                        <label id={`label${type.nombre}`} htmlFor={type.nombre} className="form-label" >{type.nombre}</label>
+                                        <input className="form-control" type="number" id={type.nombre} disabled={!typeSeason} value={priceTypeRoom[type.nombre]?.price} onChange={(e) => handlePriceChange(e, type.nombre)} />
+                                    </div>
+                                ))}
+
+                            </Row>
+
+                        </Col>
                     </Row>
                 </Container>
             </div>

@@ -9,6 +9,7 @@ export const OBTENER_TEMPORADAS = gql`
             nombre
             tipo
             precio
+            tiposHabitacion
             descripcion
         }
     }
@@ -22,6 +23,7 @@ export const OBTENER_TEMPORADA = gql`
             nombre
             tipo
             precio
+            tiposHabitacion
             descripcion
         }
     }

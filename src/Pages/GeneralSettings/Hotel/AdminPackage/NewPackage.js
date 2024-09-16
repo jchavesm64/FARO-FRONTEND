@@ -28,7 +28,6 @@ const NewPackage = () => {
     const [tour, setTour] = useState(null);
     const [toursList, setToursList] = useState([]);
     const [season, setSeason] = useState(null);
-    const [seasonList, setSeasonList] = useState([]);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState(0);
@@ -161,30 +160,9 @@ const NewPackage = () => {
         setSeason(a);
     };
 
-    const addSeason = () => {
-        if (season) {
-            const exist = seasonList.find(e => e.id === season.value.id)
-            if (exist) {
-                infoAlert('Oops', 'Ya existe esta comodidad en la habitación', 'warning', 3000, 'top-end')
-                setSeason(null)
-                return
-            }
-
-            setSeasonList([...seasonList, season.value])
-            setSeason(null)
-
-        } else {
-            infoAlert('Oops', 'No ha seleccionado una comodida', 'error', 3000, 'top-end')
-        }
-    };
-
-    const eliminarSeason = (nombre) => {
-        setSeasonList(seasonList.filter(a => a.nombre !== nombre))
-    }
-
     useEffect(() => {
-        setDisableSave(!typePackage || price <= 0 || name === '' || (toursList.length === 0 && serviceList.length === 0) || seasonList.length === 0)
-    }, [typePackage, price, name, toursList, serviceList, seasonList])
+        setDisableSave(!typePackage || price <= 0 || name === '' || (toursList.length === 0 && serviceList.length === 0) || !season)
+    }, [typePackage, price, name, toursList, serviceList, season])
 
     const cleanData = () => {
         setTypePackage(null);
@@ -205,7 +183,7 @@ const NewPackage = () => {
                 nombre: name,
                 servicios: serviceList.map(s => s.id),
                 tours: toursList.map(t => t.id),
-                temporadas: seasonList.map(s => s.id),
+                temporadas: season.value.id,
                 descripcion: description,
                 precio: price,
                 estado: 'Activo'
@@ -245,9 +223,9 @@ const NewPackage = () => {
                     <Row>
                         <Col className="col-md-4">
                             <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="supplier" className="form-label">* Tipo de paquete</label>
+                                <label htmlFor="package" className="form-label">* Tipo de paquete</label>
                                 <Select
-                                    id="supplier"
+                                    id="package"
                                     value={typePackage}
                                     onChange={(e) => {
                                         setTypePackage(e);
@@ -257,21 +235,21 @@ const NewPackage = () => {
                                 />
                             </div>
                             <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="voucherNumber" className="form-label" >Nombre del paquete</label>
-                                <input className="form-control" type="text" id="voucherNumber" value={name} onChange={(e) => { setName(e.target.value) }} />
+                                <label htmlFor="name" className="form-label" >* Nombre del paquete</label>
+                                <input className="form-control" type="text" id="name" value={name} onChange={(e) => { setName(e.target.value) }} />
                             </div>
-
                             <div className="col-md-12 col-sm-12 m-1 p-0 mt-4">
                                 <Card className="p-0">
                                     <CardBody>
                                         <Row>
                                             <div className="col mb-2">
-                                                <label htmlFor="supplier" className="form-label">Servicios</label>
+                                                <label htmlFor="service" className="form-label">* Servicios</label>
                                             </div>
                                         </Row>
                                         <div className="row row-cols-lg-auto g-3 align-items-center">
                                             <div className="col-xl-9 col-md-12 mb-2">
                                                 <Select
+                                                    id="service"
                                                     value={service}
                                                     onChange={(e) => {
                                                         handleService(e);
@@ -297,25 +275,25 @@ const NewPackage = () => {
                         </Col>
                         <Col className="col-md-4">
                             <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="voucherNumber" className="form-label" >Precio por paquete</label>
-                                <input className="form-control" type="number" id="voucherNumber" min="0" value={price} onChange={(e) => { setPrice(e.target.value) }} />
+                                <label htmlFor="price" className="form-label" >* Precio por paquete</label>
+                                <input className="form-control" type="number" id="price" min="0" value={price} onChange={(e) => { setPrice(e.target.value) }} />
                             </div>
                             <div className="col-md-12 col-sm-12 m-2">
                                 <label htmlFor="descripcion" className="form-label">Descripción</label>
                                 <textarea className="form-control" type="text" id="descripcion" value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
                             </div>
-
                             <div className="col-md-12 col-sm-12 m-1 p-0 ">
                                 <Card className="p-0">
                                     <CardBody >
                                         <Row>
                                             <div className="col mb-2">
-                                                <label htmlFor="supplier" className="form-label">Tours</label>
+                                                <label htmlFor="tour" className="form-label">* Tours</label>
                                             </div>
                                         </Row>
                                         <div className="row row-cols-lg-auto g-3 align-items-center">
                                             <div className="col-xl-9 col-md-12 mb-2">
                                                 <Select
+                                                    id="tour"
                                                     value={tour}
                                                     onChange={(e) => {
                                                         handleTours(e);
@@ -339,37 +317,18 @@ const NewPackage = () => {
                             </div>
                         </Col>
                         <Col className="col-md-4">
-                            <div className="col-md-12 col-sm-12 m-1 p-0">
-                                <Card className="p-0">
-                                    <CardBody>
-                                        <Row>
-                                            <div className="col mb-2">
-                                                <label htmlFor="supplier" className="form-label">Temporadas</label>
-                                            </div>
-                                        </Row>
-                                        <div className="row row-cols-lg-auto g-3 align-items-center">
-                                            <div className="col-xl-9 col-md-12 mb-2">
-                                                <Select
-                                                    value={season}
-                                                    onChange={(e) => {
-                                                        handleSeason(e);
-                                                    }}
-                                                    options={getSeasons()}
-                                                    placeholder="Temporadas"
-                                                    classNamePrefix="select2-selection"
-                                                />
-                                            </div>
-                                            <div className="col-12 mb-1">
-                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addSeason() }}>
-                                                    Agregar
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <Row>
-                                            <ListInfo data={seasonList} headers={['Servicio', 'Descripción']} keys={['nombre', 'descripcion']} enableEdit={false} enableDelete={true} actionDelete={eliminarSeason} mainKey={'nombre'} secondKey={'descripcion'} />
-                                        </Row>
-                                    </CardBody>
-                                </Card>
+                            <div className="col-md-12 col-sm-12 m-2">
+                                <label htmlFor="season" className="form-label">* Temporadas</label>
+                                <Select
+                                    id="season"
+                                    value={season}
+                                    onChange={(e) => {
+                                        handleSeason(e);
+                                    }}
+                                    options={getSeasons()}
+                                    placeholder="Temporadas"
+                                    classNamePrefix="select2-selection"
+                                />
                             </div>
                         </Col>
                     </Row>

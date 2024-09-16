@@ -7,7 +7,11 @@ export const OBTENER_PAQUETES = gql`
             tipo
             nombre
             servicios{
+                id
                 nombre
+                descripcion
+                precio
+                estado
             }
             tours{
                 nombre

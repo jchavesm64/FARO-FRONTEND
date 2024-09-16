@@ -13,22 +13,27 @@ import SpanSubtitleForm from '../../../components/Forms/SpanSubtitleForm';
 import NewCustomer from '../../Customers/NewCustomer';
 import { SAVE_RESERVA } from '../../../services/ReservaService';
 import { OBTENER_PAQUETES } from '../../../services/PaquetesService';
+import { OBTENER_TEMPORADAS } from '../../../services/TemporadaService';
+import { convertDate } from '../../../helpers/helpers';
 
 const NewBooking = ({ ...props }) => {
     document.title = "Nueva Reserva | FARO";
+
+    const currentDate = `${new Date().getFullYear()}-${(new Date().getMonth() + 1) > 10 ? (new Date().getMonth() + 1) : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() >= 10 ? new Date().getDate() : '0' + new Date().getDate()}`;
 
     const [filter, setFilter] = useState('')
     const { data: dataCustomer } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 });
     const { data: dataRoomsAvailable } = useQuery(OBTENER_HABITACIONES_DISPONIBLES, { pollInterval: 1000 });
     const { data: dataTypeRooms } = useQuery(OBTENER_TIPOSHABITACION, { pollInterval: 1000 });
     const { data: services } = useQuery(OBTENER_SERVICIO, { pollInterval: 1000 });
+    const { data: season } = useQuery(OBTENER_TEMPORADAS, { pollInterval: 1000 });
     const { data: packages } = useQuery(OBTENER_PAQUETES, { pollInterval: 1000 });
 
     const [insertar] = useMutation(SAVE_RESERVA);
 
     const [customer, setCustomer] = useState(null)
     const [customers, setCustomers] = useState([])
-    const [bookingDate] = useState(`${new Date().getFullYear()}-${(new Date().getMonth() + 1) > 10 ? (new Date().getMonth() + 1) : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() > 10 ? new Date().getDate() : '0' + new Date().getDate()}`);
+    const [bookingDate] = useState(currentDate);
     const [amountPeople, setAmountPeople] = useState(0);
 
     const [checkIn, setCheckIn] = useState('');
@@ -46,6 +51,9 @@ const NewBooking = ({ ...props }) => {
     const [packageBooking, setPackageBooking] = useState(null);
     const [packageBookingList, setPackageBookingList] = useState([]);
 
+    const [seasonlist, setSeasonlist] = useState([]);
+    const [currentSeason, setCurrentSeason] = useState(null);
+
     const [roomsAvailable, setRoomsAvailable] = useState(null);//Habitaciones disponibles
     const [typeRooms, setTypeRooms] = useState([]);//Tipo de habitaciones
     const [amountTypeRooms, setAmountTypeRooms] = useState([]);//Cantidad de habitaciones por tipo 
@@ -55,51 +63,56 @@ const NewBooking = ({ ...props }) => {
     const [extraService, setExtraService] = useState([]);//Lista de servicios selecionados para la reserva en general
     const [selectRoom, setSelectRoom] = useState(null);//Habitación seleccionada para agragar servicios extra a la habitación 
     const [extraServiceRoom, setExtraServiceRoom] = useState([]);//Servicios seleccionados para la habitación seleccionada
-    const [servicesPerRoom, setServicePerRoom] = useState([]);//lista de servicios por habitación
+    const [servicesPerRoom, setServicesPerRoom] = useState([]);//lista de servicios por habitación
     const [totalBooking, setTotalBooking] = useState([]);
 
     const [total, setTotal] = useState(0);
 
+    const [notes,setNotes] = useState('');
+
     const typesBooking = ['Individual', 'Grupales', 'Bloqueo'];
 
     useEffect(() => {
-        const getRoomsAvailable = () => {
-            if (dataRoomsAvailable) {
-                if (dataRoomsAvailable.obtenerHabitacionesDisponibles) {
-                    return dataRoomsAvailable.obtenerHabitacionesDisponibles;
-                }
-            }
-            return [];
-        };
 
-        const getTypeRooms = () => {
-            if (dataTypeRooms) {
-                if (dataTypeRooms.obtenerTiposHabitaciones) {
-                    return dataTypeRooms.obtenerTiposHabitaciones;
-                }
-            }
-            return [];
-        };
+        const getRoomsAvailable = () => (
+            dataRoomsAvailable?.obtenerHabitacionesDisponibles || []
+        );
 
         const getAmountTypeRooms = () => {
-            if (typeRooms) {
-                let data = []
-                typeRooms.forEach(type => {
-                    if (type) {
-                        if (roomsAvailable) {
-                            const RoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre);
-                            data.push({ 'lengthAvailable': RoomAvailable.length, 'type': type, 'amountBooking': 0, 'rooms': RoomAvailable });
-                        }
-                    }
-                })
-                return data;
-            }
+            if (!roomsAvailable || !typeRooms) return [];
+
+            return typeRooms.map(type => {
+                const RoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre);
+                return {
+                    lengthAvailable: RoomAvailable.length,
+                    type,
+                    amountBooking: 0,
+                    rooms: RoomAvailable
+                };
+            });
         };
+
+        const getSeasons = () => (
+            season?.obtenerTemporada || []
+        );
+
+        const getCurrentSeason = () => (
+            seasonlist.find(sl => {
+                const dateStart = sl.fechaInicio;
+                const dateEnd = sl.fechaFin;
+                return currentDate >= convertDate(dateStart) && currentDate <= convertDate(dateEnd);
+            }) || null
+        );
+
+        const getTypeRooms = () => (dataTypeRooms?.obtenerTiposHabitaciones || []);
+
         setRoomsAvailable(getRoomsAvailable());
         setTypeRooms(getTypeRooms());
-        setAmountTypeRooms(getAmountTypeRooms())
+        setAmountTypeRooms(getAmountTypeRooms());
+        setSeasonlist(getSeasons());
+        setCurrentSeason(getCurrentSeason());
 
-    }, [dataRoomsAvailable, dataTypeRooms, roomsAvailable, typeRooms]);
+    }, [dataRoomsAvailable, dataTypeRooms, roomsAvailable, typeRooms, season, seasonlist, currentDate]);
 
     const handleTypeBookingChange = (type) => {
         setTypeBooking(type);
@@ -164,15 +177,16 @@ const NewBooking = ({ ...props }) => {
             const i = totalBooking.findIndex(t => t.typeName === amountTypeRooms[index].type.nombre);
             if (i !== -1) {
                 setTotalBooking((prev) => {
+
                     const updatedTotal = [...prev];
                     updatedTotal[i] = {
                         ...updatedTotal[i],
-                        price: amountTypeRooms[index].amountBooking * amountTypeRooms[index].type.precioBase
+                        price: amountTypeRooms[index].amountBooking * (amountTypeRooms[index].type.precioBase + currentSeason.precio)
                     };
                     return updatedTotal;
                 });
             } else {
-                setTotalBooking([...totalBooking, { 'typeName': amountTypeRooms[index].type.nombre, 'price': amountTypeRooms[index].amountBooking * amountTypeRooms[index].type.precioBase }]);
+                setTotalBooking([...totalBooking, { 'typeName': amountTypeRooms[index].type.nombre, 'price': (amountTypeRooms[index].amountBooking * amountTypeRooms[index].type.precioBase) + currentSeason.precio }]);
             }
 
         }
@@ -198,13 +212,13 @@ const NewBooking = ({ ...props }) => {
                     const updatedTotal = [...prev];
                     updatedTotal[i] = {
                         ...updatedTotal[i],
-                        price: amountTypeRooms[index].amountBooking * amountTypeRooms[index].type.precioBase
+                        price: amountTypeRooms[index].amountBooking * (amountTypeRooms[index].type.precioBase + currentSeason.precio)
                     };
                     return updatedTotal;
                 });
             } else {
 
-                setTotalBooking([...totalBooking, { 'typeName': amountTypeRooms[index].type.nombre, 'price': amountTypeRooms[index].amountBooking * amountTypeRooms[index].type.precioBase }]);
+                setTotalBooking([...totalBooking, { 'typeName': amountTypeRooms[index].type.nombre, 'price': amountTypeRooms[index].amountBooking * (amountTypeRooms[index].type.precioBase + currentSeason.precio) }]);
             }
         }
     };
@@ -229,7 +243,7 @@ const NewBooking = ({ ...props }) => {
     };
 
     const totalPerRoom = (type) => {
-        const total = type.amountBooking * type.type.precioBase;
+        const total = (type.amountBooking * type.type.precioBase) + currentSeason.precio;
 
         return total
     }
@@ -247,7 +261,7 @@ const NewBooking = ({ ...props }) => {
     const handleChangeServiceRoom = () => {
         setServiceRoomCheck(!serviceRoomCheck);
         setExtraServiceRoom([])
-        setServicePerRoom([])
+        setServicesPerRoom([])
         setSelectRoom(null)
     };
 
@@ -255,23 +269,29 @@ const NewBooking = ({ ...props }) => {
         if (type === 'general') setServicesBooking(a);
         if (type === 'room') setServicesRoom(a);
     }
+
     const handlePackage = (a) => {
         setPackageBooking(a);
-        packageBookingList([]);
+        setPackageBookingList([]);
     }
 
     const getServices = () => {
-        const data = []
+        const data = [];
         if (services?.obtenerServicios) {
-            services?.obtenerServicios.forEach((item) => {
+            services.obtenerServicios.forEach((item) => {
+                const newItem = { ...item };
+
+                newItem.precio = item.precio + currentSeason.precio;
+
                 data.push({
-                    "value": item,
-                    "label": item.nombre
+                    value: newItem,
+                    label: newItem.nombre
                 });
             });
         }
         return data;
-    }
+    };
+
 
     const getServicesPerRoom = () => {
         const extra = extraService.map(item => item.id);
@@ -282,7 +302,7 @@ const NewBooking = ({ ...props }) => {
 
     const addExtraService = (s, extra, type) => {
 
-        if (s.length === 0) {
+        if (!s) {
             infoAlert('Oops', 'No ha seleccionado un servicio', 'error', 3000, 'top-end');
             return;
         }
@@ -297,33 +317,38 @@ const NewBooking = ({ ...props }) => {
 
         const updatedService = [...extra, s.value];
         if (type === 'general') {
+
             setExtraService(updatedService);
             setServicesBooking(null);
+            const newExtraServiceRoom = extraServiceRoom.filter(roomService => !updatedService.find(service => service.nombre === roomService.nombre));
+            setExtraServiceRoom(newExtraServiceRoom);
+
+            //Eliminar servicios de la lista de servicios por habitación
+
         } else if (type === 'room') {
             setExtraServiceRoom(updatedService);
             setServicesRoom(null);
         }
 
-        setTotalBooking([...totalBooking, { 'typeName': s.label, 'price': s.value.precio }]);
+        setTotalBooking([...totalBooking, { 'typeName': s.label, 'price': s.value.precio + currentSeason.precio }]);
     };
 
-
-    const eliminarServiceBooking = (nombre) => {
+    const deleteServiceBooking = (nombre) => {
         setExtraService(extraService.filter(a => a.nombre !== nombre))
 
     }
 
-    const eliminarServiceRoom = (nombre) => {
+    const deleteServiceRoom = (nombre) => {
         setExtraServiceRoom(extraServiceRoom.filter(a => a.nombre !== nombre));
-
     }
 
     const handleRoomSelect = (room) => {
         setSelectRoom(room);
+        debugger
         if (servicesPerRoom.length) {
             const dataService = servicesPerRoom.find(s => s.room.numeroHabitacion === room.numeroHabitacion);
             if (dataService) {
-                setExtraServiceRoom([...extraServiceRoom, dataService.service]);
+                setExtraServiceRoom(...extraServiceRoom, dataService.service);
             }
         }
     };
@@ -337,7 +362,7 @@ const NewBooking = ({ ...props }) => {
     }));
 
     const addExtraServicePerRoom = () => {
-        setServicePerRoom((prev) => {
+        setServicesPerRoom((prev) => {
             const index = prev.findIndex(r => r.room.numeroHabitacion === selectRoom.numeroHabitacion);
 
             if (index !== -1) {
@@ -362,15 +387,20 @@ const NewBooking = ({ ...props }) => {
     }
 
     const getPackage = () => {
-        const data = []
+        const data = [];
         if (packages?.obtenerPaquetes) {
             packages.obtenerPaquetes.forEach((item) => {
-                data.push({
-                    "value": item,
-                    "label": item.nombre
-                });
+                const matchingSeason = item.temporadas?.find(temporada => temporada.nombre === currentSeason.nombre);
+
+                if (matchingSeason) {
+                    data.push({
+                        value: item,
+                        label: item.nombre
+                    });
+                }
             });
         }
+
         return data;
     };
 
@@ -383,13 +413,19 @@ const NewBooking = ({ ...props }) => {
                 return
             }
 
-            setPackageBookingList([...packageBookingList, packageBooking.value])
-            setPackageBooking(null)
+            setPackageBookingList([...packageBookingList, packageBooking.value]);
+            setPackageBooking(null);
 
         } else {
             infoAlert('Oops', 'No ha seleccionado una comodida', 'error', 3000, 'top-end')
         }
+        setTotalBooking([...totalBooking, { 'typeName': packageBooking.label, 'price': packageBooking.value.precio + currentSeason.precio }]);
+    };
+
+    const deletePackage = (nombre) => {
+        setPackageBookingList(packageBookingList.filter(a => a.nombre !== nombre));
     }
+
     useEffect(() => {
         setTotal(totalBooking.reduce((sum, item) => sum + item.price, 0))
     }, [totalBooking])
@@ -403,7 +439,7 @@ const NewBooking = ({ ...props }) => {
         setAmountPeople(0);
         setTotal(0);
         setExtraService([]);
-        setServicePerRoom([]);
+        setServicesPerRoom([]);
         setRoomsBooking([]);
         setCheckIn('');
         setCheckOut('');
@@ -444,6 +480,8 @@ const NewBooking = ({ ...props }) => {
         }
     }
 
+    console.log(servicesPerRoom)
+    //Mejorar diseño ya que no es viable este que ya está creado
     return (
         <React.Fragment>
             <div className="page-content">
@@ -565,66 +603,6 @@ const NewBooking = ({ ...props }) => {
                                     </div>
                                 </Card>
                             </Row>
-                            <Card>
-                                <div className='col-md-12 d-flex flex-column align-items-center'>
-                                    <Row className="mt-3">
-                                        <h2 >
-                                            Paquetes adicionales
-                                        </h2>
-                                    </Row>
-                                    <Row className="m-2  d-flex flex-row col-md-8 col-xl-7 justify-content-center">
-                                        <div className="form-check  mb-3 col-md-6 d-flex justify-content-center">
-                                            <input
-                                                className="form-check-input"
-                                                type="checkbox"
-                                                id="isPackageBooking"
-                                                value='packageBooking'
-                                                readOnly
-                                                checked={packageBookingCheck}
-                                                onClick={handleChangePackageBooking}
-                                            />
-                                            <label htmlFor="isPackageBooking" className="form-check-label ms-2 ">¿Desea agregar paquetes a la reserva?</label>
-                                        </div>
-                                    </Row>
-                                    <div className='col-md-12 d-flex flex-row  justify-content-center'>
-                                        {packageBookingCheck && (
-                                            <Card className='col-md-5 bg-light m-2 p-2 '>
-                                                <div className="col-md-12">
-                                                    <h3 key='summary' className="text-center mb-4 mt-4">Paquetes adicionales por reserva</h3>
-                                                </div>
-
-                                                <div className="col-md-12 col-sm-12">
-                                                    <Card className="p-2">
-                                                        <CardBody>
-                                                            <div className="row row-cols-lg-auto g-3 align-items-center">
-                                                                <div className="col-xl-9 col-md-12 mb-2">
-                                                                    <Select
-                                                                        value={packageBooking}
-                                                                        onChange={(e) => {
-                                                                            handlePackage(e);
-                                                                        }}
-                                                                        options={getPackage()}
-                                                                        placeholder="Paquetes"
-                                                                        classNamePrefix="select2-selection"
-                                                                    />
-                                                                </div>
-                                                                <div className="col-12 mb-1">
-                                                                    <button type="submit" className="btn btn-outline-primary" onClick={() => { addPackage() }}>
-                                                                        Agregar
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                            <Row>
-                                                                <ListInfo data={packageBookingList} headers={['Paquete ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={eliminarServiceBooking} mainKey={'nombre'} secondKey={'precio'} />
-                                                            </Row>
-                                                        </CardBody>
-                                                    </Card>
-                                                </div>
-                                            </Card>
-                                        )}
-                                    </div>
-                                </div>
-                            </Card>
                             <Card className="m-2 p-2 d-flex flex-row justify-content-center">
                                 <div className='col-md-7 d-flex flex-column align-items-center'>
                                     <Row className="m-2">
@@ -643,7 +621,7 @@ const NewBooking = ({ ...props }) => {
                                                     </div>
                                                     <div className="col-md-7 col-sm-12 ">
                                                         <p>Typo Habitación: <span>{type.type.nombre}</span></p>
-                                                        <p>Precion por noche: $<span>{type.type.precioBase}</span></p>
+                                                        <p>Precio por noche: $<span>{type.type.precioBase + currentSeason.precio}</span></p>
                                                         <p>Decripción: <span>{type.type.descripcion}</span></p>
                                                     </div>
 
@@ -725,12 +703,29 @@ const NewBooking = ({ ...props }) => {
                                                                             {r.service.map(s => (
                                                                                 <div key={`room${s.nombre}`} className="m-0 text-light d-flex justify-content-between p-1">
                                                                                     <p className="m-0 text-nowrap">{s.nombre}</p>
-                                                                                    <p className="m-0 text-end">${s.precio}</p>
+                                                                                    <p className="m-0 text-end">${s.precio + currentSeason.precio}</p>
                                                                                 </div>
                                                                             ))}
                                                                         </div>
                                                                     </div>
                                                                 ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        {packageBookingList.length > 0 && (
+                                                            <div className='mt-2'>
+                                                                <label>Servicios adicionales por paquete</label>
+                                                                <div className='border border-secondary rounded p-1'>
+                                                                    <div className="bg-secondary col-md-11 m-3">
+                                                                        {packageBookingList.map(s => (
+                                                                            <div key={s.nombre} className="m-0 text-light d-flex justify-content-between p-1">
+                                                                                <p className="m-0 text-nowrap">{s.nombre}</p>
+                                                                                <p className="m-0 text-end">${s.precio + currentSeason.precio}</p>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         )}
                                                     </div>
@@ -756,6 +751,66 @@ const NewBooking = ({ ...props }) => {
                                         </div>
                                     </Card>
                                 </Card>
+                            </Card>
+                            <Card className="m-2 p-2 ">
+                                <div className='col-md-12 d-flex flex-column align-items-center'>
+                                    <Row className="mt-3">
+                                        <h2 >
+                                            Paquetes adicionales
+                                        </h2>
+                                    </Row>
+                                    <Row className="m-2  d-flex flex-row col-md-8 col-xl-7 justify-content-center">
+                                        <div className="form-check  mb-3 col-md-6 d-flex justify-content-center">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                id="isPackageBooking"
+                                                value='packageBooking'
+                                                readOnly
+                                                checked={packageBookingCheck}
+                                                onClick={handleChangePackageBooking}
+                                            />
+                                            <label htmlFor="isPackageBooking" className="form-check-label ms-2 ">¿Desea agregar paquetes a la reserva?</label>
+                                        </div>
+                                    </Row>
+                                    <div className='col-md-12 d-flex flex-row  justify-content-center'>
+                                        {packageBookingCheck && (
+                                            <Card className='col-md-5 bg-light m-2 p-2 '>
+                                                <div className="col-md-12">
+                                                    <h3 key='summary' className="text-center mb-4 mt-4">Paquetes adicionales por reserva</h3>
+                                                </div>
+
+                                                <div className="col-md-12 col-sm-12">
+                                                    <Card className="p-2">
+                                                        <CardBody>
+                                                            <div className="row row-cols-lg-auto g-3 align-items-center">
+                                                                <div className="col-xl-9 col-md-12 mb-2">
+                                                                    <Select
+                                                                        value={packageBooking}
+                                                                        onChange={(e) => {
+                                                                            handlePackage(e);
+                                                                        }}
+                                                                        options={getPackage()}
+                                                                        placeholder="Paquetes"
+                                                                        classNamePrefix="select2-selection"
+                                                                    />
+                                                                </div>
+                                                                <div className="col-12 mb-1">
+                                                                    <button type="submit" className="btn btn-outline-primary" onClick={() => { addPackage() }}>
+                                                                        Agregar
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <Row>
+                                                                <ListInfo data={packageBookingList} headers={['Paquete ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={deletePackage} mainKey={'nombre'} secondKey={'precio'} />
+                                                            </Row>
+                                                        </CardBody>
+                                                    </Card>
+                                                </div>
+                                            </Card>
+                                        )}
+                                    </div>
+                                </div>
                             </Card>
                             <Card className="m-2 p-2 ">
                                 <div className='col-md-12 d-flex flex-column align-items-center'>
@@ -822,7 +877,7 @@ const NewBooking = ({ ...props }) => {
                                                             </div>
                                                         </div>
                                                         <Row>
-                                                            <ListInfo data={extraService} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={eliminarServiceBooking} mainKey={'nombre'} secondKey={'precio'} />
+                                                            <ListInfo data={extraService} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={deleteServiceBooking} mainKey={'nombre'} secondKey={'precio'} />
                                                         </Row>
                                                     </CardBody>
                                                 </Card>
@@ -858,7 +913,7 @@ const NewBooking = ({ ...props }) => {
                                                                 </div>
                                                             </div>
                                                             <Row>
-                                                                <ListInfo data={extraServiceRoom} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={eliminarServiceRoom} mainKey={'nombre'} secondKey={'precio'} />
+                                                                <ListInfo data={extraServiceRoom} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={deleteServiceRoom} mainKey={'nombre'} secondKey={'precio'} />
                                                             </Row>
                                                             <div className="col-12 mt-2">
                                                                 <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraServicePerRoom() }}>
@@ -891,8 +946,11 @@ const NewBooking = ({ ...props }) => {
                                     )}
                                 </div>
                             </Card>
-
-                            <Card className="m-2 p-2 d-flex justify-content-center" style={{ height: '15vh' }}>
+                            <Card className="m-2 p-2 d-flex justify-content-center" >
+                                <div className="col-md-7 m-3">
+                                    <label htmlFor="descripcion" className="form-label">Notas para la reserva</label>
+                                    <textarea className="form-control" type="text" id="descripcion" value={notes} onChange={(e) => setNotes(e.target.value)}></textarea>
+                                </div>
                                 <div className='d-flex flex-row justify-content-end '>
                                     <button type="button" className="btn btn-primary waves-effect waves-light text-uppercase fs-3 fw-bold" style={{ width: '30%', height: '10vh' }} disabled={disableSave} onClick={() => onClickSave()}>
                                         Reservar{" "}
