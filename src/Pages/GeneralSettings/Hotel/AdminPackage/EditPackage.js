@@ -31,7 +31,6 @@ const EditPackage = () => {
     const [tour, setTour] = useState(null);
     const [toursList, setToursList] = useState([]);
     const [season, setSeason] = useState(null);
-    const [seasonList, setSeasonList] = useState([]);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState(0);
