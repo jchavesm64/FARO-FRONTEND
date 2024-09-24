@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardBody, CardTitle, Col, Container, Label, Row } from "reactstrap";
+import { Card, CardBody, Container, Label, Row } from "reactstrap";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import Select from "react-select";
 import SpanSubtitleForm from "../../components/Forms/SpanSubtitleForm";
@@ -14,7 +14,6 @@ import { useNavigate } from 'react-router-dom';
 
 const NewCustomer = (props) => {
     document.title = "Clientes | FARO";
-    console.log(props)
 
     const navigate = useNavigate();
 
@@ -185,7 +184,6 @@ const NewCustomer = (props) => {
         setTelefonos(telefonos.filter(e => e.telefono !== telefono))
     }
 
-
     const agregarCorreo = () => {
         if (/^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i.test(correoTemp)) {
             var band = false;
@@ -274,7 +272,7 @@ const NewCustomer = (props) => {
             const { estado, message } = data.insertarCliente;
             if (estado) {
                 infoAlert('Excelente', message, 'success', 3000, 'top-end');
-                debugger
+                
                 if (props.props.stateBooking) {
                     props.props.addNewCustomer(input)
                 } else {

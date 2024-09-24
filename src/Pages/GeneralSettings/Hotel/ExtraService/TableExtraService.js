@@ -18,7 +18,8 @@ const TableTypeRoom = ({ ...props }) => {
                         <th>Nombre</th>
                         <th>Descripción</th>
                         <th>Precio</th>
-                        <th></th>
+                        <th>Tipo de servicio</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,6 +29,7 @@ const TableTypeRoom = ({ ...props }) => {
                                 <td>{services.nombre}</td>
                                 <td>{services.descripcion}</td>
                                 <td>{services.precio}</td>
+                                <td>{services.tipo.nombre}</td>
                                 <td>
                                     <div className="d-flex justify-content-end mx-1 my-1">
                                         <Link to={`/hotelsettings/editextraservice/${services.id}`}>

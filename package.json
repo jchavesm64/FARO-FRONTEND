@@ -24,6 +24,7 @@
     "firebase": "^9.6.1",
     "formik": "^2.2.9",
     "graphql": "^16.8.1",
+    "headless-stepper": "^1.11.0",
     "i18next": "^21.5.3",
     "i18next-browser-languagedetector": "^6.1.2",
     "lodash": "^4.17.21",

@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client";
 import { SAVE_TIPO_HABITACION } from "../../../../services/TipoHabitacionService";
 
-const NewTypeRom = () => {
+const NewTypeRoom = () => {
     document.title = "Tipo Habitación | FARO";
 
     const navigate = useNavigate();
@@ -64,7 +64,7 @@ const NewTypeRom = () => {
                         <div className="col-md-12 col-sm-12">
                             <Row>
                                 <div className="col mb-3">
-                                    <SpanSubtitleForm subtitle='Información de la ubicación' />
+                                    <SpanSubtitleForm subtitle='Información de la Habitación' />
                                 </div>
                             </Row>
                             <Row>
@@ -94,4 +94,4 @@ const NewTypeRom = () => {
     )
 }
 
-export default NewTypeRom;
+export default NewTypeRoom;

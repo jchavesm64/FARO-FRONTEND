@@ -181,6 +181,11 @@ export const hotelsettings = [
         link: "/hotelsettings/season"
     },
     {
+        label: "Tipos de servicios",
+        icon: 'mdi mdi-bell-plus',
+        link: "/hotelsettings/typeservice"
+    },
+    {
         label: "Tours",
         icon: 'mdi mdi-compass-outline',
         link: "/hotelsettings/tours"

@@ -102,6 +102,9 @@ import NewTour from "../Pages/GeneralSettings/Hotel/Tours/NewTour";
 import EditTour from "../Pages/GeneralSettings/Hotel/Tours/EditTour";
 import NewPackage from "../Pages/GeneralSettings/Hotel/AdminPackage/NewPackage";
 import EditPackage from "../Pages/GeneralSettings/Hotel/AdminPackage/EditPackage";
+import TypeService from "../Pages/GeneralSettings/Hotel/TypeService/TypeService";
+import NewTypeService from "../Pages/GeneralSettings/Hotel/TypeService/NewTypeService";
+import EditTypeService from "../Pages/GeneralSettings/Hotel/TypeService/EditTypeService";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -212,6 +215,9 @@ const authProtectedRoutes = [
   { path: "/hotelsettings/edittour/:id", component: <EditTour /> },
   { path: "/hotelsettings/newpackage", component: <NewPackage /> },
   { path: "/hotelsettings/editpackage/:id", component: <EditPackage /> },
+  { path: "/hotelsettings/typeservice", component: <TypeService /> },
+  { path: "/hotelsettings/newtypeservice", component: <NewTypeService /> },
+  { path: "/hotelsettings/edittypeservice/:id", component: <EditTypeService /> },
 
 
   {

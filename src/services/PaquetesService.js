@@ -17,7 +17,11 @@ export const OBTENER_PAQUETES = gql`
                 nombre
             }
             temporadas{
-               nombre 
+               fechaInicio
+                fechaFin
+                nombre
+                tipo
+                precio 
             }
             descripcion
             precio

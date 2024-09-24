@@ -1,27 +1,48 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
+import Select from "react-select";
 import SpanSubtitleForm from "../../../../components/Forms/SpanSubtitleForm";
 import { infoAlert } from "../../../../helpers/alert";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { SAVE_SERVICIO } from "../../../../services/ServiciosExtraService";
+import { OBTENER_TIPOSSERVICIOS } from "../../../../services/TipoServicioService";
 
 const NewExtraService = () => {
     document.title = "Servicios Extra | FARO";
 
     const navigate = useNavigate();
+    const { data: typesService } = useQuery(OBTENER_TIPOSSERVICIOS, { pollInterval: 1000 });
     const [insertar] = useMutation(SAVE_SERVICIO);
 
-    const [name, setName] = useState('')
-    const [description, setDescription] = useState('')
-    const [price, setPrice] = useState(0)
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [price, setPrice] = useState(0);
+    const [typeService, setTypeService] = useState(null);
 
     const [disableSave, setDisableSave] = useState(true);
 
     useEffect(() => {
         setDisableSave(name.trim().length === 0 || price.length === 0)
     }, [name, price])
+
+    const getTypeService = () => {
+        const data = []
+        if (typesService?.obtenerTipoServicio) {
+            typesService.obtenerTipoServicio.forEach((item) => {
+                data.push({
+                    "value": item,
+                    "label": item.nombre
+                });
+            });
+        }
+        return data;
+    };
+
+    const handleTypeService = (a) => {
+        setTypeService(a);
+    };
 
     const onClickSave = async () => {
         try {
@@ -30,9 +51,10 @@ const NewExtraService = () => {
                 nombre: name,
                 descripcion: description,
                 precio: price,
+                tipo: typeService.value.id,
                 estado: "ACTIVO"
             }
-            
+
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' })
             const { estado, message } = data.insertarServicio;
             if (estado) {
@@ -51,7 +73,7 @@ const NewExtraService = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Nuevo servicio" breadcrumbItem="servicio" breadcrumbItemUrl='/hotelsettings/extraservices' />
+                    <Breadcrumbs title="Nuevo servicio" breadcrumbItem="Servicios" breadcrumbItemUrl='/hotelsettings/extraservices' />
                     <Row>
                         <div className="col mb-3 text-end">
                             <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
@@ -64,7 +86,22 @@ const NewExtraService = () => {
                         <div className="col-md-12 col-sm-12">
                             <Row>
                                 <div className="col mb-3">
-                                    <SpanSubtitleForm subtitle='Información de la ubicación' />
+                                    <SpanSubtitleForm subtitle='Información del servicio' />
+                                </div>
+                            </Row>
+                            <Row>
+                                <div className="col-md-6 col-sm-12 mb-3">
+                                    <label htmlFor="season" className="form-label">* Tipos de servicios</label>
+                                    <Select
+                                        id="season"
+                                        value={typeService}
+                                        onChange={(e) => {
+                                            handleTypeService(e);
+                                        }}
+                                        options={getTypeService()}
+                                        placeholder="Tipo de servicio"
+                                        classNamePrefix="select2-selection"
+                                    />
                                 </div>
                             </Row>
                             <Row>

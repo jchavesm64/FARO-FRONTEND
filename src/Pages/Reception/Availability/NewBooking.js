@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Card, CardBody, Container, InputGroup, Row, Input, ButtonGroup, Col } from 'reactstrap';
+import { Button, Card, CardBody, Container, InputGroup, Row, Input, ButtonGroup, Col, Tooltip } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { useMutation, useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
@@ -10,11 +10,23 @@ import Select from "react-select";
 import ListInfo from '../../../components/Common/ListInfo';
 import { infoAlert } from '../../../helpers/alert';
 import SpanSubtitleForm from '../../../components/Forms/SpanSubtitleForm';
-import NewCustomer from '../../Customers/NewCustomer';
 import { SAVE_RESERVA } from '../../../services/ReservaService';
 import { OBTENER_PAQUETES } from '../../../services/PaquetesService';
 import { OBTENER_TEMPORADAS } from '../../../services/TemporadaService';
 import { convertDate } from '../../../helpers/helpers';
+
+import NewCustomer from '../../Customers/NewCustomer';
+import SearchCustomer from './NewBooking/SearchCustomer';
+import TypeDateBooking from './NewBooking/Type&DateBooking';
+import Packages from './NewBooking/Packages';
+import Rooms from './NewBooking/Rooms';
+import ToursService from './NewBooking/Tours&Service';
+import Notes from './NewBooking/Notes';
+import Summary from './NewBooking/Summary';
+
+
+
+import { useStepper } from 'headless-stepper';
 
 const NewBooking = ({ ...props }) => {
     document.title = "Nueva Reserva | FARO";
@@ -68,9 +80,8 @@ const NewBooking = ({ ...props }) => {
 
     const [total, setTotal] = useState(0);
 
-    const [notes,setNotes] = useState('');
+    const [notes, setNotes] = useState('');
 
-    const typesBooking = ['Individual', 'Grupales', 'Bloqueo'];
 
     useEffect(() => {
 
@@ -272,7 +283,6 @@ const NewBooking = ({ ...props }) => {
 
     const handlePackage = (a) => {
         setPackageBooking(a);
-        setPackageBookingList([]);
     }
 
     const getServices = () => {
@@ -344,7 +354,7 @@ const NewBooking = ({ ...props }) => {
 
     const handleRoomSelect = (room) => {
         setSelectRoom(room);
-        debugger
+        
         if (servicesPerRoom.length) {
             const dataService = servicesPerRoom.find(s => s.room.numeroHabitacion === room.numeroHabitacion);
             if (dataService) {
@@ -390,8 +400,7 @@ const NewBooking = ({ ...props }) => {
         const data = [];
         if (packages?.obtenerPaquetes) {
             packages.obtenerPaquetes.forEach((item) => {
-                const matchingSeason = item.temporadas?.find(temporada => temporada.nombre === currentSeason.nombre);
-
+                const matchingSeason = item.temporadas?.nombre === currentSeason.nombre;
                 if (matchingSeason) {
                     data.push({
                         value: item,
@@ -405,6 +414,7 @@ const NewBooking = ({ ...props }) => {
     };
 
     const addPackage = () => {
+        
         if (packageBooking) {
             const exist = packageBookingList.find(e => e.id === packageBooking.value.id)
             if (exist) {
@@ -430,9 +440,7 @@ const NewBooking = ({ ...props }) => {
         setTotal(totalBooking.reduce((sum, item) => sum + item.price, 0))
     }, [totalBooking])
 
-    useEffect(() => {
-        setDisableSave(customer === '' || bookingDate === '' || total <= 0 || amountPeople <= 0 || (servicesPerRoom.length === 0 && roomsBooking === 0) || checkIn === '' || checkOut === '')
-    }, [customer, bookingDate, amountPeople, total, extraService, servicesPerRoom, roomsBooking, checkIn, checkOut])
+
 
     const restartData = () => {
         setCustomer(null);
@@ -480,129 +488,105 @@ const NewBooking = ({ ...props }) => {
         }
     }
 
-    console.log(servicesPerRoom)
     //Mejorar diseño ya que no es viable este que ya está creado
+
+    const steps = React.useMemo(
+        () => [
+            { label: 'Buscar cliente', },
+            { label: 'Tipo y fecha de reserva' },
+            { label: 'Paquetes' },
+            { label: 'Habitaciones' },
+            { label: 'Servicios y Tours' },
+            { label: 'Notas' },
+            { label: 'Resumen' }
+        ],
+        []
+    );
+    const [tooltipOpen, setTooltipOpen] = useState(false);
+
+    const toggleTooltip = () => {
+        setTooltipOpen(!tooltipOpen);
+    };
+    const { state, nextStep, prevStep, progressProps, stepsProps, stepperProps } =
+        useStepper({
+            steps,
+        });
     return (
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Nueva Reserva" breadcrumbItem="Reservas" breadcrumbItemUrl='/reception/availability' />
-
-                    <Row className="flex" style={{ alignItems: 'flex-end' }}>
-                        <div className="col-md-12 mb-1">
-                            <SpanSubtitleForm>
-                                Busca el cliente
-                            </SpanSubtitleForm>
-                            <input
-                                className="form-control"
-                                id="search-input"
-                                value={filter}
-                                onChange={handleInputChange}
-                                type="search"
-                                placeholder="Escribe el nombre o identificación del cliente" />
-                        </div>
-
-
-                    </Row>
-                    <Row>
-                        {customers.length > 0 ? (
-                            <ul className="list-group form-control ontent-scroll p-3 mb-3 border" style={{ zIndex: 1000, maxHeight: '300px', overflowY: 'auto' }}>
-                                {customers.map((customer, index) => (
-                                    <li
-                                        key={customer.id}
-                                        onClick={() => selectClient(customer)}
-                                        className='ist-group-item list-group-item-action rounded p-2'
-                                        style={{
-                                            backgroundColor: hoveredIndex === index ? '#0BB197' : '#fff',
-                                            listStyleType: 'none',
-                                            cursor: 'pointer',
-                                        }}
-                                        onMouseEnter={() => setHoveredIndex(index)}
-                                        onMouseLeave={() => setHoveredIndex(null)}
-                                    >
-                                        {customer.nombre}
-                                    </li>
+                    <Card className='col-md-12 p-2'>
+                        <div className='d-flex col-md-12 bg-light border rounded'>
+                            <nav className='d-flex col-md-12 justify-content-center' {...stepperProps}>
+                                {stepsProps?.map((step, index) => (
+                                    <div className=''>
+                                        <ol
+                                            className={`list-group text-center p-2 m-1 text-wrap fs-5 border-bottom border-top border-primary text-dark ${state.currentStep === index ? "border-3" : "border-1"}`}
+                                            key={index}
+                                            style={{
+                                                fontWeight: state.currentStep === index ? 'bold' : 'unset'
+                                            }}
+                                        >
+                                            <a  {...step}>{steps[index].label}</a>
+                                        </ol>
+                                    </div>
                                 ))}
-                            </ul>
-
-                        ) : filter !== '' && (
-                            <div className="col-md-12 col-sm-12 mb-3">
-                                <label>No existe el cliente, ¿Desea agregar uno?</label>
-                                <Card className='col-xl-12 col-md-12'>
-                                    <CardBody>
-                                        <NewCustomer props={{ addNewCustomer, stateBooking }} />
-                                    </CardBody>
-                                </Card>
+                            </nav>
+                        </div>
+                        <div className='d-flex justify-content-between m-4 mt-3 mb-0'>
+                            <Button id='Anterior' color="primary" onClick={prevStep} disabled={!state.hasPreviousStep}><i className={'mdi mdi-arrow-left-bold-circle-outline button_wizard_icon'}></i></Button>
+                            <Button id='Siguiente' color="primary" onClick={nextStep} disabled={!state.hasNextStep}><i className={'mdi mdi-arrow-right-bold-circle-outline button_wizard_icon'}></i></Button>
+                        </div>
+                        {steps[state.currentStep].label === 'Buscar cliente' &&
+                            <div>
+                                <SearchCustomer props={{ handleInputChange, selectClient, setCustomer, setFilter, filter, customers, customer, stateBooking, bookingDate }} />
                             </div>
-                        )}
-                    </Row>
+                        }
+                        {steps[state.currentStep].label === 'Tipo y fecha de reserva' &&
+                            <div>
+                                <TypeDateBooking props={{ handleTypeBookingChange, setCheckIn, setCheckOut, setAmountPeople, typeBooking, checkIn, checkOut, amountPeople }} />
+                            </div>
+                        }
+                        {steps[state.currentStep].label === 'Paquetes' &&
+                            <div>
+                                <Packages props={{ handlePackage, getPackage, addPackage, deletePackage, packageBooking, packageBookingList }} />
+                            </div>
+                        }
+                        {steps[state.currentStep].label === 'Habitaciones' &&
+                            <div>
+                                <Rooms />
+                            </div>
+                        }
+                        {steps[state.currentStep].label === 'Servicios y Tours' &&
+                            <div>
+                                <ToursService />
+                            </div>
+                        }
+                        {steps[state.currentStep].label === 'Notas' &&
+                            <div>
+                                <Notes />
+                            </div>
+                        }
+                        {steps[state.currentStep].label === 'Resumen' &&
+                            <div>
+                                <Summary />
+                            </div>
+                        }
+                    </Card>
+                </Container>
+            </div>
+        </React.Fragment>
+    );
+    /* return (
+        <React.Fragment>
+            <div className="page-content">
+                <Container fluid={true}>
+                    <Breadcrumbs title="Nueva Reserva" breadcrumbItem="Reservas" breadcrumbItemUrl='/reception/availability' />
+
                     {customer ? (
                         <div className='mt-1'>
-                            <Row className="m-2 col-md-7 d-flex flex-row flex-nowrap">
-                                <Card className="m-1 p-3 col-md-10">
-                                    <CardBody className="text-muted d-flex flex-column justify-content-center">
-                                        <h2 className="mb-2">{customer.nombre}</h2>
-                                        <p className="mb-2 fw-bold fs-5">Identificación: <span className='fw-normal'>{customer.codigo}</span></p>
-                                        <p className="mb-2 fw-bold fs-5">País: <span className='fw-normal'>{customer.pais}</span></p>
-                                        <p className="mb-2 fw-bold fs-5">Fecha de reserva: <span className='fw-normal'>{bookingDate}</span></p>
-                                    </CardBody>
-                                    <Row>
-                                        <label htmlFor="checkInDate" className="m-2 fw-bold fs-5 ">Tipo de reserva</label>
-                                        <Col>
-                                            <ButtonGroup>
-                                                {typesBooking.map((type, index) => (
-                                                    <Button
-                                                        key={index}
-                                                        color="primary"
-                                                        outline
-                                                        onClick={() => handleTypeBookingChange(type)}
-                                                        active={typeBooking === type}
-                                                        className='m-1 fw-bold fs-5'
-                                                    >
-                                                        {type}
-                                                    </Button>
-                                                ))}
-                                            </ButtonGroup>
-                                        </Col>
-                                    </Row>
-                                </Card>
-                                <Card className="m-1 p-2 col-md-10">
-                                    <div className="p-1 col-md-8">
-                                        <label htmlFor="checkInDate" className="form-label fs-5">Fecha de Entrada</label>
-                                        <input
-                                            className="form-control"
-                                            type="date"
-                                            id="checkInDate"
-                                            value={checkIn}
-                                            onChange={(e) => { setCheckIn(e.target.value) }}
-                                            min={new Date().toISOString().split('T')[0]}
-                                        />
-                                    </div>
-                                    <div className="p-1 col-md-8">
-                                        <label htmlFor="checkOutDate" className="form-label fs-5">Fecha de Salida</label>
-                                        <input
-                                            className="form-control"
-                                            type="date"
-                                            id="checkOutDate"
-                                            value={checkOut}
-                                            disabled={checkIn === ''}
-                                            onChange={(e) => { setCheckOut(e.target.value) }}
-                                            min={checkIn ? new Date(new Date(checkIn).setDate(new Date(checkIn).getDate() + 1)).toISOString().split('T')[0] : ''}
-                                        />
-                                    </div>
-                                    <div className="p-1 col-md-8">
-                                        <label htmlFor="checkOutDate" className="form-label fs-5">Cantidad de personas</label>
-                                        <input
-                                            className="form-control"
-                                            type="number"
-                                            id="checkOutDate"
-                                            value={amountPeople}
-                                            onChange={(e) => { setAmountPeople(e.target.value) }}
-                                            min='0'
-                                        />
-                                    </div>
-                                </Card>
-                            </Row>
+                            
                             <Card className="m-2 p-2 d-flex flex-row justify-content-center">
                                 <div className='col-md-7 d-flex flex-column align-items-center'>
                                     <Row className="m-2">
@@ -796,9 +780,9 @@ const NewBooking = ({ ...props }) => {
                                                                     />
                                                                 </div>
                                                                 <div className="col-12 mb-1">
-                                                                    <button type="submit" className="btn btn-outline-primary" onClick={() => { addPackage() }}>
+                                                                    <Button type="submit" className="btn btn-outline-primary" onClick={() => { addPackage() }}>
                                                                         Agregar
-                                                                    </button>
+                                                                    </Button>
                                                                 </div>
                                                             </div>
                                                             <Row>
@@ -871,9 +855,9 @@ const NewBooking = ({ ...props }) => {
                                                                 />
                                                             </div>
                                                             <div className="col-12 mb-1">
-                                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraService(ServicesBooking, extraService, 'general') }}>
+                                                                <Button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraService(ServicesBooking, extraService, 'general') }}>
                                                                     Agregar
-                                                                </button>
+                                                                </Button>
                                                             </div>
                                                         </div>
                                                         <Row>
@@ -907,18 +891,18 @@ const NewBooking = ({ ...props }) => {
                                                                     />
                                                                 </div>
                                                                 <div className="col-12 mb-1">
-                                                                    <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraService(ServicesRoom, extraServiceRoom, 'room') }}>
+                                                                    <Button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraService(ServicesRoom, extraServiceRoom, 'room') }}>
                                                                         Agregar
-                                                                    </button>
+                                                                    </Button>
                                                                 </div>
                                                             </div>
                                                             <Row>
                                                                 <ListInfo data={extraServiceRoom} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={deleteServiceRoom} mainKey={'nombre'} secondKey={'precio'} />
                                                             </Row>
                                                             <div className="col-12 mt-2">
-                                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraServicePerRoom() }}>
+                                                                <Button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraServicePerRoom() }}>
                                                                     Guardar
-                                                                </button>
+                                                                </Button>
                                                             </div>
                                                         </CardBody>
                                                     </Card>
@@ -952,10 +936,10 @@ const NewBooking = ({ ...props }) => {
                                     <textarea className="form-control" type="text" id="descripcion" value={notes} onChange={(e) => setNotes(e.target.value)}></textarea>
                                 </div>
                                 <div className='d-flex flex-row justify-content-end '>
-                                    <button type="button" className="btn btn-primary waves-effect waves-light text-uppercase fs-3 fw-bold" style={{ width: '30%', height: '10vh' }} disabled={disableSave} onClick={() => onClickSave()}>
+                                    <Button type="Button" className="btn btn-primary waves-effect waves-light text-uppercase fs-3 fw-bold" style={{ width: '30%', height: '10vh' }} disabled={disableSave} onClick={() => onClickSave()}>
                                         Reservar{" "}
                                         <i className="ri-save-line align-middle ms-2"></i>
-                                    </button>
+                                    </Button>
                                 </div>
                             </Card>
                         </div>
@@ -963,7 +947,7 @@ const NewBooking = ({ ...props }) => {
                 </Container>
             </div>
         </React.Fragment>
-    )
+    ) */
 }
 
 export default NewBooking;

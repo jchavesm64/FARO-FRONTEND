@@ -7,6 +7,11 @@ export const OBTENER_SERVICIO = gql`
             nombre
             descripcion
             precio
+            tipo{
+                id
+                nombre
+                cuantificable
+            }
             estado
         }
     }
@@ -19,6 +24,11 @@ export const OBTENER_SERVICIO_BY_ID = gql`
             nombre
             descripcion
             precio
+            tipo{
+                id
+                nombre
+                cuantificable
+            }
             estado
         }
     }

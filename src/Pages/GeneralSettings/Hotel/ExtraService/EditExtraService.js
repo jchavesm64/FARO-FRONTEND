@@ -3,9 +3,11 @@ import { Container, Row } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
+import Select from "react-select";
 import SpanSubtitleForm from "../../../../components/Forms/SpanSubtitleForm";
 import { infoAlert } from "../../../../helpers/alert";
 import { OBTENER_SERVICIO_BY_ID, UPDATE_SERVICIO } from "../../../../services/ServiciosExtraService";
+import { OBTENER_TIPOSSERVICIOS } from "../../../../services/TipoServicioService";
 
 const EditExtraService = () => {
     document.title = "Servicios Extra | FARO";
@@ -13,25 +15,31 @@ const EditExtraService = () => {
     const navigate = useNavigate();
 
     const { id } = useParams();
+    const { data: typesService } = useQuery(OBTENER_TIPOSSERVICIOS, { pollInterval: 1000 });
     const { loading: loading_extraservice, error: error_extraservice, data: data_extraservice, startPolling, stopPolling } = useQuery(OBTENER_SERVICIO_BY_ID, { variables: { id: id }, pollInterval: 1000 });
-    const [actualizar] = useMutation(UPDATE_SERVICIO)
+    const [actualizar] = useMutation(UPDATE_SERVICIO);
 
     useEffect(() => {
         startPolling(1000)
         return () => {
             stopPolling()
         }
-    }, [startPolling, stopPolling])
+    }, [startPolling, stopPolling]);
 
-    const [name, setName] = useState('')
-    const [description, setDescripcion] = useState('')
-    const [price, setPrice] = useState(0)
-
+    const [name, setName] = useState('');
+    const [description, setDescripcion] = useState('');
+    const [price, setPrice] = useState(0);
+    const [typeService, setTypeService] = useState(null);
+console.log(data_extraservice)
     useEffect(() => {
         if (data_extraservice) {
-            setName(data_extraservice.obtenerServicio.nombre)
-            setDescripcion(data_extraservice.obtenerServicio.descripcion)
-            setPrice(data_extraservice.obtenerServicio.precio)
+            setName(data_extraservice.obtenerServicio.nombre);
+            setDescripcion(data_extraservice.obtenerServicio.descripcion);
+            setPrice(data_extraservice.obtenerServicio.precio);
+            setTypeService({
+                "value": data_extraservice.obtenerServicio.tipo,
+                "label": data_extraservice.obtenerServicio.tipo.nombre
+            });
         }
     }, [data_extraservice])
 
@@ -41,6 +49,23 @@ const EditExtraService = () => {
         setDisableSave(name.trim().length === 0 || price.length === 0)
     }, [name, price])
 
+    const getTypeService = () => {
+        const data = []
+        if (typesService?.obtenerTipoServicio) {
+            typesService.obtenerTipoServicio.forEach((item) => {
+                data.push({
+                    "value": item,
+                    "label": item.nombre
+                });
+            });
+        }
+        return data;
+    };
+
+    const handleTypeService = (a) => {
+        setTypeService(a);
+    };
+
     const onClickSave = async () => {
         try {
             setDisableSave(true)
@@ -48,6 +73,7 @@ const EditExtraService = () => {
                 nombre: name,
                 descripcion: description,
                 precio: price,
+                tipo: typeService.value.id,
                 estado: "ACTIVO"
             }
 
@@ -107,7 +133,22 @@ const EditExtraService = () => {
                         <div className="col-md-12 col-sm-12">
                             <Row>
                                 <div className="col mb-3">
-                                    <SpanSubtitleForm subtitle='Información de la ubicación' />
+                                    <SpanSubtitleForm subtitle='Información del servicio' />
+                                </div>
+                            </Row>
+                            <Row>
+                                <div className="col-md-6 col-sm-12 mb-3">
+                                    <label htmlFor="season" className="form-label">* Tipos de servicios</label>
+                                    <Select
+                                        id="season"
+                                        value={typeService}
+                                        onChange={(e) => {
+                                            handleTypeService(e);
+                                        }}
+                                        options={getTypeService()}
+                                        placeholder="Tipo de servicio"
+                                        classNamePrefix="select2-selection"
+                                    />
                                 </div>
                             </Row>
                             <Row>
