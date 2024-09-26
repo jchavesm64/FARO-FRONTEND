@@ -28,6 +28,7 @@ import TableSeason from '../../Pages/GeneralSettings/Hotel/Season/TableSeason';
 import TablePackage from '../../Pages/GeneralSettings/Hotel/AdminPackage/TablePackage';
 import TableTours from '../../Pages/GeneralSettings/Hotel/Tours/TableTours';
 import TableTypeService from '../../Pages/GeneralSettings/Hotel/TypeService/TableTypeService';
+import TableOperativeAreas from '../../Pages/GeneralSettings/Hotel/OperativeAreas/TableOperativeAreas';
 
 const DataList = ({ ...props }) => {
     const { data, type, displayLength, onDelete } = props;
@@ -177,6 +178,10 @@ const DataList = ({ ...props }) => {
                 {
                     type === 'typservice' &&
                     <TableTypeService {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'operativearea' &&
+                    <TableOperativeAreas {...props} data={datos} onDelete={onDelete} />
                 }
             </div>
             {(data.length > displayLength) &&

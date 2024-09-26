@@ -105,6 +105,9 @@ import EditPackage from "../Pages/GeneralSettings/Hotel/AdminPackage/EditPackage
 import TypeService from "../Pages/GeneralSettings/Hotel/TypeService/TypeService";
 import NewTypeService from "../Pages/GeneralSettings/Hotel/TypeService/NewTypeService";
 import EditTypeService from "../Pages/GeneralSettings/Hotel/TypeService/EditTypeService";
+import OperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/OperativeAreas";
+import NewOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/NewOperativeAreas";
+import EditOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/EditOperativeAreas";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -218,6 +221,9 @@ const authProtectedRoutes = [
   { path: "/hotelsettings/typeservice", component: <TypeService /> },
   { path: "/hotelsettings/newtypeservice", component: <NewTypeService /> },
   { path: "/hotelsettings/edittypeservice/:id", component: <EditTypeService /> },
+  { path: "/hotelsettings/operativeareas", component: <OperativeAreas /> },
+  { path: "/hotelsettings/newoperativearea", component: <NewOperativeAreas /> },
+  { path: "/hotelsettings/editoperativeareas/:id", component: <EditOperativeAreas /> },
 
 
   {

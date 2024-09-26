@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Button, Card, CardBody, Container, InputGroup, Row, Input, ButtonGroup, Col, Tooltip } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
+import { stepsWizardMenuBooking } from '../../../constants/routesConst';
 import { useMutation, useQuery } from '@apollo/client';
 import { OBTENER_CLIENTES } from '../../../services/ClienteService';
 import { OBTENER_HABITACIONES_DISPONIBLES } from '../../../services/HabitacionesService';
@@ -15,7 +16,6 @@ import { OBTENER_PAQUETES } from '../../../services/PaquetesService';
 import { OBTENER_TEMPORADAS } from '../../../services/TemporadaService';
 import { convertDate } from '../../../helpers/helpers';
 
-import NewCustomer from '../../Customers/NewCustomer';
 import SearchCustomer from './NewBooking/SearchCustomer';
 import TypeDateBooking from './NewBooking/Type&DateBooking';
 import Packages from './NewBooking/Packages';
@@ -83,6 +83,8 @@ const NewBooking = ({ ...props }) => {
 
     const [notes, setNotes] = useState('');
 
+    const [componentSize, setComponentSize] = useState({ width: 0 });
+    const wizardRef = useRef(null);
 
     useEffect(() => {
 
@@ -329,8 +331,6 @@ const NewBooking = ({ ...props }) => {
             const newExtraServiceRoom = extraServiceRoom.filter(roomService => !updatedService.find(service => service.nombre === roomService.nombre));
             setExtraServiceRoom(newExtraServiceRoom);
 
-            //Eliminar servicios de la lista de servicios por habitación
-
         } else if (type === 'room') {
             setExtraServiceRoom(updatedService);
             setServicesRoom(null);
@@ -436,8 +436,6 @@ const NewBooking = ({ ...props }) => {
         setTotal(totalBooking.reduce((sum, item) => sum + item.price, 0))
     }, [totalBooking])
 
-
-
     const restartData = () => {
         setCustomer(null);
         setAmountPeople(0);
@@ -484,20 +482,9 @@ const NewBooking = ({ ...props }) => {
         }
     }
 
-    //Mejorar diseño ya que no es viable este que ya está creado
-
     const steps = React.useMemo(
-        () => [
-            { label: 'Buscar cliente', },
-            { label: 'Tipo y fecha de reserva' },
-            { label: 'Paquetes' },
-            { label: 'Habitaciones' },
-            { label: 'Servicios y Tours' },
-            { label: 'Notas' },
-            { label: 'Resumen' }
-        ],
-        []
-    );
+        () => stepsWizardMenuBooking,
+        []);
     const [tooltipOpen, setTooltipOpen] = useState(false);
 
     const toggleTooltip = () => {
@@ -508,24 +495,52 @@ const NewBooking = ({ ...props }) => {
             steps,
         });
 
+    useEffect(() => {
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+                setComponentSize({
+                    width: entry.contentRect.width,
+                });
+            }
+        });
+
+        if (wizardRef.current) {
+            resizeObserver.observe(wizardRef.current);
+        }
+        return () => {
+            if (wizardRef.current) {
+                resizeObserver.unobserve(wizardRef.current);
+            }
+        };
+    }, [wizardRef]);
+
+    console.log(componentSize.width);
+
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className="page-content " ref={wizardRef}>
                 <Container fluid={true}>
                     <Breadcrumbs title="Nueva Reserva" breadcrumbItem="Reservas" breadcrumbItemUrl='/reception/availability' />
                     <Card className='col-md-12 p-2'>
                         <div className='d-flex col-md-12 justify-content-center '>
-                            <nav className='d-flex col-md-10 justify-content-center shadow_wizard wizard_bar' {...stepperProps}>
+                            <nav className='d-flex col-md-12 justify-content-center shadow_wizard wizard_bar' {...stepperProps}>
                                 {stepsProps?.map((step, index) => (
                                     <div key={index}>
                                         <ol
-                                            className={`list-group text-center step-hover-effect_wizard p-2 m-1 text-wrap fs-5 border-bottom border-top border-primary text-dark ${state.currentStep === index ? "border-3" : "border-1"}`}
+                                            className={`
+                                                list-group wizard_button_size text-center step-hover-effect_wizard 
+                                                p-2 m-1 text-wrap fs-5 border-bottom border-top border-primary d-flex 
+                                                justify-content-center text-dark ${state.currentStep === index ? "border-3" : "border-1"}`}
                                             key={index}
                                             style={{
                                                 fontWeight: state.currentStep === index ? 'bold' : 'unset'
                                             }}
                                         >
-                                            <a  {...step}>{steps[index].label}</a>
+                                            <a  {...step}>
+                                                {componentSize.width <= 1151 ? (
+                                                    <i className={`${steps[index].icon} wizard_icon_size`}></i>
+                                                ) : steps[index].label}
+                                            </a>
                                         </ol>
                                     </div>
                                 ))}

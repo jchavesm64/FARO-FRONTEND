@@ -52,11 +52,11 @@
 }
 
 .room_card_wizard {
-    height: 90%;
+    height: 46rem;
 }
 
 .room_card_wizard_details {
-    height: 80%;
+    height: 40rem;
     overflow-y: auto;
 }
 
@@ -66,4 +66,17 @@
 
 .card_room_wizard {
     height: 120px;
+}
+
+.wizard_icon_size {
+    font-size: calc(1rem + 2vw);
+}
+
+.wizard_button_size {
+    height: 80%;
+    width: 98%;
+}
+
+.size_wizard {
+    height: 35rem;
 }

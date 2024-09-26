@@ -6,11 +6,6 @@ const Rooms = ({ ...props }) => {
 
     const { handleDecrease, handleChange, handleBlur, handleIncrease, amountTypeRooms, currentSeason, roomsBooking } = props.props;
 
-    //roomsBooking.find(r => { console.log(r) })
-
-    console.log(roomsBooking)
-    console.log(amountTypeRooms)
-
     return (
         <React.Fragment>
             <div className="page-content p-4 border m-2">
@@ -23,7 +18,7 @@ const Rooms = ({ ...props }) => {
                                         Tipo de Habitaciones
                                     </h3>
                                 </Row>
-                                <Row className="col-md-12  ms-0 flex-row justify-content-center">
+                                <Row className="col-md-12 ms-0 flex-row justify-content-center room_card_wizard_details ">
                                     {amountTypeRooms.map((type, index) => (
                                         <Card key={`${type.type.nombre}-type`} className="m-2 p-1 bg-light shadow col-md-11">
                                             <CardBody className="p-2 card_room_wizard">
@@ -70,15 +65,14 @@ const Rooms = ({ ...props }) => {
                             <Card className='col-md-12 bg-light border ms-2 p-2 room_card_wizard'>
                                 <div className="col-md-12">
                                     <h3 key='summary' className="text-center mb-4 mt-4">Habitaciones</h3>
-                                    <Card className="col-md-12 bg-tertiary rounded p-3 room_card_wizard_details" >
+                                    <Card className="col-md-12 bg-tertiary rounded p-2 room_card_wizard_details" >
                                         {roomsBooking?.length ? (
                                             <div >
                                                 <div className='border border-secondary rounded p-1'>
-
                                                     {amountTypeRooms.map(type => (
-                                                        <div key={`row${type.type.nombre}`} className="m-0 d-flex justify-content-between p-1">
-                                                            {type.amountBooking !== 0 && (
-                                                                <div className='col-md-12 border shadow_wizard rounded p-3'>
+                                                        type.amountBooking !== 0 && (
+                                                            <div className='col-md-11 border m-2 shadow_wizard rounded p-3 d-flex justify-content-between'>
+                                                                <div key={`row${type.type.nombre}`} className="m-0 col-md-11 p-1">
                                                                     <label className="fs-4 m-0 span_package_color">
                                                                         <strong>Tipo de habitación:</strong> <span className="fs-5 label_package_color">{type.type.nombre}</span>
                                                                     </label>
@@ -90,7 +84,7 @@ const Rooms = ({ ...props }) => {
                                                                         <ListSection
                                                                             title="Habitaciones"
                                                                             items={roomsBooking.filter(rooms => rooms.tipoHabitacion.nombre === type.type.nombre)}
-                                                                            label="Número de habitación"
+                                                                            label="n.º de habitación"
                                                                             emptyMessage="Sin datos"
                                                                         />
                                                                         <ListSection
@@ -102,8 +96,8 @@ const Rooms = ({ ...props }) => {
 
                                                                     </div>
                                                                 </div>
-                                                            )}
-                                                        </div>
+                                                            </div>
+                                                        )
                                                     ))}
                                                 </div>
                                             </div>

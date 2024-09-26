@@ -194,6 +194,11 @@ export const hotelsettings = [
         label: "Administrar Paquetes",
         icon: 'mdi mdi-clipboard-plus-outline',
         link: "/hotelsettings/hotelpackages"
+    },
+    {
+        label: "Áreas Operativas",
+        icon: 'mdi mdi-tools',
+        link: "/hotelsettings/operativeareas"
     }
 ]
 
@@ -345,5 +350,36 @@ export const menuRoutesGeneralSettings = [
         label: "Hotel",
         icon: "mdi mdi-office-building",
         link: '/hotelsettings'
+    }
+]
+
+export const stepsWizardMenuBooking = [
+    {
+        label: 'Buscar cliente',
+        icon: 'mdi mdi-account-search-outline'
+    },
+    {
+        label: 'Tipo y fecha de reserva',
+        icon: 'mdi mdi-calendar-range'
+    },
+    {
+        label: 'Paquetes',
+        icon: 'mdi mdi-package'
+    },
+    {
+        label: 'Habitaciones',
+        icon: 'mdi mdi-bed-outline'
+    },
+    {
+        label: 'Servicios y Tours',
+        icon: 'mdi mdi-room-service-outline'
+    },
+    {
+        label: 'Notas',
+        icon: 'mdi mdi-text'
+    },
+    {
+        label: 'Resumen',
+        icon: 'mdi mdi-text-box-check-outline'
     }
 ]

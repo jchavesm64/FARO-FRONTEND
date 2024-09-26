@@ -1,26 +1,26 @@
 import { useMutation, useQuery } from "@apollo/client";
 import React, { useState } from "react";
-import { DELETE_SERVICIO, OBTENER_SERVICIO } from "../../../../services/ServiciosExtraService";
 import Swal from "sweetalert2";
 import { infoAlert } from "../../../../helpers/alert";
 import { Card, CardBody, Container, Row } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import { Link } from "react-router-dom";
 import DataList from "../../../../components/Common/DataList";
+import { DELETE_AREA, OBTENER_AREAS } from "../../../../services/AreasOperativasService";
 
-const ExtraService = ({ ...props }) => {
-    document.title = "Servicios Extra | FARO";
+const OperativeAreas = ({ ...props }) => {
+    document.title = "Áreas Operativas | FARO";
 
     const [filter, setFilter] = useState('');
     const [modo] = useState('1')
 
-    const { data: servicio } = useQuery(OBTENER_SERVICIO, { pollInterval: 1000 });
-    const [desactivar] = useMutation(DELETE_SERVICIO);
+    const { data: areas } = useQuery(OBTENER_AREAS, { pollInterval: 1000 });
+    const [desactivar] = useMutation(DELETE_AREA);
 
-    const onDeleteExtraService = (id, nombre) => {
+    const onDeleteOperativeArea = (id, nombre) => {
         Swal.fire({
-            title: "Eliminar el Servicio",
-            text: `¿Está seguro de eliminar el Servicio ${nombre}?`,
+            title: "Eliminar el área",
+            text: `¿Está seguro de eliminar el área ${nombre}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#0BB197",
@@ -30,11 +30,11 @@ const ExtraService = ({ ...props }) => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 const { data } = await desactivar({ variables: { id } });
-                const { estado, message } = data.desactivarServicio;
+                const { estado, message } = data.desactivarArea;
                 if (estado) {
-                    infoAlert('Servicio eliminado', message, 'success', 3000, 'top-end')
+                    infoAlert('Área eliminada', message, 'success', 3000, 'top-end')
                 } else {
-                    infoAlert('Error eliminar el servicio', message, 'error', 3000, 'top-end')
+                    infoAlert('Error eliminar el área', message, 'error', 3000, 'top-end')
                 }
             }
         });
@@ -52,9 +52,9 @@ const ExtraService = ({ ...props }) => {
     }
 
     const getData = () => {
-        if (servicio) {
-            if (servicio.obtenerServicios) {
-                return servicio.obtenerServicios.filter((value, index) => {
+        if (areas) {
+            if (areas.obtenerAreas) {
+                return areas.obtenerAreas.filter((value, index) => {
                     if (filter !== "" && modo !== "") {
                         return getFilteredByKey(modo, value, filter);
                     }
@@ -71,23 +71,23 @@ const ExtraService = ({ ...props }) => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Servicios" breadcrumbItem="Ajustes generales Hotel" breadcrumbItemUrl="/hotelsettings" />
+                    <Breadcrumbs title="Áreas operativas" breadcrumbItem="Ajustes generales Hotel" breadcrumbItemUrl="/hotelsettings" />
                     <Row className="flex" style={{ alignItems: 'flex-end' }}>
                         <div className="col-md-10 mb-3">
                             <label htmlFor="search-input" className="col-md-4 col-form-label">
-                                Busca Servicio
+                                Buscar área
                             </label>
                             <input
                                 className="form-control"
                                 id="search-input"
                                 type="search"
-                                placeholder="Escribe el nombre del Servicio"
+                                placeholder="Escribe el nombre del área"
                                 onChange={(e) => { setFilter(e.target.value) }}
 
                             />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
-                            <Link to="/hotelsettings/newextraservices">
+                            <Link to="/hotelsettings/newoperativearea">
                                 <button
                                     type="button"
                                     className="btn btn-primary waves-effect waves-light"
@@ -104,7 +104,7 @@ const ExtraService = ({ ...props }) => {
                         <div className="col mb-3">
                             <Card>
                                 <CardBody>
-                                    <DataList onDelete={onDeleteExtraService} data={data} type="extraservice" displayLength={9} {...props} />
+                                    <DataList onDelete={onDeleteOperativeArea} data={data} type="operativearea" displayLength={9} {...props} />
                                 </CardBody>
                             </Card>
                         </div>
@@ -115,4 +115,4 @@ const ExtraService = ({ ...props }) => {
     );
 }
 
-export default ExtraService;
+export default OperativeAreas;

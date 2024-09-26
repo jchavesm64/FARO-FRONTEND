@@ -6,7 +6,7 @@ const SearchCustomer = ({ ...props }) => {
 
     const { handleInputChange, selectClient, setCustomer, setFilter, filter, customers, customer, stateBooking, bookingDate } = props.props;
 
-    const [ setHoveredIndex] = useState(null);
+    const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const addNewCustomer = (data) => {
         setCustomer(data);

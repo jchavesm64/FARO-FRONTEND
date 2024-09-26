@@ -2,10 +2,9 @@ import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
 import withRouter from "../../../../components/Common/withRouter"
 import { Link } from 'react-router-dom';
 
-const TableExtraService = ({ ...props }) => {
+const TableOperativeAreas = ({ ...props }) => {
     const { data, onDelete } = props;
 
-    console.log(data)
     const onClickDelete = async (id, nombre) => {
         await onDelete(id, nombre)
     }
@@ -17,25 +16,23 @@ const TableExtraService = ({ ...props }) => {
                     <tr>
                         <th>Nombre</th>
                         <th>Descripción</th>
-                        <th>Precio</th>
-                        <th>Tipo de servicio</th>
+                        <th>Estado</th>
                         <th className="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {
-                        data.map((services, i) => (
+                        data.map((area, i) => (
                             <tr key={`TypeRoom-${i}`}>
-                                <td>{services.nombre}</td>
-                                <td>{services.descripcion}</td>
-                                <td>{services.precio}</td>
-                                <td>{services.tipo.nombre}</td>
+                                <td>{area.nombre}</td>
+                                <td>{area.descripcion}</td>
+                                <td>{area.estado}</td>
                                 <td>
                                     <div className="d-flex justify-content-center mx-1 my-1">
-                                        <Link to={`/hotelsettings/editextraservice/${services.id}`}>
+                                        <Link to={`/hotelsettings/editoperativeareas/${area.id}`}>
                                             <ButtonIconTable icon='mdi mdi-pencil' color='warning' />
                                         </Link>
-                                        <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(services.id, services.nombre) }} />
+                                        <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(area.id, area.nombre) }} />
                                     </div>
                                 </td>
                             </tr>
@@ -47,4 +44,4 @@ const TableExtraService = ({ ...props }) => {
     )
 }
 
-export default withRouter(TableExtraService)
+export default withRouter(TableOperativeAreas)
