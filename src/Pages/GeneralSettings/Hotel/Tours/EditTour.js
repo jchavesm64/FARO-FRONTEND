@@ -93,7 +93,7 @@ const EditTour = () => {
                 nombre: name,
                 precio: price,
                 descripcion: description,
-                estado: "Activo"
+                estado: "ACTIVO"
             };
 
             const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' });

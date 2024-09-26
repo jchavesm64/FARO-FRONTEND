@@ -17,7 +17,8 @@ const TableTypeRoom = ({ ...props }) => {
                         <th>Nombre</th>
                         <th>Descripción</th>
                         <th>Precio Base</th>
-                        <th></th>
+                        <th>Estado</th>
+                        <th className="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,8 +28,9 @@ const TableTypeRoom = ({ ...props }) => {
                                 <td>{room.nombre}</td>
                                 <td>{room.descripcion}</td>
                                 <td>{room.precioBase}</td>
+                                <td>{room.estado}</td>
                                 <td>
-                                    <div className="d-flex justify-content-end mx-1 my-1">
+                                    <div className="d-flex justify-content-center mx-1 my-1">
                                         <Link to={`/hotelsettings/edittyperoom/${room.id}`}>
                                             <ButtonIconTable icon='mdi mdi-pencil' color='warning' />
                                         </Link>

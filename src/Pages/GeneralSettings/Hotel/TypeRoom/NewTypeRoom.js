@@ -30,7 +30,7 @@ const NewTypeRoom = () => {
                 nombre: name,
                 descripcion: description,
                 precioBase: basePrice,
-                estado: "Activo"
+                estado: "ACTIVO"
             }
 
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' })

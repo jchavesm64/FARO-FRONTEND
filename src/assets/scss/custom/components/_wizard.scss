@@ -2,7 +2,68 @@
 // wizard.scss
 //
 
+.wizard_bar {
+    background-color: rgba($secondary, 0.1);
+}
+
+.step-hover-effect_wizard {
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+
+    &:hover {
+        background-color: rgba($primary, 0.1);
+        box-shadow: 1px 4px 8px rgba($primary, 0.3);
+        cursor: pointer;
+    }
+}
+
+.search_customer_wizard {
+    list-style-type: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    background-color: #fff;
+    transition: background-color 0.1s ease, font-weight 0.1s ease, color 0.1s ease;
+
+    &:hover,
+    &.hovered {
+        background-color: #0BB197;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    &.rounded {
+        border-radius: 0.25rem;
+    }
+}
 
 .button_wizard_icon {
     font-size: 2rem;
+}
+
+.label_package_color {
+    color: rgba($primary, 1);
+}
+
+.span_package_color {
+    color: rgba($dark, 0.8);
+}
+
+.span_package_color_light {
+    color: rgba($white, 0.8);
+}
+
+.room_card_wizard {
+    height: 90%;
+}
+
+.room_card_wizard_details {
+    height: 80%;
+    overflow-y: auto;
+}
+
+.shadow_wizard {
+    box-shadow: 0 3px 4px rgba(rgba($dark, 0.8), 0.2);
+}
+
+.card_room_wizard {
+    height: 120px;
 }

@@ -2,13 +2,12 @@ import React from "react";
 import Select from "react-select";
 import { Button, Card, CardBody, Col, Container, Row } from "reactstrap";
 import ListInfo from "../../../../components/Common/ListInfo";
+import ListSection from "../../../../components/Common/ListSelection";
 
 const Packages = ({ ...props }) => {
 
     const { handlePackage, getPackage, addPackage, deletePackage, packageBooking, packageBookingList } = props.props;
 
-    console.log(packageBooking)
-    console.log('lista', packageBookingList)
     return (
         <React.Fragment>
             <div className="page-content p-4 border m-2">
@@ -58,30 +57,30 @@ const Packages = ({ ...props }) => {
                                             <div className='mt-2'>
                                                 {packageBookingList.map(pack => (
                                                     <div key={pack.nombre} className="m-0 d-flex justify-content-between p-1">
-                                                        <div className='col-md-12 border border-secondary rounded p-1'>
-                                                            <label className="fs-4 m-0">
-                                                                <strong>Paquete:</strong> <span className="fs-5">{pack.nombre}</span>
+                                                        <div className='col-md-12 border shadow_wizard rounded p-3'>
+                                                            <label className="fs-4 m-0 label_package_color">
+                                                                <strong>Paquete:</strong> <span className="fs-5 span_package_color">{pack.nombre}</span>
                                                             </label>
-                                                            <div className="col-md-11 m-1 d-flex flex-wrap flex-column">
-                                                                <label className="fs-4 m-0 ms-4">
-                                                                    <strong>Tipo:</strong> <span className="fs-5">{pack.tipo}</span>
-                                                                </label>
-                                                                <label className="fs-4 m-0 ms-4">
-                                                                    <strong>Temporada:</strong> <span className="fs-5">{pack.temporadas.nombre}</span>
-                                                                </label>
-                                                                <label className="fs-4 m-0 ms-4">
-                                                                    <strong color='primary'>Servicios:</strong>
-                                                                    {pack.servicios.length ? (
-                                                                        <div>
-                                                                            {pack.servicios.map((service) => (
-                                                                                <div className="ms-5">
-                                                                                    <span className="fs-5">Nombre: {service.nombre}</span>
-                                                                                </div>
-                                                                            ))}
-                                                                        </div>
-                                                                    ) : (<span className="fs-5"> Sin data</span>)}
 
+                                                            <div className="col-md-11 m-1 d-flex flex-wrap flex-column">
+                                                                <label className="fs-5 m-0 ms-4 label_package_color">
+                                                                    <strong>Tipo:</strong> <span className="fs-5 span_package_color">{pack.tipo}</span>
                                                                 </label>
+                                                                <label className="fs-5 m-0 ms-4 label_package_color">
+                                                                    <strong>Temporada:</strong> <span className="fs-5 span_package_color">{pack.temporadas.nombre}</span>
+                                                                </label>
+                                                                <ListSection
+                                                                    title="Servicios"
+                                                                    items={pack.servicios}
+                                                                    label="Nombre"
+                                                                    emptyMessage="Sin datos"
+                                                                />
+                                                                <ListSection
+                                                                    title="Tours"
+                                                                    items={pack.tours}
+                                                                    label="Nombre"
+                                                                    emptyMessage="Sin datos"
+                                                                />
                                                             </div>
                                                         </div>
                                                     </div>

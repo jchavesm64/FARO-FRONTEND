@@ -70,7 +70,7 @@ const NewTour = () => {
                 nombre: name,
                 precio: price,
                 descripcion: description,
-                estado: "Activo"
+                estado: "ACTIVO"
             };
 
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });

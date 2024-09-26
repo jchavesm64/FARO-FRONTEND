@@ -56,6 +56,7 @@ const NewBooking = ({ ...props }) => {
     const [disableSave, setDisableSave] = useState(false);
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [serviceBookingCheck, setServiceBookingCheck] = useState(false);
+    const [serviceTourCheck, setServiceTourCheck] = useState(false);
     const [serviceRoomCheck, setServiceRoomCheck] = useState(false);
     const [packageBookingCheck, setPackageBookingCheck] = useState(false);
     const [typeBooking, setTypeBooking] = useState(null);
@@ -177,60 +178,51 @@ const NewBooking = ({ ...props }) => {
         setCustomers([])
     }
 
-    const handleIncrease = (e, index) => {
-        if (amountTypeRooms[index].amountBooking < amountTypeRooms[index].lengthAvailable) {
-            const updatedRooms = [...amountTypeRooms];
-            updatedRooms[index].amountBooking += 1;
-            const newExtractedRooms = [...roomsBooking, updatedRooms[index].rooms.shift()];
+    const handleIncrease = (index) => {
+        const currentRoomType = amountTypeRooms[index];
+        if (currentRoomType.amountBooking >= currentRoomType.lengthAvailable) return;
+        const updatedRooms = [...amountTypeRooms];
+        const updatedRoomsBooking = [...roomsBooking];
+        updatedRooms[index] = {
+            ...currentRoomType,
+            amountBooking: currentRoomType.amountBooking + 1,
+        };
+        const roomToExtract = currentRoomType.rooms[0];
+        if (roomToExtract) {
+            updatedRooms[index] = {
+                ...updatedRooms[index],
+                rooms: currentRoomType.rooms.slice(1),
+            };
+            const newExtractedRooms = [...updatedRoomsBooking, roomToExtract];
             setAmountTypeRooms(updatedRooms);
             setRoomsBooking(newExtractedRooms);
-
-            const i = totalBooking.findIndex(t => t.typeName === amountTypeRooms[index].type.nombre);
-            if (i !== -1) {
-                setTotalBooking((prev) => {
-
-                    const updatedTotal = [...prev];
-                    updatedTotal[i] = {
-                        ...updatedTotal[i],
-                        price: amountTypeRooms[index].amountBooking * (amountTypeRooms[index].type.precioBase + currentSeason.precio)
-                    };
-                    return updatedTotal;
-                });
-            } else {
-                setTotalBooking([...totalBooking, { 'typeName': amountTypeRooms[index].type.nombre, 'price': (amountTypeRooms[index].amountBooking * amountTypeRooms[index].type.precioBase) + currentSeason.precio }]);
-            }
-
         }
     };
 
-    const handleDecrease = (e, index) => {
-        if (amountTypeRooms[index].amountBooking > 0) {
-            const updatedRooms = [...amountTypeRooms];
-            const updatedRoomsBooking = [...roomsBooking];
-            updatedRooms[index].amountBooking -= 1;
 
-            if (updatedRoomsBooking.length > 0) {
-                const roomToReturn = updatedRoomsBooking.pop();
-                updatedRooms[index].rooms.push(roomToReturn);
-            }
 
+    const handleDecrease = (index) => {
+        const currentRoomType = amountTypeRooms[index];
+        if (currentRoomType.amountBooking === 0) return;
+        const updatedRooms = [...amountTypeRooms];
+        const updatedRoomsBooking = [...roomsBooking];
+        updatedRooms[index] = {
+            ...currentRoomType,
+            amountBooking: currentRoomType.amountBooking - 1,
+        };
+        const roomToReturn = updatedRoomsBooking.find(
+            room => room.tipoHabitacion.nombre === currentRoomType.type.nombre
+        );
+        if (roomToReturn) {
+            const filteredRoomsBooking = updatedRoomsBooking.filter(
+                room => room.numeroHabitacion !== roomToReturn.numeroHabitacion
+            );
+            updatedRooms[index] = {
+                ...updatedRooms[index],
+                rooms: [...updatedRooms[index].rooms, roomToReturn],
+            };
             setAmountTypeRooms(updatedRooms);
-            setRoomsBooking(updatedRoomsBooking);
-
-            const i = totalBooking.findIndex(t => t.typeName === amountTypeRooms[index].type.nombre);
-            if (i !== -1) {
-                setTotalBooking((prev) => {
-                    const updatedTotal = [...prev];
-                    updatedTotal[i] = {
-                        ...updatedTotal[i],
-                        price: amountTypeRooms[index].amountBooking * (amountTypeRooms[index].type.precioBase + currentSeason.precio)
-                    };
-                    return updatedTotal;
-                });
-            } else {
-
-                setTotalBooking([...totalBooking, { 'typeName': amountTypeRooms[index].type.nombre, 'price': amountTypeRooms[index].amountBooking * (amountTypeRooms[index].type.precioBase + currentSeason.precio) }]);
-            }
+            setRoomsBooking(filteredRoomsBooking);
         }
     };
 
@@ -266,6 +258,10 @@ const NewBooking = ({ ...props }) => {
 
     const handleChangeServiceBooking = () => {
         setServiceBookingCheck(!serviceBookingCheck);
+        setExtraService([])
+    };
+    const handleChangeTourRoom = () => {
+        setServiceTourCheck(!serviceTourCheck);
         setExtraService([])
     };
 
@@ -354,7 +350,7 @@ const NewBooking = ({ ...props }) => {
 
     const handleRoomSelect = (room) => {
         setSelectRoom(room);
-        
+
         if (servicesPerRoom.length) {
             const dataService = servicesPerRoom.find(s => s.room.numeroHabitacion === room.numeroHabitacion);
             if (dataService) {
@@ -414,7 +410,7 @@ const NewBooking = ({ ...props }) => {
     };
 
     const addPackage = () => {
-        
+
         if (packageBooking) {
             const exist = packageBookingList.find(e => e.id === packageBooking.value.id)
             if (exist) {
@@ -429,7 +425,7 @@ const NewBooking = ({ ...props }) => {
         } else {
             infoAlert('Oops', 'No ha seleccionado una comodida', 'error', 3000, 'top-end')
         }
-        setTotalBooking([...totalBooking, { 'typeName': packageBooking.label, 'price': packageBooking.value.precio + currentSeason.precio }]);
+
     };
 
     const deletePackage = (nombre) => {
@@ -511,18 +507,19 @@ const NewBooking = ({ ...props }) => {
         useStepper({
             steps,
         });
+
     return (
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Nueva Reserva" breadcrumbItem="Reservas" breadcrumbItemUrl='/reception/availability' />
                     <Card className='col-md-12 p-2'>
-                        <div className='d-flex col-md-12 bg-light border rounded'>
-                            <nav className='d-flex col-md-12 justify-content-center' {...stepperProps}>
+                        <div className='d-flex col-md-12 justify-content-center '>
+                            <nav className='d-flex col-md-10 justify-content-center shadow_wizard wizard_bar' {...stepperProps}>
                                 {stepsProps?.map((step, index) => (
-                                    <div className=''>
+                                    <div key={index}>
                                         <ol
-                                            className={`list-group text-center p-2 m-1 text-wrap fs-5 border-bottom border-top border-primary text-dark ${state.currentStep === index ? "border-3" : "border-1"}`}
+                                            className={`list-group text-center step-hover-effect_wizard p-2 m-1 text-wrap fs-5 border-bottom border-top border-primary text-dark ${state.currentStep === index ? "border-3" : "border-1"}`}
                                             key={index}
                                             style={{
                                                 fontWeight: state.currentStep === index ? 'bold' : 'unset'
@@ -555,12 +552,34 @@ const NewBooking = ({ ...props }) => {
                         }
                         {steps[state.currentStep].label === 'Habitaciones' &&
                             <div>
-                                <Rooms />
+                                <Rooms props={{ handleDecrease, handleChange, handleBlur, totalPerRoom, handleIncrease, amountTypeRooms, currentSeason, roomsBooking }} />
                             </div>
                         }
                         {steps[state.currentStep].label === 'Servicios y Tours' &&
                             <div>
-                                <ToursService />
+                                <ToursService props={{
+                                    handleChangeServiceBooking,
+                                    handleChangeServiceRoom,
+                                    handleChangeTourRoom,
+                                    handleService,
+                                    deleteServiceBooking,
+                                    deleteServiceRoom,
+                                    handleRoomSelect,
+                                    getServices,
+                                    addExtraService,
+                                    getServicesPerRoom,
+                                    addExtraServicePerRoom,
+                                    ServicesRoom,
+                                    roomsBooking,
+                                    selectRoom,
+                                    serviceBookingCheck,
+                                    serviceRoomCheck,
+                                    ServicesBooking,
+                                    extraService,
+                                    extraServiceRoom,
+                                    options,
+                                    serviceTourCheck
+                                }} />
                             </div>
                         }
                         {steps[state.currentStep].label === 'Notas' &&
@@ -586,7 +605,6 @@ const NewBooking = ({ ...props }) => {
 
                     {customer ? (
                         <div className='mt-1'>
-                            
                             <Card className="m-2 p-2 d-flex flex-row justify-content-center">
                                 <div className='col-md-7 d-flex flex-column align-items-center'>
                                     <Row className="m-2">

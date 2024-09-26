@@ -55,7 +55,7 @@ const EditTypeService = () => {
             const input = {
                 nombre: name,
                 cuantificable,
-                estado: "Activo"
+                estado: "ACTIVO"
             };
             const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' });
             const { estado, message } = data.actualizarTipoServicio;

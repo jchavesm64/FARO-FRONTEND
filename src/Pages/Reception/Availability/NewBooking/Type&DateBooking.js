@@ -32,7 +32,7 @@ const TypeDateBooking = ({ ...props }) => {
                         </Row>
                         <Row className="m-3 col-md-12 d-flex flex-row flex-nowrap">
                             <Card className="d-flex flex-row flex-nowrap justify-content-center ">
-                                <Col className="p-1 col-md-5 border m-2">
+                                <Col className="p-1 col-md-5 border shadow_wizard m-2">
                                     <div className="p-1 col-md-12">
                                         <label htmlFor="checkInDate" className="form-label fs-5">Fecha de Entrada</label>
                                         <input
@@ -57,7 +57,7 @@ const TypeDateBooking = ({ ...props }) => {
                                         />
                                     </div>
                                 </Col>
-                                <Col className="p-1 col-md-5 border m-2">
+                                <Col className="p-1 col-md-5 border shadow_wizard m-2">
                                     <div className="p-1 col-md-12">
                                         <label htmlFor="checkOutDate" className="form-label fs-5">Cantidad de personas por reserva</label>
                                         <input

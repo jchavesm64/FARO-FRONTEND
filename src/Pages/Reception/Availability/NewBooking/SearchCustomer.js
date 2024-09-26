@@ -6,7 +6,7 @@ const SearchCustomer = ({ ...props }) => {
 
     const { handleInputChange, selectClient, setCustomer, setFilter, filter, customers, customer, stateBooking, bookingDate } = props.props;
 
-    const [hoveredIndex, setHoveredIndex] = useState(null);
+    const [ setHoveredIndex] = useState(null);
 
     const addNewCustomer = (data) => {
         setCustomer(data);
@@ -37,12 +37,8 @@ const SearchCustomer = ({ ...props }) => {
                                     <li
                                         key={customer.id}
                                         onClick={() => selectClient(customer)}
-                                        className='ist-group-item list-group-item-action rounded p-2'
-                                        style={{
-                                            backgroundColor: hoveredIndex === index ? '#0BB197' : '#fff',
-                                            listStyleType: 'none',
-                                            cursor: 'pointer',
-                                        }}
+                                        className='ist-group-item list-group-item-action rounded p-2 search_customer_wizard'
+
                                         onMouseEnter={() => setHoveredIndex(index)}
                                         onMouseLeave={() => setHoveredIndex(null)}
                                     >

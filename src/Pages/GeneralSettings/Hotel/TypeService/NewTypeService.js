@@ -34,7 +34,7 @@ const NewTypeService = () => {
             const input = {
                 nombre: name,
                 cuantificable,
-                estado: "Activo"
+                estado: "ACTIVO"
             };
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
             const { estado, message } = data.insertarTipoServicio;
