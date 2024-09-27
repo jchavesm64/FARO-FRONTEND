@@ -38,7 +38,7 @@ const OperativeAreas = ({ ...props }) => {
                 }
             }
         });
-    }
+    };
 
     function getFilteredByKey(modo, key, value) {
         const valName = key.nombre.toLowerCase()
@@ -49,7 +49,7 @@ const OperativeAreas = ({ ...props }) => {
         }
 
         return null
-    }
+    };
 
     const getData = () => {
         if (areas) {
@@ -63,7 +63,7 @@ const OperativeAreas = ({ ...props }) => {
             }
         }
         return []
-    }
+    };
 
     const data = getData();
 

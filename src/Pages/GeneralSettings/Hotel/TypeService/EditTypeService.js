@@ -4,6 +4,7 @@ import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import SpanSubtitleForm from "../../../../components/Forms/SpanSubtitleForm";
 import { infoAlert } from "../../../../helpers/alert";
 import { useNavigate, useParams } from "react-router-dom";
+import Select from "react-select";
 import { useMutation, useQuery } from "@apollo/client";
 import { OBTENER_TIPOSSERVICIOSBYID, UPDATE_TIPO_SERVICIOS } from "../../../../services/TipoServicioService";
 
@@ -27,8 +28,29 @@ const EditTypeService = () => {
 
     const [name, setName] = useState('');
     const [cuantificable, setCuantificable] = useState(false);
+    const [timeDay, setTimeDay] = useState(null);
 
     const [disableSave, setDisableSave] = useState(true);
+
+    const timeOfDayOptions = [
+        {
+            label: 'Noche',
+            value: 'Noche'
+        },
+        {
+            label: 'Día',
+            value: 'Día'
+        },
+        {
+            label: 'Tarde',
+            value: 'Tarde'
+        },
+        {
+            label: 'No aplica',
+            value: 'No aplica'
+        }
+    ];
+
 
     const stringToBoolean = (str) => {
         return str.toLowerCase() === "true";
@@ -38,6 +60,10 @@ const EditTypeService = () => {
         if (data_typeservice) {
             setName(data_typeservice.obtenerTipoServicioId.nombre);
             setCuantificable(stringToBoolean(data_typeservice.obtenerTipoServicioId.cuantificable));
+            setTimeDay({
+                label: data_typeservice.obtenerTipoServicioId.horadia,
+                value: data_typeservice.obtenerTipoServicioId.horadia
+            })
         }
     }, [data_typeservice])
 
@@ -55,6 +81,7 @@ const EditTypeService = () => {
             const input = {
                 nombre: name,
                 cuantificable,
+                horadia: timeDay.value,
                 estado: "ACTIVO"
             };
             const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' });
@@ -78,7 +105,7 @@ const EditTypeService = () => {
             <React.Fragment>
                 <div className="page-content">
                     <Container fluid={true}>
-                        <Breadcrumbs title="Editar tipo de habitación" breadcrumbItem="Tipo de habitación" breadcrumbItemUrl='/hotelsettings/typeroom' />
+                        <Breadcrumbs title="Editar tipo de servicio" breadcrumbItem="Tipo de servicio" breadcrumbItemUrl='/hotelsettings/typeservice' />
                         <Row>
                             <div className="col text-center pt-3 pb-3">
                                 <div className="spinner-border" role="status">
@@ -99,7 +126,7 @@ const EditTypeService = () => {
 
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className="page-content" style={{ height: '35rem' }}>
                 <Container fluid={true}>
                     <Breadcrumbs title="Nuevo tipo de servicio" breadcrumbItem="Tipo de servicio" breadcrumbItemUrl='/hotelsettings/typeservice' />
                     <Row>
@@ -120,7 +147,7 @@ const EditTypeService = () => {
 
                             <Row className="d-flex flex-nowrap">
                                 <div className="col-md-4 col-sm-12 mb-3">
-                                    <label htmlFor="type" className="form-label">* Nombre del tipo de habitación</label>
+                                    <label htmlFor="type" className="form-label">* Nombre del tipo de servicio</label>
                                     <input className="form-control" type="text" id="type" value={name} onChange={(e) => { setName(e.target.value) }} />
                                 </div>
                                 <div className="form-check ms-3 mt-4">
@@ -132,6 +159,20 @@ const EditTypeService = () => {
                                         readOnly
                                         checked={cuantificable}
                                         onClick={() => { handleOnClickIsQuantifiable() }}
+                                    />
+                                </div>
+                            </Row>
+                            <Row>
+                                <div className="col-md-4 col-sm-12 ">
+                                    <label htmlFor="timeday" className="form-label">* Hora del día </label>
+                                    <Select
+                                        id="timeday"
+                                        value={timeDay}
+                                        onChange={(e) => {
+                                            setTimeDay(e);
+                                        }}
+                                        options={timeOfDayOptions}
+                                        classNamePrefix="select2-selection"
                                     />
                                 </div>
                             </Row>

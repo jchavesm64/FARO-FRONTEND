@@ -30,7 +30,7 @@ const TablePackage = ({ ...props }) => {
                                 <td>{adminPackage.tipo}</td>
                                 <td>{adminPackage.nombre}</td>
                                 <td>{adminPackage.precio}</td>
-                                <td>{adminPackage.temporadas.nombre}</td>
+                                <td>{adminPackage.temporadas?.nombre}</td>
                                 <td>{adminPackage.descripcion}</td>
                                 <td>
                                     <div className="d-flex justify-content-center mx-1 my-1">

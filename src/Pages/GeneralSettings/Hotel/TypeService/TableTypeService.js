@@ -19,6 +19,7 @@ const TableTypeservice = ({ ...props }) => {
                     <tr>
                         <th>Nombre</th>
                         <th>Cuantificable</th>
+                        <th>Hora del día</th>
                         <th className="text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -28,6 +29,7 @@ const TableTypeservice = ({ ...props }) => {
                             <tr key={`Typeservice-${i}`}>
                                 <td>{service.nombre}</td>
                                 <td>{validateQuantifiable(service.cuantificable)}</td>
+                                <td>{service.horadia}</td>
                                 <td>
                                     <div className="d-flex justify-content-center mx-1 my-1">
                                         <Link to={`/hotelsettings/edittypeservice/${service.id}`}>

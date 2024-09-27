@@ -186,7 +186,7 @@ const NewPackage = () => {
                 temporadas: season.value.id,
                 descripcion: description,
                 precio: price,
-                estado: 'Activo'
+                estado: 'ACTIVO'
             };
 
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
@@ -208,7 +208,7 @@ const NewPackage = () => {
 
     return (
         <React.Fragment>
-            <div className="page-content ">
+            <div className="page-content" style={{height:'55rem'}}>
                 <Container fluid={true}>
                     <Breadcrumbs title="Nuevo paquete" breadcrumbItem="Paquetes" breadcrumbItemUrl='/hotelsettings/hotelpackages' />
 

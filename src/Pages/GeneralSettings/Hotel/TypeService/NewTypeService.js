@@ -5,6 +5,7 @@ import SpanSubtitleForm from "../../../../components/Forms/SpanSubtitleForm";
 import { infoAlert } from "../../../../helpers/alert";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client";
+import Select from "react-select";
 import { SAVE_TIPO_SERVICIOS } from "../../../../services/TipoServicioService";
 
 
@@ -17,8 +18,29 @@ const NewTypeService = () => {
 
     const [name, setName] = useState('');
     const [cuantificable, setCuantificable] = useState(false);
+    const [timeDay, setTimeDay] = useState(null);
 
     const [disableSave, setDisableSave] = useState(true);
+
+    const timeOfDayOptions = [
+        {
+            label: 'Noche',
+            value: 'Noche'
+        },
+        {
+            label: 'Día',
+            value: 'Día'
+        },
+        {
+            label: 'Tarde',
+            value: 'Tarde'
+        },
+        {
+            label: 'No aplica',
+            value: 'No aplica'
+        }
+    ];
+
 
     useEffect(() => {
         setDisableSave(name.trim().length === 0)
@@ -34,6 +56,7 @@ const NewTypeService = () => {
             const input = {
                 nombre: name,
                 cuantificable,
+                horadia: timeDay.value,
                 estado: "ACTIVO"
             };
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
@@ -53,7 +76,7 @@ const NewTypeService = () => {
 
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className="page-content " style={{ height: '35rem' }}>
                 <Container fluid={true}>
                     <Breadcrumbs title="Nuevo tipo de servicio" breadcrumbItem="Tipo de servicio" breadcrumbItemUrl='/hotelsettings/typeservice' />
                     <Row>
@@ -74,7 +97,7 @@ const NewTypeService = () => {
 
                             <Row className="d-flex flex-nowrap">
                                 <div className="col-md-4 col-sm-12 mb-3">
-                                    <label htmlFor="type" className="form-label">* Nombre del tipo de habitación</label>
+                                    <label htmlFor="type" className="form-label">* Nombre del tipo de servicio</label>
                                     <input className="form-control" type="text" id="type" value={name} onChange={(e) => { setName(e.target.value) }} />
                                 </div>
                                 <div className="form-check ms-3 mt-4">
@@ -88,8 +111,22 @@ const NewTypeService = () => {
                                         onClick={() => { handleOnClickIsQuantifiable() }}
                                     />
                                 </div>
-                            </Row>
 
+                            </Row>
+                            <Row>
+                                <div className="col-md-4 col-sm-12 ">
+                                    <label htmlFor="timeday" className="form-label">* Hora del día </label>
+                                    <Select
+                                        id="timeday"
+                                        value={timeDay}
+                                        onChange={(e) => {
+                                            setTimeDay(e);
+                                        }}
+                                        options={timeOfDayOptions}
+                                        classNamePrefix="select2-selection"
+                                    />
+                                </div>
+                            </Row>
 
                         </div>
                     </Row>

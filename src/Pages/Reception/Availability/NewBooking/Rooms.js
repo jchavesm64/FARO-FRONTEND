@@ -29,9 +29,9 @@ const Rooms = ({ ...props }) => {
                                                         </span>
                                                     </div>
                                                     <div className="col-md-7 col-sm-12 ">
-                                                        <p>Typo Habitación: <span>{type.type.nombre}</span></p>
-                                                        <p>Precio por noche: $<span>{type.type.precioBase + currentSeason.precio}</span></p>
-                                                        <p>Decripción: <span>{type.type.descripcion}</span></p>
+                                                        <p className="mb-1 mt-1">Typo Habitación: <span>{type.type.nombre}</span></p>
+                                                        <p className="mb-1 mt-1">Precio por noche: $<span>{type.type.precioBase + currentSeason.precio}</span></p>
+                                                        <div className="d-flex flex-wrap description_room_wizard"> <p>Decripción: <span>{type.type.descripcion}</span></p></div>
                                                     </div>
 
                                                     <div className="col-md-3 col-sm-12 d-flex flex-column align-items-center justify-content-end"  >

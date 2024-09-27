@@ -17,7 +17,7 @@ const TableSeason = ({ ...props }) => {
                         <th>Fecha inicio</th>
                         <th>Fecha fin</th>
                         <th>Descripción</th>
-                        <th></th>
+                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,7 +28,7 @@ const TableSeason = ({ ...props }) => {
                                 <td>{season.fechaInicio}</td>
                                 <td>{season.fechaFin}</td>
                                 <td>{season.descripcion}</td>
-                                <td>
+                                <td className="d-flex">
                                     <div className="d-flex justify-content-end mx-1 my-1">
                                         <Link to={`/hotelsettings/editseason/${season.id}`}>
                                             <ButtonIconTable icon='mdi mdi-pencil' color='warning' />

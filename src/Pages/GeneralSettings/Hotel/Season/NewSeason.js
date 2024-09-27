@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Col, Container, Row } from "reactstrap";
+import { Card, CardBody, Col, Container, Row } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@apollo/client";
@@ -7,6 +7,7 @@ import Select from "react-select";
 import { OBTENER_TEMPORADAS, SAVE_TEMPORADA } from "../../../../services/TemporadaService";
 import { infoAlert } from "../../../../helpers/alert";
 import { OBTENER_TIPOSHABITACION } from "../../../../services/TipoHabitacionService";
+import DataList from "../../../../components/Common/DataList";
 
 const NewSeason = () => {
     document.title = "Temporada | FARO";
@@ -26,6 +27,7 @@ const NewSeason = () => {
 
     const [typeRooms, setTypeRooms] = useState([]);
     const [priceTypeRoom, setPriceTypeRoom] = useState({});
+    const [filterTypeRooms, setFilterTypeRooms] = useState([]);
 
     const typeSeasons = [
         {
@@ -50,7 +52,6 @@ const NewSeason = () => {
         return Object.values(obj).some(item => item.price !== 0);
     };
 
-    console.log(priceTypeRoom)
 
     useEffect(() => {
         setDisableSave(!(typeSeason && dateStart && dateEnd && validatePriceForPriceTypeRoom(priceTypeRoom)));
@@ -111,6 +112,18 @@ const NewSeason = () => {
         }));
     };
 
+    const getFilteredTypeRoomByKey = (nombre) => {
+        if (nombre !== '') {
+            const value = nombre.toLowerCase();
+            const filtered = typeRooms.filter(type =>
+                type.nombre.toLowerCase().includes(value)
+            );
+            setFilterTypeRooms(filtered);
+        } else {
+            setFilterTypeRooms([]);
+        }
+    };
+
     const onClickSave = async () => {
         try {
             setDisableSave(true);
@@ -162,8 +175,8 @@ const NewSeason = () => {
                         </div>
                     </Row>
                     <Row>
-                        <Col className="col-md-6 d-flex align-content-center flex-wrap">
-                            <div className="col-md-11 d-flex">
+                        <Col className="col-md-6 d-flex  flex-wrap">
+                            <div className="col-md-11 d-flex ">
                                 <div className="col-md-12 col-sm-12 m-1">
                                     <label htmlFor="supplier" className="form-label">* Tipo de temporada</label>
                                     <Select
@@ -175,51 +188,47 @@ const NewSeason = () => {
                                         options={seasonLimit()}
                                         classNamePrefix="select2-selection"
                                     />
+                                    <div className="col-md-12 d-flex mt-3">
+                                        <div className="col-md-6 me-1">
+                                            <label htmlFor="checkInDate" className="form-label ">Fecha de Inicio</label>
+                                            <input
+                                                className="form-control"
+                                                type="date"
+                                                id="checkInDate"
+                                                value={dateStart}
+                                                disabled={!typeSeason}
+                                                onChange={(e) => { setDateStart(e.target.value) }}
+                                            />
+                                        </div>
+                                        <div className=" col-md-6 ms-1">
+                                            <label htmlFor="checkOutDate" className="form-label ">Fecha de Fin</label>
+                                            <input
+                                                className="form-control"
+                                                type="date"
+                                                id="checkOutDate"
+                                                value={dateEnd}
+                                                disabled={dateStart === '' || !typeSeason}
+                                                onChange={(e) => { setDateEnd(e.target.value) }}
+                                                min={dateStart ? new Date(new Date(dateStart).setDate(new Date(dateStart).getDate() + 1)).toISOString().split('T')[0] : ''}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="col-md-12 m-1">
+                                        <label htmlFor="descripcion" className="form-label">Descripción</label>
+                                        <textarea className="form-control" type="text" id="descripcion" disabled={!typeSeason} value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
+                                    </div>
                                 </div>
-
                             </div>
-                            <div className="col-md-11 d-flex ">
-                                <div className="col-md-6 m-1">
-                                    <label htmlFor="checkInDate" className="form-label ">Fecha de Inicio</label>
-                                    <input
-                                        className="form-control"
-                                        type="date"
-                                        id="checkInDate"
-                                        value={dateStart}
-                                        disabled={!typeSeason}
-                                        onChange={(e) => { setDateStart(e.target.value) }}
-                                    />
-                                </div>
-                                <div className=" col-md-6 m-1">
-                                    <label htmlFor="checkOutDate" className="form-label ">Fecha de Fin</label>
-                                    <input
-                                        className="form-control"
-                                        type="date"
-                                        id="checkOutDate"
-                                        value={dateEnd}
-                                        disabled={dateStart === '' || !typeSeason}
-                                        onChange={(e) => { setDateEnd(e.target.value) }}
-                                        min={dateStart ? new Date(new Date(dateStart).setDate(new Date(dateStart).getDate() + 1)).toISOString().split('T')[0] : ''}
-                                    />
-                                </div>
-                            </div>
-                            <Row className="col-md-12">
-                                <div className="col-md-12 m-1">
-                                    <label htmlFor="descripcion" className="form-label">Descripción</label>
-                                    <textarea className="form-control" type="text" id="descripcion" disabled={!typeSeason} value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
-                                </div>
-                            </Row>
                         </Col >
                         <Col>
                             <Row className="mt-3">
-                                <label htmlFor="lableTypeRoom" className="form-label" >Precio por tipo de Habitación</label>
-                                {typeRooms.map(type => (
-                                    <div id={`id${type.nombre}`} className="col-md-6 col-sm-12 m-1">
-                                        <label id={`label${type.nombre}`} htmlFor={type.nombre} className="form-label" >{type.nombre}</label>
-                                        <input className="form-control" type="number" id={type.nombre} disabled={!typeSeason} value={priceTypeRoom[type.nombre]?.price} onChange={(e) => handlePriceChange(e, type.nombre)} />
-                                    </div>
-                                ))}
-
+                                <div className="col mb-3">
+                                    <Card>
+                                        <CardBody >
+                                            <DataList props={{ handlePriceChange, getFilteredTypeRoomByKey, priceTypeRoom }} data={filterTypeRooms.length > 0 ? filterTypeRooms : typeRooms} type="typeroomseason" displayLength={5} />
+                                        </CardBody>
+                                    </Card>
+                                </div>
                             </Row>
 
                         </Col>

@@ -85,7 +85,7 @@ const EditPackage = () => {
             setToursList(data_paquete.obtenerPaquete.tours);
             setServiceList(data_paquete.obtenerPaquete.servicios);
             setSeason({
-                label: data_paquete.obtenerPaquete.temporadas.nombre,
+                label: data_paquete.obtenerPaquete.temporadas?.nombre,
                 value: data_paquete.obtenerPaquete.temporadas
             });
             setPrice(data_paquete.obtenerPaquete.precio);
@@ -217,7 +217,7 @@ const EditPackage = () => {
                 temporadas: season.value.id,
                 descripcion: description,
                 precio: price,
-                estado: 'Activo'
+                estado: 'ACTIVO'
             };
 
             const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' });
