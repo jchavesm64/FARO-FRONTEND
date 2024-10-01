@@ -17,6 +17,7 @@ const TableTypeservice = ({ ...props }) => {
             <table className="table table-hover table-striped mb-0">
                 <thead>
                     <tr>
+                        <th className="text-center">Ícono</th>
                         <th>Nombre</th>
                         <th>Cuantificable</th>
                         <th>Hora del día</th>
@@ -27,7 +28,8 @@ const TableTypeservice = ({ ...props }) => {
                     {
                         data.map((service, i) => (
                             <tr key={`Typeservice-${i}`}>
-                                <td>{service.nombre}</td>
+                                <td className="text-center"><i className={`${service.icon}`} /></td>
+                                <td >{service.nombre}</td>
                                 <td>{validateQuantifiable(service.cuantificable)}</td>
                                 <td>{service.horadia}</td>
                                 <td>

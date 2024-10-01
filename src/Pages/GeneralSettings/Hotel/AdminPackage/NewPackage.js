@@ -160,6 +160,10 @@ const NewPackage = () => {
         setSeason(a);
     };
 
+    const handlePrice = (a) => {
+        setPrice(a)
+    }
+
     useEffect(() => {
         setDisableSave(!typePackage || price <= 0 || name === '' || (toursList.length === 0 && serviceList.length === 0) || !season)
     }, [typePackage, price, name, toursList, serviceList, season])
@@ -206,12 +210,13 @@ const NewPackage = () => {
         }
     };
 
+    console.log(serviceList);
+    
     return (
         <React.Fragment>
-            <div className="page-content" style={{height:'55rem'}}>
+            <div className="page-content" style={{ height: '55rem' }}>
                 <Container fluid={true}>
                     <Breadcrumbs title="Nuevo paquete" breadcrumbItem="Paquetes" breadcrumbItemUrl='/hotelsettings/hotelpackages' />
-
                     <Row>
                         <div className="col mb-3 text-end">
                             <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
@@ -279,7 +284,7 @@ const NewPackage = () => {
                                             </div>
                                         </div>
                                         <Row>
-                                            <ListInfo data={serviceList} headers={['Servicio', 'Descripción']} keys={['nombre', 'descripcion']} enableEdit={false} enableDelete={true} actionDelete={eliminarService} mainKey={'nombre'} secondKey={'descripcion'} />
+                                            <ListInfo data={serviceList} headers={['Servicio', 'Descripción']} keys={['nombre', 'descripcion']} enableEdit={true} enableDelete={true} actionDelete={eliminarService} mainKey={'nombre'} secondKey={'descripcion'} />
                                         </Row>
                                     </CardBody>
                                 </Card>
@@ -288,7 +293,7 @@ const NewPackage = () => {
                         <Col className="col-md-4">
                             <div className="col-md-12 col-sm-12 m-2">
                                 <label htmlFor="price" className="form-label" >* Precio por paquete</label>
-                                <input className="form-control" type="number" id="price" min="0" value={price} onChange={(e) => { setPrice(e.target.value) }} />
+                                <input className="form-control" type="number" id="price" min="0" value={price} onChange={(e) => { handlePrice(e.target.value) }} />
                             </div>
                             <div className="col-md-12 col-sm-12 m-2">
                                 <label htmlFor="descripcion" className="form-label">Descripción</label>
@@ -328,7 +333,6 @@ const NewPackage = () => {
                                 </Card>
                             </div>
                         </Col>
-
                     </Row>
 
                 </Container>

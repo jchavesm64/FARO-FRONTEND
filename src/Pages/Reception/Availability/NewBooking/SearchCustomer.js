@@ -1,16 +1,23 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card, CardBody, Container, Row } from "reactstrap";
 import NewCustomer from '../../../Customers/NewCustomer'
 
 const SearchCustomer = ({ ...props }) => {
 
-    const { handleInputChange, selectClient, setCustomer, setFilter, filter, customers, customer, stateBooking, bookingDate } = props.props;
+    const { handleInputChange, selectClient, setCustomer, setFilter, setDisabledButton, filter, customers, customer, stateBooking, bookingDate } = props.props;
 
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const addNewCustomer = (data) => {
         setCustomer(data);
         setFilter('');
+
+    };
+
+    useEffect(() => { setDisabledButton(!customer) }, [setDisabledButton, customer])
+
+    const handleCustomer = (customer) => {
+        selectClient(customer)
     };
 
     return (
@@ -36,7 +43,7 @@ const SearchCustomer = ({ ...props }) => {
                                 {customers.map((customer, index) => (
                                     <li
                                         key={customer.id}
-                                        onClick={() => selectClient(customer)}
+                                        onClick={() => handleCustomer(customer)}
                                         className='ist-group-item list-group-item-action rounded p-2 search_customer_wizard'
 
                                         onMouseEnter={() => setHoveredIndex(index)}

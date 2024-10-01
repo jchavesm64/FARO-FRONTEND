@@ -11,6 +11,8 @@ export const OBTENER_SERVICIO = gql`
                 id
                 nombre
                 cuantificable
+                horadia
+                icon
             }
             estado
         }
@@ -28,6 +30,8 @@ export const OBTENER_SERVICIO_BY_ID = gql`
                 id
                 nombre
                 cuantificable
+                horadia
+                icon
             }
             estado
         }

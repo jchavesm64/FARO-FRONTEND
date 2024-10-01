@@ -1,10 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card, CardBody, Col, Container, Input, InputGroup, Row } from "reactstrap";
 import ListSection from "../../../../components/Common/ListSelection";
 
 const Rooms = ({ ...props }) => {
 
-    const { handleDecrease, handleChange, handleBlur, handleIncrease, amountTypeRooms, currentSeason, roomsBooking } = props.props;
+    const { handleDecrease, handleChange, handleBlur, handleIncrease, setDisabledButton, amountTypeRooms, currentSeason, roomsBooking, typeBooking } = props.props;
+
+    useEffect(() => { setDisabledButton(roomsBooking.length === 0) }, [setDisabledButton, roomsBooking]);
+
+    const [enableRooms, setEnableRooms] = useState(false);
+    console.log(roomsBooking.length)
+    useEffect(() => {
+
+        const valIndividualBooking = () => {
+            if (typeBooking !== 'Individual') return false;
+
+            if (roomsBooking.length >= 1) return true;
+        };
+        setEnableRooms(valIndividualBooking)
+    }, [typeBooking, roomsBooking])
 
     return (
         <React.Fragment>
@@ -46,7 +60,7 @@ const Rooms = ({ ...props }) => {
                                                                 onBlur={(e) => handleBlur(e, index)}
                                                                 className="text-center"
                                                             />
-                                                            <Button color="primary" onClick={() => handleIncrease(index)} disabled={type.amountBooking === type.lengthAvailable}>
+                                                            <Button color="primary" onClick={() => handleIncrease(index)} disabled={type.amountBooking === type.lengthAvailable || enableRooms}>
                                                                 +
                                                             </Button>
                                                         </InputGroup>

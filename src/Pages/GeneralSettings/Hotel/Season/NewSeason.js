@@ -52,7 +52,6 @@ const NewSeason = () => {
         return Object.values(obj).some(item => item.price !== 0);
     };
 
-
     useEffect(() => {
         setDisableSave(!(typeSeason && dateStart && dateEnd && validatePriceForPriceTypeRoom(priceTypeRoom)));
     }, [typeSeason, dateStart, dateEnd, priceTypeRoom]);
@@ -165,7 +164,7 @@ const NewSeason = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Nueva temporada" breadcrumbItem="temporada" breadcrumbItemUrl='/hotelsettings/season' />
+                    <Breadcrumbs title="Nueva temporada" breadcrumbItem="Temporada" breadcrumbItemUrl='/hotelsettings/season' />
                     <Row>
                         <div className="col mb-0 text-end">
                             <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>

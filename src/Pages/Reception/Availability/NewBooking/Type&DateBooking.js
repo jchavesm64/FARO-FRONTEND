@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button, ButtonGroup, Card, Col, Container, Row } from "reactstrap";
 
 const TypeDateBooking = ({ ...props }) => {
 
-    const { handleTypeBookingChange, setCheckIn, setCheckOut, setAmountPeople, typeBooking, checkIn, checkOut, amountPeople } = props.props
+    const { handleTypeBookingChange, setCheckIn, setCheckOut, setAmountAdult, setAmountChildren, setDisabledButton, typeBooking, checkIn, checkOut, amountAdult, amountChildren } = props.props
     const typesBooking = ['Individual', 'Grupales', 'Bloqueo', 'Sobreventa'];
+
+    useEffect(() => { setDisabledButton(!typeBooking || checkIn === "" || checkOut === "" || amountAdult === 0) }, [setDisabledButton, typeBooking, checkIn, checkOut, amountAdult, amountChildren])
 
     return (
         <React.Fragment>
@@ -32,7 +34,7 @@ const TypeDateBooking = ({ ...props }) => {
                         </Row>
                         <Row className="m-3 col-md-12 d-flex flex-row flex-nowrap">
                             <Card className="d-flex flex-row flex-nowrap justify-content-center ">
-                                <Col className="p-1 col-md-5 border shadow_wizard m-2">
+                                <Col className="p-1 col-md-5 border shadow_wizard m-2" >
                                     <div className="p-1 col-md-12">
                                         <label htmlFor="checkInDate" className="form-label fs-5">Fecha de Entrada</label>
                                         <input
@@ -40,6 +42,7 @@ const TypeDateBooking = ({ ...props }) => {
                                             type="date"
                                             id="checkInDate"
                                             value={checkIn}
+                                            disabled={!typeBooking}
                                             onChange={(e) => { setCheckIn(e.target.value) }}
                                             min={new Date().toISOString().split('T')[0]}
                                         />
@@ -58,16 +61,33 @@ const TypeDateBooking = ({ ...props }) => {
                                     </div>
                                 </Col>
                                 <Col className="p-1 col-md-5 border shadow_wizard m-2">
-                                    <div className="p-1 col-md-12">
-                                        <label htmlFor="checkOutDate" className="form-label fs-5">Cantidad de personas por reserva</label>
-                                        <input
-                                            className="form-control"
-                                            type="number"
-                                            id="checkOutDate"
-                                            value={amountPeople}
-                                            onChange={(e) => { setAmountPeople(e.target.value) }}
-                                            min='0'
-                                        />
+                                    <label htmlFor="checkOutDate" className="form-label fs-5">Cantidad de personas por reserva</label>
+                                    <div className="p-1 col-md-12 d-flex">
+                                        <div className="p-1 col-md-6">
+                                            <label htmlFor="checkOutDate" className="form-label fs-6">Adultos:</label>
+                                            <input
+                                                className="form-control"
+                                                type="number"
+                                                id="checkOutDate"
+                                                value={amountAdult}
+                                                disabled={checkIn === "" || checkOut === ""}
+                                                onChange={(e) => { setAmountAdult(e.target.value) }}
+                                                min='0'
+                                            />
+                                        </div>
+                                        <div className="p-1 col-md-6">
+                                            <label htmlFor="checkOutDate" className="form-label fs-6">Niños:</label>
+                                            <input
+                                                className="form-control"
+                                                type="number"
+                                                id="checkOutDate"
+                                                value={amountChildren}
+                                                disabled={checkIn === "" || checkOut === ""}
+                                                onChange={(e) => { setAmountChildren(e.target.value) }}
+                                                min='0'
+                                            />
+                                        </div>
+
                                     </div>
                                 </Col>
                             </Card>

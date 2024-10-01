@@ -6,6 +6,7 @@ export const OBTENER_TIPOSSERVICIOS = gql`
             id
             nombre
             cuantificable
+            icon
             horadia
         }
     }
@@ -17,6 +18,7 @@ export const OBTENER_TIPOSSERVICIOSBYID = gql`
             id
             nombre
             cuantificable
+            icon
             horadia
         }
     }

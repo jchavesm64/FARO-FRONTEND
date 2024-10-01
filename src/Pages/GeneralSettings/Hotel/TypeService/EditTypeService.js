@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 import { useMutation, useQuery } from "@apollo/client";
 import { OBTENER_TIPOSSERVICIOSBYID, UPDATE_TIPO_SERVICIOS } from "../../../../services/TipoServicioService";
+import { iconTypeService } from "../../../../constants/routesConst";
 
 
 const EditTypeService = () => {
@@ -29,6 +30,7 @@ const EditTypeService = () => {
     const [name, setName] = useState('');
     const [cuantificable, setCuantificable] = useState(false);
     const [timeDay, setTimeDay] = useState(null);
+    const [icon, setIcon] = useState(null);
 
     const [disableSave, setDisableSave] = useState(true);
 
@@ -82,6 +84,7 @@ const EditTypeService = () => {
                 nombre: name,
                 cuantificable,
                 horadia: timeDay.value,
+                icon: icon.value,
                 estado: "ACTIVO"
             };
             const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' });
@@ -99,6 +102,22 @@ const EditTypeService = () => {
             setDisableSave(false)
         }
     };
+
+    const getIcon = () => {
+        const data = []
+        if (iconTypeService) {
+            iconTypeService.forEach((item) => {
+                data.push({
+                    "value": item.icon,
+                    "label": <label className={`${item.icon}`}><span className="ms-2 fs-7">{item.label}</span></label>,
+                    labelText: item.label
+
+                });
+            });
+        }
+        return data;
+    };
+
 
     if (loading_typeservice) {
         return (
@@ -163,6 +182,21 @@ const EditTypeService = () => {
                                 </div>
                             </Row>
                             <Row>
+                                <div className="col-md-4 col-sm-12 ">
+                                    <label htmlFor="icon" className="form-label">* Icono </label>
+                                    <Select
+                                        id="timeday"
+                                        value={icon}
+                                        onChange={(e) => {
+                                            setIcon(e);
+                                        }}
+                                        options={getIcon()}
+                                        classNamePrefix="select2-selection"
+                                        isSearchable={true}
+                                        getOptionLabel={(option) => option.labelText}
+                                        formatOptionLabel={(option) => option.label}
+                                    />
+                                </div>
                                 <div className="col-md-4 col-sm-12 ">
                                     <label htmlFor="timeday" className="form-label">* Hora del día </label>
                                     <Select

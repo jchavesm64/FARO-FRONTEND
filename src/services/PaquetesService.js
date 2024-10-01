@@ -11,6 +11,11 @@ export const OBTENER_PAQUETES = gql`
                 nombre
                 descripcion
                 precio
+                tipo{
+                    nombre
+                    cuantificable
+                    horadia
+                }
                 estado
             }
             tours{
@@ -41,24 +46,24 @@ export const OBTENER_PAQUETE = gql`
                 nombre
                 descripcion
                 precio
+                tipo{
+                    id
+                    nombre
+                    cuantificable
+                    horadia
+                icon
+            }
                 estado
             }
             tours{
-                id
-                tipo
                 nombre
-                precio
-                estado
-                descripcion
             }
             temporadas{
-                id
-                fechaInicio
+               fechaInicio
                 fechaFin
-                tipo
                 nombre
-                precio
-                descripcion
+                tipo
+                precio 
             }
             descripcion
             precio

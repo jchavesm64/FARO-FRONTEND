@@ -22,6 +22,7 @@ const ToursService = ({ ...props }) => {
         addExtraService,
         getServicesPerRoom,
         addExtraServicePerRoom,
+        setDisabledButton,
         ServicesRoom,
         roomsBooking,
         selectRoom,
@@ -34,7 +35,8 @@ const ToursService = ({ ...props }) => {
         serviceTourCheck,
         tours,
         toursList,
-        servicesPerRoom
+        servicesPerRoom,
+        typeBooking
     } = props.props;
 
     const [isOpenServicePerBooking, setIsOpenServicePerBooking] = useState(false);
@@ -50,6 +52,9 @@ const ToursService = ({ ...props }) => {
     const toggleAccordionServiceTour = () => {
         setIsOpenServiceTour(!isOpenServiceTour);
     };
+
+    setDisabledButton(false);
+
 
     return (
         <React.Fragment>
@@ -73,6 +78,7 @@ const ToursService = ({ ...props }) => {
                                             readOnly
                                             checked={serviceBookingCheck}
                                             onClick={handleChangeServiceBooking}
+                                            disabled={typeBooking === 'Individual'}
                                         />
                                         <label htmlFor="isServiceBooking" className="form-check-label ms-2">Servicios por reserva</label>
                                     </div>
@@ -169,7 +175,11 @@ const ToursService = ({ ...props }) => {
                                                                         <div className='col-md-11 border m-2 shadow_wizard rounded p-3 d-flex justify-content-between'>
                                                                             <div key={`row${service.nombre}`} className="m-0 col-md-11 p-1">
                                                                                 <label className="fs-4 m-0 span_package_color">
-                                                                                    <strong>Servicio:</strong> <span className="fs-5 label_package_color">{service.nombre}</span>
+                                                                                    <strong>Servicio:</strong>
+                                                                                    <span className="fs-5 label_package_color"> {service.nombre}</span>
+                                                                                    <span className="span_package_color fs-5">
+                                                                                        {(service.cantidad !== 0 && service.cantidad !== undefined) && (<span> x{service.cantidad} </span>)}
+                                                                                    </span>
                                                                                 </label>
 
                                                                                 <div className="col-md-11 m-1 d-flex flex-wrap flex-column">

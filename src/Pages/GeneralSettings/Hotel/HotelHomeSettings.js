@@ -11,7 +11,7 @@ const HotelHomeSettings = () => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Ajustes hotel" breadcrumbItem="Ajustes generales" breadcrumbItemUrl="/generalsettings" />
-                    <Row className="flex justify-content-center gap-3">
+                    <Row className="flex justify-content-center gap-3 mb-3">
                         {
                             hotelsettings.map((route, index) => (
                                 <ButtomCardHome key={index} route={route} />

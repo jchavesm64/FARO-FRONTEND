@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client";
 import Select from "react-select";
 import { SAVE_TIPO_SERVICIOS } from "../../../../services/TipoServicioService";
+import { iconTypeService } from "../../../../constants/routesConst";
 
 
 const NewTypeService = () => {
@@ -19,6 +20,7 @@ const NewTypeService = () => {
     const [name, setName] = useState('');
     const [cuantificable, setCuantificable] = useState(false);
     const [timeDay, setTimeDay] = useState(null);
+    const [icon, setIcon] = useState(null);
 
     const [disableSave, setDisableSave] = useState(true);
 
@@ -41,6 +43,20 @@ const NewTypeService = () => {
         }
     ];
 
+    const getIcon = () => {
+        const data = []
+        if (iconTypeService) {
+            iconTypeService.forEach((item) => {
+                data.push({
+                    "value": item.icon,
+                    "label": <label className={`${item.icon}`}><span className="ms-2 fs-7">{item.label}</span></label>,
+                    labelText: item.label
+
+                });
+            });
+        }
+        return data;
+    };
 
     useEffect(() => {
         setDisableSave(name.trim().length === 0)
@@ -57,6 +73,7 @@ const NewTypeService = () => {
                 nombre: name,
                 cuantificable,
                 horadia: timeDay.value,
+                icon: icon.value,
                 estado: "ACTIVO"
             };
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
@@ -74,9 +91,10 @@ const NewTypeService = () => {
         }
     };
 
+    console.log(icon)
     return (
         <React.Fragment>
-            <div className="page-content " style={{ height: '35rem' }}>
+            <div className="page-content " style={{ height: '50rem' }}>
                 <Container fluid={true}>
                     <Breadcrumbs title="Nuevo tipo de servicio" breadcrumbItem="Tipo de servicio" breadcrumbItemUrl='/hotelsettings/typeservice' />
                     <Row>
@@ -114,6 +132,21 @@ const NewTypeService = () => {
 
                             </Row>
                             <Row>
+                                <div className="col-md-4 col-sm-12 ">
+                                    <label htmlFor="icon" className="form-label">* Icono </label>
+                                    <Select
+                                        id="timeday"
+                                        value={icon}
+                                        onChange={(e) => {
+                                            setIcon(e);
+                                        }}
+                                        options={getIcon()}
+                                        classNamePrefix="select2-selection"
+                                        isSearchable={true}
+                                        getOptionLabel={(option) => option.labelText}
+                                        formatOptionLabel={(option) => option.label} 
+                                    />
+                                </div>
                                 <div className="col-md-4 col-sm-12 ">
                                     <label htmlFor="timeday" className="form-label">* Hora del día </label>
                                     <Select

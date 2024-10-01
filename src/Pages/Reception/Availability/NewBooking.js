@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { Button, Card, Container } from 'reactstrap';
 import Breadcrumbs from '../../../components/Common/Breadcrumb';
 import { stepsWizardMenuBooking } from '../../../constants/routesConst';
@@ -44,7 +44,10 @@ const NewBooking = ({ ...props }) => {
     const [customer, setCustomer] = useState(null)
     const [customers, setCustomers] = useState([])
     const [bookingDate] = useState(currentDate);
-    const [amountPeople, setAmountPeople] = useState(0);
+    const [amountAdult, setAmountAdult] = useState(0);
+    const [amountChildren, setAmountChildren] = useState(0);
+
+    const [disabledButton, setDisabledButton] = useState(true)
 
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
@@ -134,6 +137,50 @@ const NewBooking = ({ ...props }) => {
 
     }, [dataRoomsAvailable, dataTypeRooms, roomsAvailable, operativeAreas, typeRooms, season, seasonlist, currentDate, areas]);
 
+    const calAmountService = (service) => {
+        if (service.tipo.cuantificable === 'true') {
+
+            if (service.tipo.horadia === 'Día' || service.tipo.horadia === 'Noche') {
+                return calculateNights() * amountPeople()
+            }
+            return (calculateNights() + 1) * amountPeople()
+
+        }
+        return 0;
+    };
+
+    useEffect(() => {
+        const updatedExtraService = extraService.map(service => ({
+            ...service,
+            cantidad: calAmountService(service, checkIn, checkOut, amountAdult, amountChildren)
+        }));
+
+        // Actualizar paxkageBookingList con la cantidad calculada para cada servicio
+        const updatedPakageBookingList = packageBookingList.map(packageItem => ({
+            ...packageItem,
+            servicios: packageItem.servicios.map(service => ({
+                ...service,
+                cantidad: calAmountService(service, checkIn, checkOut, amountAdult, amountChildren)
+            }))
+        }));
+
+        // Actualizar los estados
+        setExtraService(updatedExtraService);
+        setPackageBookingList(updatedPakageBookingList);
+
+    }, [amountAdult, amountChildren, checkIn, checkOut])
+
+    function calculateNights() {
+        const startDateObj = new Date(checkIn);
+        const endDateObj = new Date(checkOut);
+        const timeDifference = endDateObj - startDateObj;
+        const dayDifference = timeDifference / (1000 * 60 * 60 * 24);
+        return dayDifference;
+    };
+
+    const amountPeople = () => {
+        return parseInt(amountAdult, 10) + parseInt(amountChildren, 10)
+    }
 
     const handleTypeBookingChange = (type) => {
         setTypeBooking(type);
@@ -308,6 +355,7 @@ const NewBooking = ({ ...props }) => {
     }
 
     const addExtraService = (s, extra, type) => {
+
         if (!s) {
             infoAlert('Oops', 'No ha seleccionado un servicio', 'error', 3000, 'top-end');
             return;
@@ -319,9 +367,16 @@ const NewBooking = ({ ...props }) => {
             if (type === 'general') setServicesBooking(null);
             if (type === 'room') setServicesRoom(null);
             return;
-        }
+        };
 
-        const updatedService = [...extra, s.value];
+        const updatedService = [
+            ...extra,
+            {
+                ...s.value,
+                cantidad: calAmountService(s.value)
+            }
+        ];
+
         if (type === 'general') {
 
             setExtraService(updatedService);
@@ -405,6 +460,7 @@ const NewBooking = ({ ...props }) => {
 
     const addExtraServicePerRoom = () => {
         setServicesPerRoom((prev) => {
+
             const index = prev.findIndex(r => r.room.numeroHabitacion === selectRoom.numeroHabitacion);
 
             if (index !== -1) {
@@ -449,8 +505,15 @@ const NewBooking = ({ ...props }) => {
                 setPackageBooking(null)
                 return
             }
+            const servicePackageUpdate = {
+                ...packageBooking.value,
+                servicios: packageBooking.value.servicios.map(servicio => ({
+                    ...servicio,
+                    cantidad: calAmountService(servicio)
+                }))
+            };
 
-            setPackageBookingList([...packageBookingList, packageBooking.value]);
+            setPackageBookingList([...packageBookingList, servicePackageUpdate]);
             setPackageBooking(null);
 
         } else {
@@ -463,14 +526,30 @@ const NewBooking = ({ ...props }) => {
         setPackageBookingList(packageBookingList.filter(a => a.nombre !== nombre));
     }
 
-    const steps = React.useMemo(
-        () => stepsWizardMenuBooking,
-        []);
+    const stepsFromWizard = useMemo(() => stepsWizardMenuBooking, []);
 
-    const { state, nextStep, prevStep, stepsProps, stepperProps } =
-        useStepper({
-            steps,
-        });
+    const [steps, setSteps] = useState(stepsFromWizard);
+
+    const enableNextStep = (index) => {
+        setSteps((prevSteps) =>
+            prevSteps.map((step, i) => {
+                if (i === index + 1 && step.disabled) {
+                    return { ...step, disabled: false };
+                }
+                return step;
+            })
+        );
+    };
+
+    const { state, nextStep, prevStep, stepsProps, stepperProps } = useStepper({
+        steps,
+    });
+
+    useEffect(() => {
+        if (!disabledButton) {
+            enableNextStep(state.currentStep);
+        }
+    }, [disabledButton, state]);
 
     useEffect(() => {
         const resizeObserver = new ResizeObserver((entries) => {
@@ -492,6 +571,7 @@ const NewBooking = ({ ...props }) => {
     }, [wizardRef]);
 
     const handleSaveNote = (updatedNote) => {
+        console.log('data',updatedNote)
         const update = notes.map(note => {
             if (note.area.id === updatedNote.area.id) {
                 return {
@@ -502,6 +582,7 @@ const NewBooking = ({ ...props }) => {
             return note;
         });
         setNotes(update);
+        console.log('notas',notes)
     };
 
     const getFilteredAreaByKey = (nombre) => {
@@ -511,8 +592,20 @@ const NewBooking = ({ ...props }) => {
                 note.area.nombre.toLowerCase().includes(value)
             );
             setFilterNotes(filtered);
+            console.log(filtered)
         } else {
             setFilterNotes([]);
+        }
+    };
+
+    const handleChangeState = () => {
+        setDisabledButton(true);
+    };
+
+    const handleStep = (onClickFunction) => {
+        handleChangeState()
+        if (onClickFunction) {
+            onClickFunction()
         }
     }
 
@@ -533,10 +626,12 @@ const NewBooking = ({ ...props }) => {
                                                 justify-content-center text-dark ${state.currentStep === index ? "border-3" : "border-1"}`}
                                             key={index}
                                             style={{
-                                                fontWeight: state.currentStep === index ? 'bold' : 'unset'
+                                                fontWeight: state.currentStep === index ? 'bold' : 'unset',
+                                                opacity: steps[index].disabled ? 0.6 : 1
                                             }}
+
                                         >
-                                            <a  {...step}>
+                                            <a {...step} onClick={() => handleStep(stepsProps[index].onClick)}  >
                                                 {componentSize.width <= 1151 ? (
                                                     <i className={`${steps[index].icon} wizard_icon_size`}></i>
                                                 ) : steps[index].label}
@@ -548,26 +643,26 @@ const NewBooking = ({ ...props }) => {
                         </div>
                         <div className='d-flex justify-content-between m-4 mt-3 mb-0'>
                             <Button id='Anterior' color="primary" onClick={prevStep} disabled={!state.hasPreviousStep}><i className={'mdi mdi-arrow-left-bold-circle-outline button_wizard_icon'}></i></Button>
-                            <Button id='Siguiente' color="primary" onClick={nextStep} disabled={!state.hasNextStep}><i className={'mdi mdi-arrow-right-bold-circle-outline button_wizard_icon'}></i></Button>
+                            <Button id='Siguiente' color="primary" onClick={() => { nextStep(); handleChangeState(); }} disabled={!state.hasNextStep || disabledButton}><i className={'mdi mdi-arrow-right-bold-circle-outline button_wizard_icon'}></i></Button>
                         </div>
                         {steps[state.currentStep].label === 'Buscar cliente' &&
                             <div>
-                                <SearchCustomer props={{ handleInputChange, selectClient, setCustomer, setFilter, filter, customers, customer, stateBooking, bookingDate }} />
+                                <SearchCustomer props={{ handleInputChange, selectClient, setCustomer, setFilter, setDisabledButton, filter, customers, customer, stateBooking, bookingDate }} />
                             </div>
                         }
                         {steps[state.currentStep].label === 'Tipo y fecha de reserva' &&
                             <div>
-                                <TypeDateBooking props={{ handleTypeBookingChange, setCheckIn, setCheckOut, setAmountPeople, typeBooking, checkIn, checkOut, amountPeople }} />
+                                <TypeDateBooking props={{ handleTypeBookingChange, setCheckIn, setCheckOut, setAmountAdult, setAmountChildren, setDisabledButton, typeBooking, checkIn, checkOut, amountAdult, amountChildren }} />
                             </div>
                         }
                         {steps[state.currentStep].label === 'Paquetes' &&
                             <div>
-                                <Packages props={{ handlePackage, getPackage, addPackage, deletePackage, packageBooking, packageBookingList }} />
+                                <Packages props={{ handlePackage, getPackage, addPackage, deletePackage, setDisabledButton, packageBooking, packageBookingList }} />
                             </div>
                         }
                         {steps[state.currentStep].label === 'Habitaciones' &&
                             <div>
-                                <Rooms props={{ handleDecrease, handleChange, handleBlur, totalPerRoom, handleIncrease, amountTypeRooms, currentSeason, roomsBooking }} />
+                                <Rooms props={{ handleDecrease, handleChange, handleBlur, totalPerRoom, handleIncrease, setDisabledButton, amountTypeRooms, currentSeason, roomsBooking, typeBooking }} />
                             </div>
                         }
                         {steps[state.currentStep].label === 'Servicios y Tours' &&
@@ -588,6 +683,7 @@ const NewBooking = ({ ...props }) => {
                                     addExtraService,
                                     getServicesPerRoom,
                                     addExtraServicePerRoom,
+                                    setDisabledButton,
                                     ServicesRoom,
                                     roomsBooking,
                                     selectRoom,
@@ -600,18 +696,19 @@ const NewBooking = ({ ...props }) => {
                                     serviceTourCheck,
                                     tours,
                                     toursList,
-                                    servicesPerRoom
+                                    servicesPerRoom,
+                                    typeBooking
                                 }} />
                             </div>
                         }
                         {steps[state.currentStep].label === 'Notas' &&
                             <div>
-                                <Notes props={{ handleSaveNote, getFilteredAreaByKey, filterNotes, notes }} />
+                                <Notes props={{ handleSaveNote, getFilteredAreaByKey, setDisabledButton, filterNotes, notes }} />
                             </div>
                         }
                         {steps[state.currentStep].label === 'Resumen' &&
                             <div>
-                                <Summary props={{ customer, currentDate, currentSeason, checkIn, checkOut, amountPeople, typeBooking, packageBookingList, roomsBooking, servicesPerRoom }} />
+                                <Summary props={{ amountPeople, calculateNights, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes }} />
                             </div>
                         }
                     </Card>

@@ -6,33 +6,36 @@ import { Row } from 'reactstrap';
 const TableAreas = ({ ...props }) => {
 
     const { data } = props;
+    //console.log(data)
 
     const handleNoteChange = (id, newNota) => {
         const updatedNote = data.find(item => item.area.id === id);
+        //console.log(updatedNote)
         if (updatedNote) {
             props.props.handleSaveNote({ ...updatedNote, nota: newNota });
         }
     };
-    
+
     const handleSearchAreas = (data) => {
         props.props.getFilteredAreaByKey(data)
     };
-
+    // se desactiva la busqueda, se debe retomar despues 
+    /* <Row className="flex mb-3" style={{ alignItems: 'flex-end' }}>
+                    <div className="col-md-12 mb-1">
+                        <label> Busca el área</label>
+                        <input
+                            className="form-control"
+                            id="search-input"
+                            type="search"
+                            placeholder="Escribe el nombre del área"
+                            onChange={(e) => { handleSearchAreas(e.target.value) }}
+                        />
+                    </div>
+                </Row> */
     return (
         <div className=" mb-3 ">
             <Breadcrumbs title="Notas por área operativa" />
-            <Row className="flex mb-3" style={{ alignItems: 'flex-end' }}>
-                <div className="col-md-12 mb-1">
-                    <label> Busca el área</label>
-                    <input
-                        className="form-control"
-                        id="search-input"
-                        type="search"
-                        placeholder="Escribe el nombre del área"
-                        onChange={(e) => { handleSearchAreas(e.target.value) }}
-                    />
-                </div>
-            </Row>
+
             <table className="table table-hover table-striped mb-0 col-md-4">
                 <thead>
                     <tr>

@@ -6,7 +6,8 @@ import ListSection from "../../../../components/Common/ListSelection";
 
 const Packages = ({ ...props }) => {
 
-    const { handlePackage, getPackage, addPackage, deletePackage, packageBooking, packageBookingList } = props.props;
+    const { handlePackage, getPackage, addPackage, deletePackage, setDisabledButton, packageBooking, packageBookingList } = props.props;
+    setDisabledButton(false);
 
     return (
         <React.Fragment>
