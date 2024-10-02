@@ -1,35 +1,38 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { Button, Card, Container } from 'reactstrap';
-import Breadcrumbs from '../../../components/Common/Breadcrumb';
-import { stepsWizardMenuBooking } from '../../../constants/routesConst';
-import { OBTENER_CLIENTES } from '../../../services/ClienteService';
-import { OBTENER_HABITACIONES_DISPONIBLES } from '../../../services/HabitacionesService';
-import { OBTENER_TIPOSHABITACION } from '../../../services/TipoHabitacionService';
-import { OBTENER_SERVICIO } from '../../../services/ServiciosExtraService';
-import { infoAlert } from '../../../helpers/alert';
-import { OBTENER_PAQUETES } from '../../../services/PaquetesService';
-import { OBTENER_TEMPORADAS } from '../../../services/TemporadaService';
-import { convertDate } from '../../../helpers/helpers';
+import Breadcrumbs from '../../../../components/Common/Breadcrumb';
+import { stepsWizardMenuBooking } from '../../../../constants/routesConst';
+import { OBTENER_CLIENTES } from '../../../../services/ClienteService';
+import { OBTENER_HABITACIONES_DISPONIBLES } from '../../../../services/HabitacionesService';
+import { OBTENER_TIPOSHABITACION } from '../../../../services/TipoHabitacionService';
+import { OBTENER_SERVICIO } from '../../../../services/ServiciosExtraService';
+import { infoAlert } from '../../../../helpers/alert';
+import { OBTENER_PAQUETES } from '../../../../services/PaquetesService';
+import { OBTENER_TEMPORADAS } from '../../../../services/TemporadaService';
+import { convertDate } from '../../../../helpers/helpers';
 
-import SearchCustomer from './NewBooking/SearchCustomer';
-import TypeDateBooking from './NewBooking/Type&DateBooking';
-import Packages from './NewBooking/Packages';
-import Rooms from './NewBooking/Rooms';
-import ToursService from './NewBooking/Tours&Service';
-import Notes from './NewBooking/Notes/Notes';
-import Summary from './NewBooking/Summary';
-
-
+import SearchCustomer from './SearchCustomer';
+import TypeDateBooking from './Type&DateBooking';
+import Packages from './Packages';
+import Rooms from './Rooms';
+import ToursService from './Tours&Service';
+import Notes from './Notes/Notes';
+import Summary from './Summary';
 
 import { useStepper } from 'headless-stepper';
-import { OBTENER_AREAS } from '../../../services/AreasOperativasService';
-import { OBTENER_TOURS } from '../../../services/TourService';
-import { useQuery } from '@apollo/client';
+import { OBTENER_AREAS } from '../../../../services/AreasOperativasService';
+import { OBTENER_TOURS } from '../../../../services/TourService';
+import { useMutation, useQuery } from '@apollo/client';
+import { SAVE_RESERVA } from '../../../../services/ReservaService';
+import { OBTENER_USUARIO_CODIGO } from '../../../../services/UsuarioService';
+import { useNavigate } from 'react-router-dom';
 
-const NewBooking = ({ ...props }) => {
+const NewBooking = () => {
     document.title = "Nueva Reserva | FARO";
 
-    const currentDate = `${new Date().getFullYear()}-${(new Date().getMonth() + 1) > 10 ? (new Date().getMonth() + 1) : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() >= 10 ? new Date().getDate() : '0' + new Date().getDate()}`;
+    const navigate = useNavigate();
+
+    const currentDate = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
 
     const [filter, setFilter] = useState('')
     const { data: dataCustomer } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 });
@@ -39,7 +42,13 @@ const NewBooking = ({ ...props }) => {
     const { data: season } = useQuery(OBTENER_TEMPORADAS, { pollInterval: 1000 });
     const { data: packages } = useQuery(OBTENER_PAQUETES, { pollInterval: 1000 });
     const { data: data_tours } = useQuery(OBTENER_TOURS, { pollInterval: 1000 });
+    const { data: data_user } = useQuery(OBTENER_USUARIO_CODIGO, { variables: { codigo: localStorage.getItem('cedula') }, pollInterval: 1000 });
+    //const { data: user } = useQuery(OBTENER_USUARIO_AUTENTICADO, { pollInterval: 1000 });
     const { data: operativeAreas } = useQuery(OBTENER_AREAS, { pollInterval: 1000 });
+
+    const [insertar] = useMutation(SAVE_RESERVA);
+
+    const [user] = useState(data_user?.obtenerUsuarioByCodigo || [])
 
     const [customer, setCustomer] = useState(null)
     const [customers, setCustomers] = useState([])
@@ -86,6 +95,7 @@ const NewBooking = ({ ...props }) => {
 
     const [componentSize, setComponentSize] = useState({ width: 0 });
     const wizardRef = useRef(null);
+
 
     useEffect(() => {
 
@@ -571,7 +581,7 @@ const NewBooking = ({ ...props }) => {
     }, [wizardRef]);
 
     const handleSaveNote = (updatedNote) => {
-        console.log('data',updatedNote)
+        console.log('data', updatedNote)
         const update = notes.map(note => {
             if (note.area.id === updatedNote.area.id) {
                 return {
@@ -582,7 +592,7 @@ const NewBooking = ({ ...props }) => {
             return note;
         });
         setNotes(update);
-        console.log('notas',notes)
+        console.log('notas', notes)
     };
 
     const getFilteredAreaByKey = (nombre) => {
@@ -607,11 +617,57 @@ const NewBooking = ({ ...props }) => {
         if (onClickFunction) {
             onClickFunction()
         }
+    };
+
+    const onClickSave = async () => {
+        try {
+            const input = {
+                cliente: customer ? customer.id : null,
+                tipo: typeBooking,
+                fechaReserva: bookingDate,
+                numeroPersonas: {
+                    adulto: amountAdult,
+                    ninos: amountChildren
+                },
+                total: null,
+                serviciosGrupal: extraService.map(s => s.id),
+                paquetes: packageBookingList.map(p => p.id),
+                tours: toursList.map(t => t.id),
+                notas: notes.filter(note => note.nota !== ""),
+                metodoPago: null,
+                politicas: null,
+                usuario: user.id
+            }
+
+            const bookingRoom = {
+                habitacion: roomsBooking.length > 0 ? roomsBooking.map(room => room.id) : null,
+                fechaEntrada: checkIn,
+                fechaSalida: checkOut,
+                serviciosExtra: servicesPerRoom.length > 0 ? servicesPerRoom.map(roomData => ({
+                    room: roomData.room.id,
+                    service: roomData.service.map(serviceData => serviceData.id)
+                })) : null
+            };
+
+
+            const { data } = await insertar({ variables: { input, bookingRoom }, errorPolicy: 'all' });
+            const { estado, message } = data.insertarReserva;
+
+            if (estado) {
+                infoAlert('Excelente', message, 'success', 3000, 'top-end')
+                navigate(`/reception/availability`)
+            } else {
+                infoAlert('Oops', message, 'error', 3000, 'top-end')
+            }
+        } catch (error) {
+
+        }
     }
 
     return (
         <React.Fragment>
             <div className="page-content " ref={wizardRef}>
+
                 <Container fluid={true}>
                     <Breadcrumbs title="Nueva Reserva" breadcrumbItem="Reservas" breadcrumbItemUrl='/reception/availability' />
                     <Card className='col-md-12 p-2'>
@@ -708,7 +764,7 @@ const NewBooking = ({ ...props }) => {
                         }
                         {steps[state.currentStep].label === 'Resumen' &&
                             <div>
-                                <Summary props={{ amountPeople, calculateNights, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes }} />
+                                <Summary props={{ amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes }} />
                             </div>
                         }
                     </Card>

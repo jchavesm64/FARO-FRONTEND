@@ -48,7 +48,7 @@ import CleaningJobs from "../Pages/CleaningJobs/CleaningJobs";
 
 import ReceptionHome from "../Pages/Reception/ReceptionHome";
 import AvailabilityNewBooking from "../Pages/Reception/Availability/AvailabilityNewBooking"
-import NewBooking from "../Pages/Reception/Availability/NewBooking";
+import NewBooking from "../Pages/Reception/Availability/NewBooking/NewBooking";
 
 import TaxManagement from "../Pages/TaxManagement/TaxManagement";
 import NewTaxManagement from "../Pages/TaxManagement/NewTaxManagement";

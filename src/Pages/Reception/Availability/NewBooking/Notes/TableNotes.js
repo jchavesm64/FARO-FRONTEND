@@ -1,26 +1,23 @@
 import React from 'react';
 import withRouter from "../../../../../components/Common/withRouter";
 import Breadcrumbs from '../../../../../components/Common/Breadcrumb';
-import { Row } from 'reactstrap';
 
 const TableAreas = ({ ...props }) => {
 
     const { data } = props;
-    //console.log(data)
 
     const handleNoteChange = (id, newNota) => {
         const updatedNote = data.find(item => item.area.id === id);
-        //console.log(updatedNote)
         if (updatedNote) {
             props.props.handleSaveNote({ ...updatedNote, nota: newNota });
         }
     };
 
-    const handleSearchAreas = (data) => {
+    // se desactiva la busqueda, se debe retomar despues 
+    /* const handleSearchAreas = (data) => {
         props.props.getFilteredAreaByKey(data)
     };
-    // se desactiva la busqueda, se debe retomar despues 
-    /* <Row className="flex mb-3" style={{ alignItems: 'flex-end' }}>
+    <Row className="flex mb-3" style={{ alignItems: 'flex-end' }}>
                     <div className="col-md-12 mb-1">
                         <label> Busca el área</label>
                         <input

@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
 import { Button, ButtonGroup, Card, Col, Container, Row } from "reactstrap";
+import { typesBooking } from '../../../../constants/routesConst';
 
 const TypeDateBooking = ({ ...props }) => {
 
     const { handleTypeBookingChange, setCheckIn, setCheckOut, setAmountAdult, setAmountChildren, setDisabledButton, typeBooking, checkIn, checkOut, amountAdult, amountChildren } = props.props
-    const typesBooking = ['Individual', 'Grupales', 'Bloqueo', 'Sobreventa'];
 
     useEffect(() => { setDisabledButton(!typeBooking || checkIn === "" || checkOut === "" || amountAdult === 0) }, [setDisabledButton, typeBooking, checkIn, checkOut, amountAdult, amountChildren])
 
@@ -22,11 +22,11 @@ const TypeDateBooking = ({ ...props }) => {
                                             key={index}
                                             color="primary"
                                             outline
-                                            onClick={() => handleTypeBookingChange(type)}
-                                            active={typeBooking === type}
+                                            onClick={() => handleTypeBookingChange(type.value)}
+                                            active={typeBooking === type.value}
                                             className='m-1 fw-bold fs-5'
                                         >
-                                            {type}
+                                            {type.label}
                                         </Button>
                                     ))}
                                 </ButtonGroup>

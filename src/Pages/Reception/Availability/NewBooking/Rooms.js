@@ -13,7 +13,7 @@ const Rooms = ({ ...props }) => {
     useEffect(() => {
 
         const valIndividualBooking = () => {
-            if (typeBooking !== 'Individual') return false;
+            if (typeBooking !== 'IN') return false;
 
             if (roomsBooking.length >= 1) return true;
         };

@@ -1,18 +1,15 @@
 import React from "react";
-import { Badge, Card, Col, Container, Row } from "reactstrap";
+import { Badge, Button, Card, Col, Container, Row } from "reactstrap";
 import ListSection from "../../../../components/Common/ListSelection";
 
 const Summary = ({ ...props }) => {
 
-    const { amountPeople, calculateNights, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes } = props.props
-
+    const { amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes } = props.props
 
     const getServicesPerRoom = (room, servicesPerRoom) => {
         const service = servicesPerRoom.find(service => service.room.numeroHabitacion === room)?.service;
         return service ? service : [];
     };
-
-    console.log(notes)
 
     return (
         <React.Fragment>
@@ -285,8 +282,19 @@ const Summary = ({ ...props }) => {
                                         </Row>
 
                                     </div>
-
                                 </Card>
+                                <Row className="mt-4">
+                                    <Col >
+                                        <Button
+                                            color="primary"
+                                            size="lg"
+                                            className="position-fixed send_booking_wizard"
+                                            onClick={() => onClickSave()}
+                                        >
+                                            Realizar Reserva
+                                        </Button>
+                                    </Col>
+                                </Row>
                             </Col>
                         </Row>
                     </div >

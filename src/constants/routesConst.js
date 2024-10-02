@@ -76,7 +76,6 @@ export const menuRoutes = [
     },
 ]
 
-
 export const restaurantRoutes = [
     // { 
     //     label: "POS Restaurante", 
@@ -728,3 +727,22 @@ export const iconTypeService = [
         icon: 'mdi mdi-web'
     }
 ]
+
+export const typesBooking = [
+    {
+        label: 'Individual',
+        value: 'IN'
+    },
+    {
+        label: 'Grupales',
+        value: 'GR'
+    },
+    {
+        label: 'Bloqueo',
+        value: 'BL'
+    },
+    {
+        label: 'Sobreventa',
+        value: 'OS'
+    }
+];

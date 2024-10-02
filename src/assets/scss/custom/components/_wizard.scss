@@ -85,3 +85,19 @@
     overflow-y: scroll;
     height: 60px;
 }
+
+.send_booking_wizard {
+    position: absolute;
+    bottom: 50px;
+    right: 20px;
+    z-index: 1000;
+    border-radius: 60px;
+    padding: 15px 30px;
+    box-shadow: 0 5px 9px rgba(0, 0, 0, 0.241);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.send_booking_wizard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+}

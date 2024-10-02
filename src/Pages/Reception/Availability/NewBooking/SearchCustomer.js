@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Card, CardBody, Container, Row } from "reactstrap";
 import NewCustomer from '../../../Customers/NewCustomer'
 
 const SearchCustomer = ({ ...props }) => {
 
     const { handleInputChange, selectClient, setCustomer, setFilter, setDisabledButton, filter, customers, customer, stateBooking, bookingDate } = props.props;
-
-    const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const addNewCustomer = (data) => {
         setCustomer(data);
@@ -46,8 +44,6 @@ const SearchCustomer = ({ ...props }) => {
                                         onClick={() => handleCustomer(customer)}
                                         className='ist-group-item list-group-item-action rounded p-2 search_customer_wizard'
 
-                                        onMouseEnter={() => setHoveredIndex(index)}
-                                        onMouseLeave={() => setHoveredIndex(null)}
                                     >
                                         {customer.nombre}
                                     </li>
