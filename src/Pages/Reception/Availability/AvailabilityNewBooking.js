@@ -62,7 +62,7 @@ export default function ReceptionHome() {
             });
 
             const habitacionesDisponibles = totalHabitaciones - habitacionesReservadas;
-            const porcentajeDisponibilidad = (habitacionesDisponibles / totalHabitaciones) * 100;
+            const porcentajeDisponibilidad = Math.max(0, Math.abs(((habitacionesDisponibles / totalHabitaciones) * 100) - 100));
 
             disponibilidadPorDia.push({
                 dia,
@@ -77,13 +77,13 @@ export default function ReceptionHome() {
     const disponibilidadDia = calcularDisponibilidadPorDia(month, year);
 
     const getColorByPercentage = (porcentajeDisponibilidad) => {
-        if (porcentajeDisponibilidad === 100) {
+        if (porcentajeDisponibilidad === 0) {
             return 'green';
-        } else if (porcentajeDisponibilidad >= 75) {
+        } else if (porcentajeDisponibilidad <= 25) {
             return 'yellow';
-        } else if (porcentajeDisponibilidad >= 50) {
+        } else if (porcentajeDisponibilidad <= 50) {
             return 'orange';
-        } else if (porcentajeDisponibilidad >= 25) {
+        } else if (porcentajeDisponibilidad <= 25) {
             return 'red';
         }
 
@@ -133,7 +133,7 @@ export default function ReceptionHome() {
 
 
 
-console.log(crearDisponibilidadPorMes(month));
+    console.log(crearDisponibilidadPorMes(month));
 
 
     return (
