@@ -37,7 +37,7 @@ const DataList = ({ ...props }) => {
     const { data, type, displayLength, onDelete } = props;
     const [page, setPage] = useState(() => {
         const savedPage = localStorage.getItem('active_page_' + type);
-        return savedPage && data.length > displayLength ? parseInt(savedPage, 10) : 1;
+        return savedPage && data?.length > displayLength ? parseInt(savedPage, 10) : 1;
     });
 
     const [datos, setDatos] = useState([]);

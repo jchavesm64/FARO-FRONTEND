@@ -13,17 +13,19 @@ const TableDataTypeRoom = ({ ...props }) => {
                         <th>Habitación</th>
                         <th className="text-center">Cantidad total</th>
                         <th className="text-center">Cantidad disponible</th>
+                        <th className="text-center">Cantidad reservados</th>
                         <th className="text-center">% de ocupación</th>
                     </tr>
                 </thead>
                 <tbody>
                     {
-                        data.map((room, i) => (
+                        data?.map((room, i) => (
                             <tr key={`TypeRoomData-${i}`}>
                                 <td  >{room.nombre}</td>
                                 <td className="text-center">{room.cantidadTotal}</td>
-                                <td className="text-center">{room.cantidadDisponibles}</td>
-                                <td className="text-center">{room.porcentajeDisponibilidad}</td>
+                                <td className="text-center">{room.cantidadDisponible}</td>
+                                <td className="text-center">{room.cantidadReservadas}</td>
+                                <td className="text-center">{room.porcentajeDisponible}%</td>
                             </tr>
                         ))
                     }
