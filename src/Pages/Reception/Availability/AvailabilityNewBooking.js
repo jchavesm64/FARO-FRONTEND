@@ -21,9 +21,9 @@ export default function ReceptionHome() {
     const [month, setMonth] = useState(new Date().getMonth());
     const [year, setYear] = useState(new Date().getFullYear());
 
-    const [rooms, setRoom] = useState(null);
-    const [typeRoom, setTypeRoom] = useState(null);
-    const [reservaHabitacion, setReservaHabitacion] = useState(null);
+    const [rooms, setRoom] = useState([]);
+    const [typeRoom, setTypeRoom] = useState([]);
+    const [reservaHabitacion, setReservaHabitacion] = useState([]);
 
     const [modal, setModal] = useState(false);
 
