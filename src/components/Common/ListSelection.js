@@ -12,7 +12,7 @@ const ListSection = ({ title, items, label, icon, emptyMessage }) => (
                                 {item.nombre || item.numeroHabitacion || item.email || item.telefono || "Sin información"}
                             </span>
                             <span className="span_package_color">
-                                {(item.cantidad !== 0 && item.cantidad !== undefined) && (<span> x{item.cantidad} </span>)}
+                                {(item.cantidad !== 0 && item.cantidad !== undefined) && (<span> x{parseInt(item.cantidad) + parseInt(item.extra !== undefined ? item.extra : 0)} </span>)}
                             </span>
 
                         </span>

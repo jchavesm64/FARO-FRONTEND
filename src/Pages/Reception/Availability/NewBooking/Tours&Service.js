@@ -3,6 +3,7 @@ import Select from "react-select";
 import { Button, Card, CardBody, Col, Container, Row } from "reactstrap";
 import ListInfo from "../../../../components/Common/ListInfo";
 import ListSection from "../../../../components/Common/ListSelection";
+import TabeListService from "./DataService/TableListService";
 
 const ToursService = ({ ...props }) => {
 
@@ -23,6 +24,7 @@ const ToursService = ({ ...props }) => {
         getServicesPerRoom,
         addExtraServicePerRoom,
         setDisabledButton,
+        updateAmountService,
         ServicesRoom,
         roomsBooking,
         selectRoom,
@@ -140,7 +142,7 @@ const ToursService = ({ ...props }) => {
                                                             </div>
                                                         </div>
                                                         <Row>
-                                                            <ListInfo data={extraService} headers={['Servicio ']} keys={['nombre']} enableEdit={false} enableDelete={true} actionDelete={deleteServiceBooking} mainKey={'nombre'} />
+                                                            <TabeListService data={extraService} headers={['Servicio ']} keys={['nombre']} enableAmount={true} enableDelete={true} actionDelete={deleteServiceBooking} actionAmount={updateAmountService} mainKey={'nombre'} type='booking' />
                                                         </Row>
                                                     </CardBody>
                                                 </Card>
@@ -168,9 +170,9 @@ const ToursService = ({ ...props }) => {
                                                 >
                                                     <div className="accordion-body">
                                                         <div className="d-flex justify-content-center flex-wrap align-content-center">
-                                                            {extraService.length !== 0 ? (
+                                                            {extraService?.length !== 0 ? (
                                                                 <div className='col-md-11 col-sm-8 border border-secondary rounded p-1 me-2 d-flex justify-content-center flex-wrap'>
-                                                                    {extraService.map(service => (
+                                                                    {extraService?.map(service => (
 
                                                                         <div className='col-md-11 border m-2 shadow_wizard rounded p-3 d-flex justify-content-between'>
                                                                             <div key={`row${service.nombre}`} className="m-0 col-md-11 p-1">
@@ -178,7 +180,7 @@ const ToursService = ({ ...props }) => {
                                                                                     <strong>Servicio:</strong>
                                                                                     <span className="fs-5 label_package_color"> {service.nombre}</span>
                                                                                     <span className="span_package_color fs-5">
-                                                                                        {(service.cantidad !== 0 && service.cantidad !== undefined) && (<span> x{service.cantidad} </span>)}
+                                                                                        {(service.cantidad !== 0 && service.cantidad !== undefined) && (<span> x{parseInt(service.cantidad) + parseInt(service?.extra !== undefined ? service.extra : 0)} </span>)}
                                                                                     </span>
                                                                                 </label>
 
@@ -245,7 +247,7 @@ const ToursService = ({ ...props }) => {
                                                                     </div>
                                                                 </div>
                                                                 <Row>
-                                                                    <ListInfo data={extraServiceRoom} headers={['Servicio ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={deleteServiceRoom} mainKey={'nombre'} secondKey={'precio'} />
+                                                                    <TabeListService data={extraServiceRoom} headers={['Servicio ']} keys={['nombre']} enableAmount={true} enableDelete={true} actionDelete={deleteServiceBooking} actionAmount={updateAmountService} mainKey={'nombre'} type='room' />
                                                                 </Row>
                                                                 <div className="col-12 mt-2">
                                                                     <Button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraServicePerRoom() }}>

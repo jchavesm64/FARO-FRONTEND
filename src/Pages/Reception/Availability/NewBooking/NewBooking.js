@@ -160,7 +160,7 @@ const NewBooking = () => {
     };
 
     useEffect(() => {
-        const updatedExtraService = extraService.map(service => ({
+        const updatedExtraService = extraService?.map(service => ({
             ...service,
             cantidad: calAmountService(service, checkIn, checkOut, amountAdult, amountChildren)
         }));
@@ -358,7 +358,7 @@ const NewBooking = () => {
     };
 
     const getServicesPerRoom = () => {
-        const extra = extraService.map(item => item.id);
+        const extra = extraService?.map(item => item.id);
         const data = getServices().filter(item => !extra.includes(item.value.id));
 
         return data;
@@ -404,7 +404,35 @@ const NewBooking = () => {
     const deleteServiceBooking = (nombre) => {
         setExtraService(extraService.filter(a => a.nombre !== nombre))
 
-    }
+    };
+
+    const updateAmountService = (type, amount, service) => {
+        console.log(amount)
+        if (type === 'booking') {
+            setExtraService(prevServices =>
+                prevServices.map(s =>
+                    s.id === service.id
+                        ? {
+                            ...service,
+                            extra: amount
+                        }
+                        : service
+                )
+            );
+        } else {
+            setExtraServiceRoom(prevServices =>
+                prevServices.map(s =>
+                    s.id === service.id
+                        ? {
+                            ...service,
+                            extra: amount
+                        }
+                        : service
+                )
+            );
+        }
+
+    };
 
     const deleteServiceRoom = (nombre) => {
         setExtraServiceRoom(extraServiceRoom.filter(a => a.nombre !== nombre));
@@ -631,7 +659,7 @@ const NewBooking = () => {
                     ninos: amountChildren
                 },
                 total: null,
-                serviciosGrupal: extraService.map(s => s.id),
+                serviciosGrupal: extraService?.map(s => s.id),
                 paquetes: packageBookingList.map(p => p.id),
                 tours: toursList.map(t => t.id),
                 notas: notes.filter(note => note.nota !== ""),
@@ -663,7 +691,7 @@ const NewBooking = () => {
         } catch (error) {
 
         }
-    }
+    };
 
     return (
         <React.Fragment>
@@ -741,6 +769,7 @@ const NewBooking = () => {
                                     getServicesPerRoom,
                                     addExtraServicePerRoom,
                                     setDisabledButton,
+                                    updateAmountService,
                                     ServicesRoom,
                                     roomsBooking,
                                     selectRoom,

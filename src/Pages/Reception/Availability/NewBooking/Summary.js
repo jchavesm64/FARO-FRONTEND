@@ -206,7 +206,7 @@ const Summary = ({ ...props }) => {
                                                                     </label>
 
                                                                     <div className='mt-1'>
-                                                                        {extraService.map(extra => (
+                                                                        {extraService?.map(extra => (
                                                                             <label className="fs-5 m-0 ms-4 span_package_color">
                                                                                 <strong className={`${extra.tipo.icon} me-1`}></strong>
                                                                                 <span className="fs-5 label_package_color">{extra.nombre}

@@ -55,7 +55,8 @@ const TableAreas = ({ ...props }) => {
                                     value={item.fecha}
                                     onChange={(e) => { setDate(e.target.value) }}
                                     min={new Date().toISOString().split('T')[0]}
-                                /></td>
+                                />
+                            </td>
                             <td>
                                 <div className='col-md-10 col-sm-12 m-2'>
                                     <textarea
