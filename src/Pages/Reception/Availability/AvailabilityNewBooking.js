@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Container, Row, CardBody, Col, Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+import { Card, Container, Row, CardBody, Col, Button, Modal, ModalHeader, ModalBody } from "reactstrap";
 import Select from "react-select";
 import Breadcrumbs from "../../../components/Common/Breadcrumb";
 import { Link } from "react-router-dom";
@@ -9,7 +9,6 @@ import { OBTENER_RESERVAHABITACION } from "../../../services/ReservaHabitacionSe
 import DataList from "../../../components/Common/DataList";
 import { OBTENER_TIPOSHABITACION } from "../../../services/TipoHabitacionService";
 import { daysWeek } from "../../../constants/routesConst";
-import ListSection from "../../../components/Common/ListSelection";
 
 export default function ReceptionHome() {
     document.title = "Disponibilidad | FARO";
@@ -122,7 +121,7 @@ export default function ReceptionHome() {
             return 'yellow';
         } else if (porcentajeDisponibilidad <= 50) {
             return 'orange';
-        } else if (porcentajeDisponibilidad <= 25) {
+        } else if (porcentajeDisponibilidad <= 100) {
             return 'red';
         }
     };
@@ -215,8 +214,6 @@ export default function ReceptionHome() {
 
     const toggle = () => setModal(!modal);
 
-
-
     function filtrarReservasPorFecha(reservas, fechaSeleccionada) {
 
         const fechaSeleccionadaMs = new Date(fechaSeleccionada).getTime();
@@ -227,14 +224,13 @@ export default function ReceptionHome() {
 
             return fechaSeleccionadaMs >= fechaEntradaMs && fechaSeleccionadaMs <= fechaSalidaMs;
         });
-    }
-    console.log(filtrarReservasPorFecha(reservaHabitacion, "2024-10-3"))
+    };
+
     return (
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Disponibilidad y nuevas reservas" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
-
 
                     <Card className='col-md-12 p-2'>
                         <Row className="d-flex justify-content-end" >
@@ -251,7 +247,6 @@ export default function ReceptionHome() {
                                 </Link>
                             </div>
                         </Row>
-
                         <Row>
                             <div className="col-md-4 m-3 mt-0 shadow_calendar rounded">
                                 <Col className='d-flex justify-content-center '>
@@ -275,29 +270,27 @@ export default function ReceptionHome() {
                                     />
                                 </Col>
                                 <div className="calendar mb-1 ">
-                                    <div className="calendar-header">
+                                    <div className="calendar-header p-1">
                                         {
-                                            daysWeek.map(day => <div className="header-day">{day.label}</div>)
+                                            daysWeek.map(day => <div className="header-day ">{day.label}</div>)
                                         }
                                     </div>
-                                    <div className="calendar-body p-2">
+                                    <div className="calendar-body p-1">
                                         {weeks.map((week, weekIndex) => (
                                             <div className="calendar-week" key={weekIndex}>
                                                 {week.map((dia) => (
                                                     <Button
                                                         key={dia.dia}
-                                                        className="calendar-day border border-secondary rounded"
+                                                        className="calendar-day border border-secondary rounded "
                                                         style={{
                                                             backgroundColor: getColorByPercentage(parseInt(dia.porcentajeDisponibilidad)),
                                                         }}
                                                         onClick={() => getData(dia.dia, dia.porcentajeDisponibilidad, true)}
                                                     >
-                                                        <div style={{
-                                                            color: parseInt(dia.porcentajeDisponibilidad) === 100 ? 'red' : 'black',
-                                                        }}>{dia.dia}</div>
-                                                        <div style={{
-                                                            color: parseInt(dia.porcentajeDisponibilidad) === 100 ? 'red' : 'black',
-                                                        }}>{dia.porcentajeDisponibilidad}%</div>
+                                                        <span className="fs-5 " style={{
+                                                            color: parseInt(dia.porcentajeDisponibilidad) === 100 ? 'white' : 'black',
+                                                        }}>{dia.dia}</span>
+
                                                     </Button>
                                                 ))}
                                             </div>
@@ -309,7 +302,7 @@ export default function ReceptionHome() {
                             <div className="col-md-7">
                                 <Card>
                                     <CardBody>
-                                        <DataList data={roomAvailability !== undefined ? roomAvailability : []} type="typeroomdata" displayLength={5} />
+                                        <DataList data={roomAvailability !== undefined ? roomAvailability : []} type="typeroomdata" displayLength={3} />
                                     </CardBody>
                                 </Card>
                             </div>

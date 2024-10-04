@@ -43,7 +43,6 @@ const NewBooking = () => {
     const { data: packages } = useQuery(OBTENER_PAQUETES, { pollInterval: 1000 });
     const { data: data_tours } = useQuery(OBTENER_TOURS, { pollInterval: 1000 });
     const { data: data_user } = useQuery(OBTENER_USUARIO_CODIGO, { variables: { codigo: localStorage.getItem('cedula') }, pollInterval: 1000 });
-    //const { data: user } = useQuery(OBTENER_USUARIO_AUTENTICADO, { pollInterval: 1000 });
     const { data: operativeAreas } = useQuery(OBTENER_AREAS, { pollInterval: 1000 });
 
     const [insertar] = useMutation(SAVE_RESERVA);
