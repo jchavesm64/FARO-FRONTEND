@@ -6,7 +6,6 @@ const Notes = ({ ...props }) => {
 
     const { notes, filterNotes, setDisabledButton } = props.props;
     console.log(notes)
-    console.log('filtro',filterNotes)
     const data = filterNotes && filterNotes.length > 0 ? filterNotes : notes
     setDisabledButton(false);
 

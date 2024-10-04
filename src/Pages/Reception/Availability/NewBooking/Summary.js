@@ -263,6 +263,12 @@ const Summary = ({ ...props }) => {
                                                                             </label>
                                                                             <div className="col-md-12 m-1 ">
                                                                                 <label className="fs-5 m-0 ms-4 span_package_color">
+                                                                                    <strong className="mdi mdi-calendar-month-outline me-1" />
+                                                                                    <strong>Fecha: </strong> <span className="fs-5 label_package_color">{note.fecha}</span>
+                                                                                </label>
+                                                                            </div>
+                                                                            <div className="col-md-12 m-1 ">
+                                                                                <label className="fs-5 m-0 ms-4 span_package_color">
                                                                                     <strong className="mdi mdi-note-text me-1" />
                                                                                     <strong>Nota: </strong> <span className="fs-5 label_package_color">{note.nota}</span>
                                                                                 </label>

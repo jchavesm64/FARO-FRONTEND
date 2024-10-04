@@ -138,7 +138,8 @@ const NewBooking = () => {
             areas.map(area => (
                 {
                     area,
-                    nota: ''
+                    nota: '',
+                    fecha: ''
                 }
             ))
         );
@@ -585,7 +586,8 @@ const NewBooking = () => {
             if (note.area.id === updatedNote.area.id) {
                 return {
                     ...note,
-                    nota: updatedNote.nota
+                    nota: updatedNote.nota,
+                    fecha: updatedNote.fecha
                 };
             }
             return note;
