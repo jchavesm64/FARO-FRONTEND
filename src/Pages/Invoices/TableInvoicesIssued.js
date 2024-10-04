@@ -41,7 +41,7 @@ const TableInvoicesIssued = ({ ...props }) => {
         redirect: "follow"
         };
 
-        const response = await fetch("http://localhost/get/document", requestOptions);
+        const response = await fetch("http://18.223.1.94/get/document", requestOptions);
         const res = await response.json();
         if (res.result) {
 

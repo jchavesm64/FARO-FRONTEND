@@ -349,7 +349,7 @@ const InvoiceMaintenance = ({ ...props }) => {
                 redirect: "follow"
                 };
 
-                fetch("http://localhost/send/document", requestOptions)
+                fetch("http://18.223.1.94/send/document", requestOptions)
                 .then((response) => response.json())
                 .then((result) => {
                     console.log(result)
