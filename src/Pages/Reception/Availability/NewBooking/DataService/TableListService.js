@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import ButtonIconTable from '../../../../../components/Common/ButtonIconTable';
 
 const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enableAmount, actionAmount, mainKey, secondKey, type }) => {
@@ -11,9 +11,6 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
         }
 
     };
-
-
-    console.log(data);
 
     const onUpdateAmount = (amount, service) => {
         actionAmount(type, amount, service);

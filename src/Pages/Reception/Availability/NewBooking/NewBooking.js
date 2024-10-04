@@ -407,7 +407,6 @@ const NewBooking = () => {
     };
 
     const updateAmountService = (type, amount, service) => {
-        console.log(amount)
         if (type === 'booking') {
             setExtraService(prevServices =>
                 prevServices.map(s =>

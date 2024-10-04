@@ -5,7 +5,6 @@ import DataList from "../../../../../components/Common/DataList";
 const Notes = ({ ...props }) => {
 
     const { notes, filterNotes, setDisabledButton } = props.props;
-    console.log(notes)
     const data = filterNotes && filterNotes.length > 0 ? filterNotes : notes
     setDisabledButton(false);
 
