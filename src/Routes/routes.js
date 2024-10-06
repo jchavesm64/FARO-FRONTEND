@@ -46,6 +46,10 @@ import EditMenuContainer from "../Pages/Restaurant/Menu/EditMenuContainer";
 import RestaurantHome from "../Pages/Restaurant/RestaurantHome";
 import CleaningJobs from "../Pages/CleaningJobs/CleaningJobs";
 
+import ReceptionHome from "../Pages/Reception/ReceptionHome";
+import AvailabilityNewBooking from "../Pages/Reception/Availability/AvailabilityNewBooking"
+import NewBooking from "../Pages/Reception/Availability/NewBooking/NewBooking";
+
 import TaxManagement from "../Pages/TaxManagement/TaxManagement";
 import NewTaxManagement from "../Pages/TaxManagement/NewTaxManagement";
 import EditTaxManagement from "../Pages/TaxManagement/EditTaxManagement";
@@ -76,6 +80,35 @@ import AssetMove from "../Pages/AssetsMove/AssetMove";
 import NewAssetMove from "../Pages/AssetsMove/NewAssetMove";
 import NewSupplyType from "../Pages/GeneralSettings/SupplyType/NewSupplyType";
 import NewLocation from "../Pages/GeneralSettings/Locations/NewLocation";
+import HotelHomeSettings from "../Pages/GeneralSettings/Hotel/HotelHomeSettings";
+import Amenities from "../Pages/GeneralSettings/Hotel/Amenities/Amenities";
+import NewAmenities from "../Pages/GeneralSettings/Hotel/Amenities/NewAmenities";
+import EditAmenities from "../Pages/GeneralSettings/Hotel/Amenities/EditAmenities";
+import TypeRoom from "../Pages/GeneralSettings/Hotel/TypeRoom/TypeRoom";
+import NewTypeRom from "../Pages/GeneralSettings/Hotel/TypeRoom/NewTypeRoom";
+import EditTypeRoom from "../Pages/GeneralSettings/Hotel/TypeRoom/EditTypeRoom";
+import ExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/ExtraService";
+import NewExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/NewExtraService";
+import EditExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/EditExtraService";
+import EditRoom from '../Pages/GeneralSettings/Hotel/Rooms/EditRoom'
+import Rooms from "../Pages/GeneralSettings/Hotel/Rooms/Roms";
+import NewRoom from "../Pages/GeneralSettings/Hotel/Rooms/NewRoom";
+import Season from "../Pages/GeneralSettings/Hotel/Season/Season";
+import NewSeason from "../Pages/GeneralSettings/Hotel/Season/NewSeason";
+import EditSeason from "../Pages/GeneralSettings/Hotel/Season/EditSeason";
+import AdminPackages from "../Pages/GeneralSettings/Hotel/AdminPackage/AdminPackage";
+import Tour from "../Pages/GeneralSettings/Hotel/Tours/Tours";
+import NewTour from "../Pages/GeneralSettings/Hotel/Tours/NewTour";
+import EditTour from "../Pages/GeneralSettings/Hotel/Tours/EditTour";
+import NewPackage from "../Pages/GeneralSettings/Hotel/AdminPackage/NewPackage";
+import EditPackage from "../Pages/GeneralSettings/Hotel/AdminPackage/EditPackage";
+import TypeService from "../Pages/GeneralSettings/Hotel/TypeService/TypeService";
+import NewTypeService from "../Pages/GeneralSettings/Hotel/TypeService/NewTypeService";
+import EditTypeService from "../Pages/GeneralSettings/Hotel/TypeService/EditTypeService";
+import OperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/OperativeAreas";
+import NewOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/NewOperativeAreas";
+import EditOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/EditOperativeAreas";
+import Booking from "../Pages/Reception/Availability/ViewBooking/View&EditBooking";
 
 import InvoiceMaintenance from "../Pages/Invoices/Maintenance";
 import InvoiceIssued from "../Pages/Invoices/Issued";
@@ -133,6 +166,10 @@ const authProtectedRoutes = [
   { path: "/restaurant/newmenu", component: <NewMenu /> },
   { path: "/restaurant/editmenu/:id", component: <EditMenuContainer /> },
 
+  { path: "/reception", component: <ReceptionHome /> },
+  { path: "/reception/availability", component: <AvailabilityNewBooking /> },
+  { path: "/reception/availability/newbooking", component: <NewBooking /> },
+  { path: "/reception/availability/booking", component: <Booking /> },
 
   { path: "/cleaningjobs", component: <CleaningJobs /> },
   { path: "/editcleaningjob/:id", component: <EditCleaningJobContainer /> },
@@ -167,6 +204,35 @@ const authProtectedRoutes = [
   { path: "/locations", component: <Location /> },
   { path: "/editlocation/:id", component: <EditLocation /> },
   { path: "/newlocation", component: <NewLocation /> },
+  { path: "/hotelsettings", component: <HotelHomeSettings /> },
+  { path: "/hotelsettings/typeroom", component: <TypeRoom /> },
+  { path: "/hotelsettings/newtyperoom", component: <NewTypeRom /> },
+  { path: "/hotelsettings/edittyperoom/:id", component: <EditTypeRoom /> },
+  { path: "/hotelsettings/amenities", component: <Amenities /> },
+  { path: "/hotelsettings/newamenities", component: <NewAmenities /> },
+  { path: "/hotelsettings/editamenities/:id", component: <EditAmenities /> },
+  { path: "/hotelsettings/extraservices", component: <ExtraService /> },
+  { path: "/hotelsettings/newextraservices", component: <NewExtraService /> },
+  { path: "/hotelsettings/editextraservice/:id", component: <EditExtraService /> },
+  { path: "/hotelsettings/rooms", component: <Rooms /> },
+  { path: "/hotelsettings/newroom", component: <NewRoom /> },
+  { path: "/hotelsettings/editroom/:id", component: <EditRoom /> },
+  { path: "/hotelsettings/season", component: <Season /> },
+  { path: "/hotelsettings/newseason", component: <NewSeason /> },
+  { path: "/hotelsettings/editseason/:id", component: <EditSeason /> },
+  { path: "/hotelsettings/hotelpackages", component: <AdminPackages /> },
+  { path: "/hotelsettings/tours", component: <Tour /> },
+  { path: "/hotelsettings/newtour", component: <NewTour /> },
+  { path: "/hotelsettings/edittour/:id", component: <EditTour /> },
+  { path: "/hotelsettings/newpackage", component: <NewPackage /> },
+  { path: "/hotelsettings/editpackage/:id", component: <EditPackage /> },
+  { path: "/hotelsettings/typeservice", component: <TypeService /> },
+  { path: "/hotelsettings/newtypeservice", component: <NewTypeService /> },
+  { path: "/hotelsettings/edittypeservice/:id", component: <EditTypeService /> },
+  { path: "/hotelsettings/operativeareas", component: <OperativeAreas /> },
+  { path: "/hotelsettings/newoperativearea", component: <NewOperativeAreas /> },
+  { path: "/hotelsettings/editoperativeareas/:id", component: <EditOperativeAreas /> },
+
 
   { path: "/invoice/maintenance", component: <InvoiceMaintenance /> },
   { path: "/invoice/credit/notes", component: <InvoiceCreditNote /> },

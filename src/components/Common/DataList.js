@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import TableCustomers from '../../Pages/Customers/TableCustomers';
 import TableAccountingControl from '../../Pages/AccountingControl/TableAccountingControl';
 import DataListPagination from './DataListPagination';
@@ -22,42 +22,52 @@ import TableAssets from '../../Pages/Assets/TableAssets';
 import TableAssetMove from '../../Pages/AssetsMove/TableAssetMove';
 import TableInvoicesIssued from '../../Pages/Invoices/TableInvoicesIssued';
 import TableInvoicesParameters from '../../Pages/Invoices/TableInvoicesParameters';
+import TableTypeRoom from '../../Pages/GeneralSettings/Hotel/TypeRoom/TableTypeRoom'
+import TableAmenities from '../../Pages/GeneralSettings/Hotel/Amenities/TableAmenities'
+import TableExtraService from '../../Pages/GeneralSettings/Hotel/ExtraService/TableExtraService'
+import TableRooms from '../../Pages/GeneralSettings/Hotel/Rooms/TableRooms';
+import TableSeason from '../../Pages/GeneralSettings/Hotel/Season/TableSeason';
+import TablePackage from '../../Pages/GeneralSettings/Hotel/AdminPackage/TablePackage';
+import TableTours from '../../Pages/GeneralSettings/Hotel/Tours/TableTours';
+import TableTypeService from '../../Pages/GeneralSettings/Hotel/TypeService/TableTypeService';
+import TableOperativeAreas from '../../Pages/GeneralSettings/Hotel/OperativeAreas/TableOperativeAreas';
+import TableNotes from '../../Pages/Reception/Availability/NewBooking/Notes/TableNotes';
+import TableTypeRoomSeason from '../../Pages/GeneralSettings/Hotel/Season/TableTypeRoomSeason';
+import TableDataTypeRoom from '../../Pages/Reception/Availability/NewBooking/TableDataTypeRoom';
 
 const DataList = ({ ...props }) => {
     const { data, type, displayLength, onDelete } = props;
-    var index = 0
-    const [page, setPage] = useState((localStorage.getItem('active_page_' + type) && (data.length > displayLength)) ? localStorage.getItem('active_page_' + type) : 1);
-    if (data.length < displayLength && page !== 1) {
-        setPage(1)
-    }
+    const [page, setPage] = useState(() => {
+        const savedPage = localStorage.getItem('active_page_' + type);
+        return savedPage && data?.length > displayLength ? parseInt(savedPage, 10) : 1;
+    });
 
-    const [datos, setDatos] = useState([])
+    const [datos, setDatos] = useState([]);
+
+    // Memoriza la función getData para que no se redefina en cada renderizado
+    const getData = useCallback(() => {
+        let array = [];
+        const startIndex = (page - 1) * displayLength;
+        let size = data.length;
+
+        if (startIndex + displayLength <= data.length) {
+            size = startIndex + displayLength;
+        }
+
+        for (let i = startIndex; i < size; i++) {
+            array.push(data[i]);
+        }
+
+        return array;
+    }, [data, page, displayLength]);
 
     useEffect(() => {
-        setDatos(getData())
-    }, [page, data])
-
-
-    const getData = () => {
-        var array = [], size = data.length;
-        if (index + displayLength <= data.length) {
-            size = index + displayLength;
-        }
-        for (let i = index; i < size; i++) {
-            array.push(data[i])
-        }
-        return array
-    }
-
-    const calIndex = () => {
-        if (page === 1) {
-            index = 0
+        if (data.length < displayLength && page !== 1) {
+            setPage(1);
         } else {
-            index = (((page - 1) * displayLength))
+            setDatos(getData());
         }
-    }
-
-    calIndex()
+    }, [data, displayLength, page, getData]);
 
     return (
         <>
@@ -141,6 +151,54 @@ const DataList = ({ ...props }) => {
                 {
                     type === 'assetMove' &&
                     <TableAssetMove {...props} data={datos} />
+                }
+                {
+                    type === 'typeroom' &&
+                    <TableTypeRoom {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'amenities' &&
+                    <TableAmenities {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'extraservice' &&
+                    <TableExtraService {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'rooms' &&
+                    <TableRooms {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'season' &&
+                    <TableSeason {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'package' &&
+                    <TablePackage {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'tour' &&
+                    <TableTours {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'typservice' &&
+                    <TableTypeService {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'operativearea' &&
+                    <TableOperativeAreas {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'notes' &&
+                    <TableNotes {...props} data={datos} />
+                }
+                {
+                    type === 'typeroomseason' &&
+                    <TableTypeRoomSeason {...props} data={datos} />
+                }
+                {
+                    type === 'typeroomdata' &&
+                    <TableDataTypeRoom data={datos} />
                 }
                 {
                     type === 'invoicesIssued' &&

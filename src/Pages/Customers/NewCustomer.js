@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardBody, CardTitle, Col, Container, Label, Row } from "reactstrap";
+import { Card, CardBody, Container, Label, Row } from "reactstrap";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import Select from "react-select";
 import SpanSubtitleForm from "../../components/Forms/SpanSubtitleForm";
@@ -180,6 +180,7 @@ const NewCustomer = (props) => {
     }
 
     const eliminarTelefono = (telefono) => {
+        console.log(telefonos.filter(e => e.telefono !== telefono))
         setTelefonos(telefonos.filter(e => e.telefono !== telefono))
     }
 
@@ -270,8 +271,14 @@ const NewCustomer = (props) => {
             const { data } = await insertar({ variables: { input }, errorPolicy: 'all' });
             const { estado, message } = data.insertarCliente;
             if (estado) {
-                infoAlert('Excelente', message, 'success', 3000, 'top-end')
-                navigate('/customers');
+                infoAlert('Excelente', message, 'success', 3000, 'top-end');
+                
+                if (props.props.stateBooking) {
+                    props.props.addNewCustomer(input)
+                } else {
+
+                    navigate('/customers');
+                }
             } else {
                 infoAlert('Oops', message, 'error', 3000, 'top-end')
             }

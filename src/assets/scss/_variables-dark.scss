@@ -149,19 +149,21 @@ $warning:       $yellow;
 $danger:        $red;
 $light:         $gray-300;
 $dark:          $gray-800;
+$tertiary:      $white;
 // scss-docs-end theme-color-variables
 
 // scss-docs-start theme-colors-map
 $theme-colors: (
   "primary":    $primary,
   "secondary":  $secondary,
+  "tertiary":   $tertiary
   "success":    $success,
   "info":       $info,
   "warning":    $warning,
   "danger":     $danger,
   "pink":       $pink,
   "light":      $light,
-  "dark":       $dark
+  "dark":       $dark,
 );
 // scss-docs-end theme-colors-map
 

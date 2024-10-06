@@ -175,8 +175,8 @@ const NewPurchaseOrder = (props) => {
             impuesto: impuestoLinea,
             montoImpuestos: montoImpuestos.toFixed(2),
             subtotalConImpuesto: (subtotalLinea + montoImpuestos).toFixed(2)
-        }
 
+        }
         return obj
     }
 

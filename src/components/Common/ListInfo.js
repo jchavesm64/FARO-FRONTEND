@@ -27,7 +27,7 @@ const ListInfo = ({ data, headers, keys, enableDelete, actionDelete, enableEdit,
                             ))
                         }
                         {
-                            enableEdit || enableDelete &&
+                            (enableEdit || enableDelete) &&
                             <th>Acciones</th>
                         }
                     </tr>
