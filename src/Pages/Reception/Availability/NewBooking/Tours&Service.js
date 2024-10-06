@@ -142,7 +142,7 @@ const ToursService = ({ ...props }) => {
                                                             </div>
                                                         </div>
                                                         <Row>
-                                                            <TabeListService data={extraService} headers={['Servicio ']} keys={['nombre']} enableAmount={true} enableDelete={true} actionDelete={deleteServiceBooking} actionAmount={updateAmountService} mainKey={'nombre'} type='booking' />
+                                                            <TabeListService data={extraService} headers={['Servicio','Precio']} keys={['nombre','precio']} enableAmount={true} enableDelete={true} actionDelete={deleteServiceBooking} actionAmount={updateAmountService} mainKey={'nombre'} type='booking' />
                                                         </Row>
                                                     </CardBody>
                                                 </Card>
@@ -247,7 +247,7 @@ const ToursService = ({ ...props }) => {
                                                                     </div>
                                                                 </div>
                                                                 <Row>
-                                                                    <TabeListService data={extraServiceRoom} headers={['Servicio ']} keys={['nombre']} enableAmount={true} enableDelete={true} actionDelete={deleteServiceBooking} actionAmount={updateAmountService} mainKey={'nombre'} type='room' />
+                                                                    <TabeListService data={extraServiceRoom} headers={['Servicio','Precio']} keys={['nombre','precio']} enableAmount={true} enableDelete={true} actionDelete={deleteServiceRoom} actionAmount={updateAmountService} mainKey={'nombre'} type='room' />
                                                                 </Row>
                                                                 <div className="col-12 mt-2">
                                                                     <Button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraServicePerRoom() }}>

@@ -10,7 +10,7 @@ import DataList from "../../../components/Common/DataList";
 import { OBTENER_TIPOSHABITACION } from "../../../services/TipoHabitacionService";
 import { daysWeek } from "../../../constants/routesConst";
 
-export default function ReceptionHome() {
+const ReceptionHome = () => {
     document.title = "Disponibilidad | FARO";
 
     const { data: data_rooms } = useQuery(OBTENER_HABITACIONES, { pollInterval: 1000 });
@@ -100,12 +100,13 @@ export default function ReceptionHome() {
             });
 
             const habitacionesDisponibles = totalHabitaciones - habitacionesReservadas;
-            const porcentajeDisponibilidad = Math.max(0, Math.abs(((habitacionesDisponibles / totalHabitaciones) * 100) - 100));
+
+            const porcentajeDisponibilidad = (100 * habitacionesReservadas) / totalHabitaciones;
 
             disponibilidadPorDia.push({
                 dia,
                 porcentajeDisponibilidad: porcentajeDisponibilidad.toFixed(0),
-
+                habitacionesDisponibles
             });
         }
 
@@ -204,11 +205,14 @@ export default function ReceptionHome() {
         setRoomAvailability(typeRoomAvailability());
     }, [typeRoom, rooms, month, year, reservaHabitacion]);
 
-    const getData = (day, percent, show) => {
+    const getData = (day, show) => {
+        console.log(day);
+
         setModal(show);
         setDataModal({
-            day,
-            percent
+            day: day.dia,
+            percent: day.porcentajeDisponibilidad,
+            rooms: day.habitacionesDisponibles
         })
     };
 
@@ -233,21 +237,33 @@ export default function ReceptionHome() {
                     <Breadcrumbs title="Disponibilidad y nuevas reservas" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
 
                     <Card className='col-md-12 p-2'>
-                        <Row className="d-flex justify-content-end" >
+                        <Row className="d-flex justify-content-between m-2 border-bottom align-items-center shadow_calendar_button" >
+                            <div className="col-md-2 col-sm-12 mb-3">
+                                <Link to="/reception/availability/booking">
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary waves-effect waves-light shadow_calendar"
+                                        style={{ width: '100%' }}
+                                    >
+                                        Ver reservas{""}
+                                        <i className="mdi mdi-clipboard-text align-middle ms-2"></i>
+                                    </button>
+                                </Link>
+                            </div>
                             <div className="col-md-2 col-sm-12 mb-3">
                                 <Link to="/reception/availability/newbooking">
                                     <button
                                         type="button"
-                                        className="btn btn-primary waves-effect waves-light"
+                                        className="btn btn-primary waves-effect waves-light shadow_calendar"
                                         style={{ width: '100%' }}
                                     >
-                                        Reservar{" "}
+                                        Reservar{""}
                                         <i className="mdi mdi-plus align-middle ms-2"></i>
                                     </button>
                                 </Link>
                             </div>
                         </Row>
-                        <Row>
+                        <Row className='mt-3'>
                             <div className="col-md-4 m-3 mt-0 shadow_calendar rounded">
                                 <Col className='d-flex justify-content-center '>
                                     <Select
@@ -272,7 +288,7 @@ export default function ReceptionHome() {
                                 <div className="calendar mb-1 ">
                                     <div className="calendar-header p-1">
                                         {
-                                            daysWeek.map(day => <div className="header-day ">{day.label}</div>)
+                                            daysWeek.map(day => <div className="header-day" key={day.lable}>{day.label}</div>)
                                         }
                                     </div>
                                     <div className="calendar-body p-1">
@@ -285,7 +301,7 @@ export default function ReceptionHome() {
                                                         style={{
                                                             backgroundColor: getColorByPercentage(parseInt(dia.porcentajeDisponibilidad)),
                                                         }}
-                                                        onClick={() => getData(dia.dia, dia.porcentajeDisponibilidad, true)}
+                                                        onClick={() => getData(dia, true)}
                                                     >
                                                         <span className="fs-5 " style={{
                                                             color: parseInt(dia.porcentajeDisponibilidad) === 100 ? 'white' : 'black',
@@ -314,6 +330,8 @@ export default function ReceptionHome() {
                                     <label className="fs-6 m-0 ms-4 span_package_color">
                                         <strong className="mdi mdi-calendar-range me-1" />
                                         <strong>Detalles del día: </strong> <span className="fs-6 label_package_color">{`${dataModal.day}/${month + 1}/${year}`}</span>
+                                        <strong> &nbsp; </strong>
+                                        <strong>Habitaciones disponibles: </strong> <span className="fs-6 label_package_color">{`${dataModal.rooms}`}</span>
                                     </label>
                                     <label className="fs-6 m-0 ms-4 span_package_color">
                                         <strong className="mdi mdi-percent me-1" />
@@ -338,14 +356,12 @@ export default function ReceptionHome() {
                                             <div className="ms-5">
                                                 {filtrarReservasPorFecha(reservaHabitacion, `${year}-${month + 1}-${dataModal.day}`)?.map(data => (
 
-                                                    <div>Habitación: <span className="fs-6 label_package_color">{`${data.habitacion.numeroHabitacion}`}</span></div>
+                                                    <div key={data.habitacion}>Habitación: <span className="fs-6 label_package_color">{`${data.habitacion.numeroHabitacion}`}</span></div>
 
                                                 ))}
                                             </div>
                                         </label>
                                     </div>
-
-
 
                                 </div>
                             </ModalBody>
@@ -357,4 +373,5 @@ export default function ReceptionHome() {
             </div>
         </React.Fragment>
     )
-}
+};
+export default ReceptionHome;

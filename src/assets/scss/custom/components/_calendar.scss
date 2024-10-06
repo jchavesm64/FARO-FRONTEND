@@ -40,7 +40,8 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.calendar-day:hover {
+.calendar-day:hover,
+.btn:hover {
     background-color: $primary !important;
     transform: scale(1.1);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -49,6 +50,10 @@
 
 .shadow_calendar {
     box-shadow: 0 3px 4px rgba(rgba($dark, 0.8), 0.2);
+}
+
+.shadow_calendar_button {
+    box-shadow: 0 2px 3px rgba(rgba($dark, 0.5), 0.1);
 }
 
 
@@ -72,4 +77,3 @@
         min-width: 20px;
     }
 }
-

@@ -108,6 +108,7 @@ import EditTypeService from "../Pages/GeneralSettings/Hotel/TypeService/EditType
 import OperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/OperativeAreas";
 import NewOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/NewOperativeAreas";
 import EditOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/EditOperativeAreas";
+import Booking from "../Pages/Reception/Availability/ViewBooking/View&EditBooking";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -162,6 +163,7 @@ const authProtectedRoutes = [
   { path: "/reception", component: <ReceptionHome /> },
   { path: "/reception/availability", component: <AvailabilityNewBooking /> },
   { path: "/reception/availability/newbooking", component: <NewBooking /> },
+  { path: "/reception/availability/booking", component: <Booking /> },
 
   { path: "/cleaningjobs", component: <CleaningJobs /> },
   { path: "/editcleaningjob/:id", component: <EditCleaningJobContainer /> },

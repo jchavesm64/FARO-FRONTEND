@@ -47,7 +47,7 @@ const NewBooking = () => {
 
     const [insertar] = useMutation(SAVE_RESERVA);
 
-    const [user] = useState(data_user?.obtenerUsuarioByCodigo || [])
+    const [user, setUser] = useState([])
 
     const [customer, setCustomer] = useState(null)
     const [customers, setCustomers] = useState([])
@@ -95,6 +95,9 @@ const NewBooking = () => {
     const [componentSize, setComponentSize] = useState({ width: 0 });
     const wizardRef = useRef(null);
 
+    useEffect(() => {
+        setUser(data_user?.obtenerUsuarioByCodigo || [])
+    }, [data_user])
 
     useEffect(() => {
 
@@ -608,7 +611,7 @@ const NewBooking = () => {
     }, [wizardRef]);
 
     const handleSaveNote = (updatedNote) => {
-        console.log('data', updatedNote)
+        
         const update = notes.map(note => {
             if (note.area.id === updatedNote.area.id) {
                 return {
@@ -620,7 +623,6 @@ const NewBooking = () => {
             return note;
         });
         setNotes(update);
-        console.log('notas', notes)
     };
 
     const getFilteredAreaByKey = (nombre) => {
@@ -630,7 +632,6 @@ const NewBooking = () => {
                 note.area.nombre.toLowerCase().includes(value)
             );
             setFilterNotes(filtered);
-            console.log(filtered)
         } else {
             setFilterNotes([]);
         }
@@ -664,7 +665,7 @@ const NewBooking = () => {
                 notas: notes.filter(note => note.nota !== ""),
                 metodoPago: null,
                 politicas: null,
-                usuario: user.id
+                usuario: user.id !== undefined ? user.id : null
             }
 
             const bookingRoom = {
@@ -695,7 +696,6 @@ const NewBooking = () => {
     return (
         <React.Fragment>
             <div className="page-content " ref={wizardRef}>
-
                 <Container fluid={true}>
                     <Breadcrumbs title="Nueva Reserva" breadcrumbItem="Reservas" breadcrumbItemUrl='/reception/availability' />
                     <Card className='col-md-12 p-2'>
@@ -793,7 +793,7 @@ const NewBooking = () => {
                         }
                         {steps[state.currentStep].label === 'Resumen' &&
                             <div>
-                                <Summary props={{ amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes }} />
+                                <Summary props={{ amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes, user }} />
                             </div>
                         }
                     </Card>

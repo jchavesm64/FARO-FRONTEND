@@ -14,7 +14,7 @@ const TableDataTypeRoom = ({ ...props }) => {
                         <th className="text-center">Cantidad total</th>
                         <th className="text-center">Cantidad disponible</th>
                         <th className="text-center">Cantidad reservados</th>
-                        <th className="text-center">% de ocupación</th>
+                        <th className="text-center">% de disponibilidad</th>
                     </tr>
                 </thead>
                 <tbody>

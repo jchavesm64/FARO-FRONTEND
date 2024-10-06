@@ -4,7 +4,7 @@ import ListSection from "../../../../components/Common/ListSelection";
 
 const Summary = ({ ...props }) => {
 
-    const { amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes } = props.props
+    const { amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes, user } = props.props
 
     const getServicesPerRoom = (room, servicesPerRoom) => {
         const service = servicesPerRoom.find(service => service.room.numeroHabitacion === room)?.service;
@@ -21,9 +21,14 @@ const Summary = ({ ...props }) => {
                                 <Card className='col-md-12 bg-light border ms-2 p-2  room_card_wizard'>
                                     <div className="col-md-12">
                                         <h3 key='summary' className="  mt-2">Resumen de Reserva</h3>
-                                        <label className="fs-5 m-0 ms-1 mb-2 span_package_color">
-                                            <strong>Fecha de la reserva:</strong> <span className="fs-5 label_package_color">{currentDate}</span>
-                                        </label>
+                                        <div className="d-flex flex-column">
+                                            <label className="fs-5 m-0 ms-1 mb-2 span_package_color">
+                                                <strong>Fecha de la reserva:</strong> <span className="fs-5 label_package_color">{currentDate}</span>
+                                            </label>
+                                            <label className="fs-5 m-0 ms-1 mb-2 span_package_color">
+                                                <strong>Usuario:</strong> <span className="fs-5 label_package_color">{user.nombre}</span>
+                                            </label>
+                                        </div>
                                         <Row className="col-md-12 bg-tertiary rounded p-2  room_card_wizard_details" >
                                             {customer ? (
                                                 <div className="d-flex justify-content-center">

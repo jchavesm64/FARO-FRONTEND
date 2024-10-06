@@ -29,7 +29,7 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
                         }
                         {
                             (enableAmount) &&
-                            <th>Cantidad extra</th>
+                            <th>Extra</th>
                         }
                         {
                             (enableDelete) &&
@@ -54,7 +54,7 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
                                         {
                                             enableAmount &&
                                             <input
-                                                className="form-control "
+                                                className="form-control text-center "
                                                 type="number"
                                                 id="checkInDate"
                                                 value={line?.extra !== undefined ? line?.extra : 0}
