@@ -8,7 +8,52 @@ export const OBTENER_RESERVAS = gql`
                 adulto
                 ninos
             }
-            estado
+            serviciosGrupal{
+                nombre
+                descripcion
+                precio
+                tipo{
+                    nombre
+                    cuantificable
+                    icon
+                    horadia
+                }
+                
+            }
+            tours{
+                tipo
+                nombre
+                precio
+                descripcion
+            }
+            paquetes{
+                tipo
+                nombre
+                servicios{
+                    id
+                    nombre
+                    descripcion
+                    precio
+                    tipo{
+                        nombre
+                        cuantificable
+                        horadia
+                    }
+                }
+                tours{
+                    nombre
+                }
+                temporadas{
+                    fechaInicio
+                    fechaFin
+                    nombre
+                    tipo
+                    precio 
+                }
+                descripcion
+                precio
+            }
+
             cliente {
                 id
                 tipo
@@ -30,6 +75,7 @@ export const OBTENER_RESERVAS = gql`
             total
             metodoPago
             politicas
+            estado
         }
     }
 `;

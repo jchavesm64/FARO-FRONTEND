@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Container } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import { useQuery } from "@apollo/client";
@@ -9,7 +9,14 @@ const Booking = () => {
 
     const { data: data_booking } = useQuery(OBTENER_RESERVAS, { pollInterval: 1000 });
 
-    console.log(data_booking)
+    const [booking, setBooking] = useState([]);
+
+    useEffect(() => {
+        setBooking(data_booking?.obtenerReservas || [])
+    }, [data_booking]);
+    
+    console.log(booking);
+
     return (
         <React.Fragment>
             <div className="page-content">

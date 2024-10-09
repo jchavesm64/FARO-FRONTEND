@@ -297,7 +297,7 @@ export const sidebarRoutes = [
     },
     {
         label: "Facturación Electronica",
-        icon: "fas fa-soap",
+        icon: "mdi mdi-file-document",
         subItem: [
             { sublabel: "Mantenimiento", link: "/invoice/maintenance" },
             { sublabel: "Notas de crédito", link: "/invoice/credit/notes" },

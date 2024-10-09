@@ -12,10 +12,10 @@ export default function ReceptionHome() {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Recepción" />
-                    <Row className="flex justify-content-center gap-3">
+                    <Row  key='receprionHome' className="flex justify-content-center gap-3">
                         {
                             receptionRoutes.map((route, index) => (
-                                <ButtomCardHome key={index} route={route} />
+                                <ButtomCardHome key={`${route}${index}`} route={route} />
                             ))
                         }
                     </Row>

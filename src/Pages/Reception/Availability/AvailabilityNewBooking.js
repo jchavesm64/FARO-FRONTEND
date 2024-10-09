@@ -206,7 +206,6 @@ const ReceptionHome = () => {
     }, [typeRoom, rooms, month, year, reservaHabitacion]);
 
     const getData = (day, show) => {
-        console.log(day);
 
         setModal(show);
         setDataModal({
@@ -236,11 +235,12 @@ const ReceptionHome = () => {
                 <Container fluid={true}>
                     <Breadcrumbs title="Disponibilidad y nuevas reservas" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
 
-                    <Card className='col-md-12 p-2'>
-                        <Row className="d-flex justify-content-between m-2 border-bottom align-items-center shadow_calendar_button" >
-                            <div className="col-md-2 col-sm-12 mb-3">
-                                <Link to="/reception/availability/booking">
+                    <Card key='availability' className='col-md-12 p-2'>
+                        <Row key='rowavailability' className="d-flex justify-content-between m-2 border-bottom align-items-center shadow_calendar_button" >
+                            <div key='maindiv' className="col-md-2 col-sm-12 mb-3">
+                                <Link key='linkviewbooking' to="/reception/availability/booking">
                                     <button
+                                        key='buttonviewbooking'
                                         type="button"
                                         className="btn btn-primary waves-effect waves-light shadow_calendar"
                                         style={{ width: '100%' }}
@@ -251,8 +251,9 @@ const ReceptionHome = () => {
                                 </Link>
                             </div>
                             <div className="col-md-2 col-sm-12 mb-3">
-                                <Link to="/reception/availability/newbooking">
+                                <Link key='linknewbooking' to="/reception/availability/newbooking">
                                     <button
+                                        key='buttonnewbooking'
                                         type="button"
                                         className="btn btn-primary waves-effect waves-light shadow_calendar"
                                         style={{ width: '100%' }}
@@ -263,10 +264,11 @@ const ReceptionHome = () => {
                                 </Link>
                             </div>
                         </Row>
-                        <Row className='mt-3'>
-                            <div className="col-md-4 m-3 mt-0 shadow_calendar rounded">
-                                <Col className='d-flex justify-content-center '>
+                        <Row key='calendarmain' className='mt-3'>
+                            <div key='calendardiv' className="col-md-4 m-3 mt-0 shadow_calendar rounded">
+                                <Col key='calendarselect' className='d-flex justify-content-center '>
                                     <Select
+                                        key='selectmonth'
                                         options={monthOptions}
                                         value={{ value: month, label: monthOptions[month].label }}
                                         onChange={handleMonthChange}
@@ -276,6 +278,7 @@ const ReceptionHome = () => {
 
                                     />
                                     <Select
+                                        key='selectyear'
                                         options={yearOptions}
                                         value={{ value: year, label: year }}
                                         onChange={handleYearChange}
@@ -285,25 +288,25 @@ const ReceptionHome = () => {
 
                                     />
                                 </Col>
-                                <div className="calendar mb-1 ">
-                                    <div className="calendar-header p-1">
+                                <div key='hotcalendar' className="calendar mb-1 ">
+                                    <div key='listday' className="calendar-header p-1">
                                         {
-                                            daysWeek.map(day => <div className="header-day" key={day.lable}>{day.label}</div>)
+                                            daysWeek.map(day => <div className="header-day" key={`header-day${day.label}`}>{day.label}</div>)
                                         }
                                     </div>
-                                    <div className="calendar-body p-1">
+                                    <div key='calendardays' className="calendar-body p-1">
                                         {weeks.map((week, weekIndex) => (
-                                            <div className="calendar-week" key={weekIndex}>
+                                            <div className="calendar-week" key={`calendarweek${weekIndex}`}>
                                                 {week.map((dia) => (
                                                     <Button
-                                                        key={dia.dia}
+                                                        key={`dayweek${dia.dia}${week}`}
                                                         className="calendar-day border border-secondary rounded "
                                                         style={{
                                                             backgroundColor: getColorByPercentage(parseInt(dia.porcentajeDisponibilidad)),
                                                         }}
                                                         onClick={() => getData(dia, true)}
                                                     >
-                                                        <span className="fs-5 " style={{
+                                                        <span key={`span${dia.dia}${week}`} className="fs-5 " style={{
                                                             color: parseInt(dia.porcentajeDisponibilidad) === 100 ? 'white' : 'black',
                                                         }}>{dia.dia}</span>
 
@@ -315,7 +318,7 @@ const ReceptionHome = () => {
                                 </div>
                             </div>
 
-                            <div className="col-md-7">
+                            <div key='listtyperoom' className="col-md-7">
                                 <Card>
                                     <CardBody>
                                         <DataList data={roomAvailability !== undefined ? roomAvailability : []} type="typeroomdata" displayLength={3} />
@@ -323,12 +326,12 @@ const ReceptionHome = () => {
                                 </Card>
                             </div>
                         </Row>
-                        <Modal isOpen={modal} toggle={toggle} >
-                            <ModalHeader toggle={toggle}><span className="fs-4 m-0 span_package_color">Información de reserva por día</span></ModalHeader>
-                            <ModalBody>
-                                <div className="col-md-12 border-bottom mb-3">
-                                    <label className="fs-6 m-0 ms-4 span_package_color">
-                                        <strong className="mdi mdi-calendar-range me-1" />
+                        <Modal key='modalavailability' isOpen={modal} toggle={toggle} >
+                            <ModalHeader key='modalheader' toggle={toggle}><span className="fs-4 m-0 span_package_color">Información de reserva por día</span></ModalHeader>
+                            <ModalBody key='modalbody'>
+                                <div key='modaldivmain' className="col-md-12 border-bottom mb-3">
+                                    <label key='labelmodalmain' className="fs-6 m-0 ms-4 span_package_color">
+                                        <strong key='modaliconday' className="mdi mdi-calendar-range me-1" />
                                         <strong>Detalles del día: </strong> <span className="fs-6 label_package_color">{`${dataModal.day}/${month + 1}/${year}`}</span>
                                         <strong> &nbsp; </strong>
                                         <strong>Habitaciones disponibles: </strong> <span className="fs-6 label_package_color">{`${dataModal.rooms}`}</span>
@@ -356,7 +359,7 @@ const ReceptionHome = () => {
                                             <div className="ms-5">
                                                 {filtrarReservasPorFecha(reservaHabitacion, `${year}-${month + 1}-${dataModal.day}`)?.map(data => (
 
-                                                    <div key={data.habitacion}>Habitación: <span className="fs-6 label_package_color">{`${data.habitacion.numeroHabitacion}`}</span></div>
+                                                    <div key={data.habitacion.numeroHabitacion}>Habitación: <span className="fs-6 label_package_color">{`${data.habitacion.numeroHabitacion}`}</span></div>
 
                                                 ))}
                                             </div>

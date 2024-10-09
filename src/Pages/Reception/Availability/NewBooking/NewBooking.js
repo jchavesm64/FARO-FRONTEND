@@ -95,6 +95,8 @@ const NewBooking = () => {
     const [componentSize, setComponentSize] = useState({ width: 0 });
     const wizardRef = useRef(null);
 
+    console.log(extraService)
+
     useEffect(() => {
         setUser(data_user?.obtenerUsuarioByCodigo || [])
     }, [data_user])
@@ -386,7 +388,8 @@ const NewBooking = () => {
             ...extra,
             {
                 ...s.value,
-                cantidad: calAmountService(s.value)
+                cantidad: calAmountService(s.value),
+                extra: 1
             }
         ];
 
@@ -410,15 +413,16 @@ const NewBooking = () => {
     };
 
     const updateAmountService = (type, amount, service) => {
+        debugger
         if (type === 'booking') {
             setExtraService(prevServices =>
                 prevServices.map(s =>
                     s.id === service.id
                         ? {
-                            ...service,
-                            extra: amount
+                            ...s,
+                            extra: amount !== '' ? amount : 0
                         }
-                        : service
+                        : s
                 )
             );
         } else {
@@ -426,10 +430,10 @@ const NewBooking = () => {
                 prevServices.map(s =>
                     s.id === service.id
                         ? {
-                            ...service,
-                            extra: amount
+                            ...s,
+                            extra: amount !== '' ? amount : 0
                         }
-                        : service
+                        : s
                 )
             );
         }
@@ -611,7 +615,7 @@ const NewBooking = () => {
     }, [wizardRef]);
 
     const handleSaveNote = (updatedNote) => {
-        
+
         const update = notes.map(note => {
             if (note.area.id === updatedNote.area.id) {
                 return {
