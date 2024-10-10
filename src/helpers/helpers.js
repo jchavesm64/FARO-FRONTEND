@@ -2,7 +2,7 @@ import moment from 'moment-timezone';
 
 export const calculateStockMovements = (datos) => {
     var cantidad = 0;
-    datos.map(item => {
+    datos.forEach(item => {
         if (item.tipo === 'ENTRADA') {
             cantidad += item.cantidad
         } else {
@@ -13,7 +13,7 @@ export const calculateStockMovements = (datos) => {
 }
 
 export const getFechaTZ = (modo, fecha) => {
-    if (fecha !== null && fecha.trim().length > 0, modo !== null && modo.trim().length > 0) {
+    if (fecha !== null && fecha.trim().length > 0 && modo !== null && modo.trim().length > 0) {
         switch (modo) {
             case 'fecha':
                 return moment.tz(fecha, 'America/Costa_Rica').format('DD-MM-YYYY');
