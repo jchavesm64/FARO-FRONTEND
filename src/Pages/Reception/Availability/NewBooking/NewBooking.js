@@ -95,8 +95,6 @@ const NewBooking = () => {
     const [componentSize, setComponentSize] = useState({ width: 0 });
     const wizardRef = useRef(null);
 
-    console.log(extraService)
-
     useEffect(() => {
         setUser(data_user?.obtenerUsuarioByCodigo || [])
     }, [data_user])

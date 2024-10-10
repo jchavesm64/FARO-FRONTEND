@@ -20,7 +20,7 @@ const Summary = ({ ...props }) => {
                             <Col className='col-md-12'>
                                 <Card className='col-md-12 bg-light border ms-2 p-2  room_card_wizard'>
                                     <div className="col-md-12">
-                                        <h3 key='summary' className="  mt-2">Resumen de Reserva</h3>
+                                        <h3 key='summary' className="mt-2">Resumen de Reserva</h3>
                                         <div className="d-flex flex-column">
                                             <label className="fs-5 m-0 ms-1 mb-2 span_package_color">
                                                 <strong>Fecha de la reserva:</strong> <span className="fs-5 label_package_color">{currentDate}</span>

@@ -9,9 +9,8 @@ const Rooms = ({ ...props }) => {
     useEffect(() => { setDisabledButton(roomsBooking.length === 0) }, [setDisabledButton, roomsBooking]);
 
     const [enableRooms, setEnableRooms] = useState(false);
-    console.log(roomsBooking.length)
-    useEffect(() => {
 
+    useEffect(() => {
         const valIndividualBooking = () => {
             if (typeBooking !== 'IN') return false;
 
