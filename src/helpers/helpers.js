@@ -142,12 +142,18 @@ export const convertDate = (fechaStr) => {
     return `${currentYear}-${monthFormatted}-${dayFormatted}`;
 };
 
-export const timestampToDateLocal = (timestamp) => {
+export const timestampToDateLocal = (timestamp, format) => {
     const date = new Date(timestamp);
 
     const day = String(date.getUTCDate()).padStart(2, '0');  // Obtener el día y agregar ceros a la izquierda si es necesario
     const month = String(date.getUTCMonth() + 1).padStart(2, '0');  // Obtener el mes (de 0 a 11) y agregar 1
     const year = date.getUTCFullYear();
 
-    return `${day}/${month}/${year}`;
+    if (format === 'label') {
+
+        return `${day}/${month}/${year}`;
+    }
+    if (format === 'date') {
+        return `${year}-${month}-${day}`;
+    }
 };

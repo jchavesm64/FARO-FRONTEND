@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react'
-import { Button, Card, Container } from 'reactstrap';
+import { Button, Card, Container, Row } from 'reactstrap';
 import Breadcrumbs from '../../../../components/Common/Breadcrumb';
 import { stepsWizardMenuBooking } from '../../../../constants/routesConst';
 import { OBTENER_CLIENTES } from '../../../../services/ClienteService';
@@ -9,7 +9,7 @@ import { OBTENER_SERVICIO } from '../../../../services/ServiciosExtraService';
 import { infoAlert } from '../../../../helpers/alert';
 import { OBTENER_PAQUETES } from '../../../../services/PaquetesService';
 import { OBTENER_TEMPORADAS } from '../../../../services/TemporadaService';
-import { convertDate } from '../../../../helpers/helpers';
+import { convertDate, timestampToDateLocal } from '../../../../helpers/helpers';
 
 import SearchCustomer from './SearchCustomer';
 import TypeDateBooking from './Type&DateBooking';
@@ -23,14 +23,16 @@ import { useStepper } from 'headless-stepper';
 import { OBTENER_AREAS } from '../../../../services/AreasOperativasService';
 import { OBTENER_TOURS } from '../../../../services/TourService';
 import { useMutation, useQuery } from '@apollo/client';
-import { SAVE_RESERVA } from '../../../../services/ReservaService';
+import { OBTENER_RESERVA, SAVE_RESERVA } from '../../../../services/ReservaService';
 import { OBTENER_USUARIO_CODIGO } from '../../../../services/UsuarioService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { OBTENER_RESERVAHABITACION } from '../../../../services/ReservaHabitacionService';
 
 const NewBooking = () => {
     document.title = "Nueva Reserva | FARO";
 
     const navigate = useNavigate();
+    const { id } = useParams();
 
     const currentDate = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
 
@@ -44,6 +46,9 @@ const NewBooking = () => {
     const { data: data_tours } = useQuery(OBTENER_TOURS, { pollInterval: 1000 });
     const { data: data_user } = useQuery(OBTENER_USUARIO_CODIGO, { variables: { codigo: localStorage.getItem('cedula') }, pollInterval: 1000 });
     const { data: operativeAreas } = useQuery(OBTENER_AREAS, { pollInterval: 1000 });
+
+    const { loading: loading_booking, data: booking } = useQuery(OBTENER_RESERVA, { variables: { id: id }, skip: !id, pollInterval: 1000 });
+    const { data: bookingRoom } = useQuery(OBTENER_RESERVAHABITACION, { variables: { id: booking?.obtenerReserva.id }, skip: !id, pollInterval: 1000 })
 
     const [insertar] = useMutation(SAVE_RESERVA);
 
@@ -95,6 +100,22 @@ const NewBooking = () => {
     const [componentSize, setComponentSize] = useState({ width: 0 });
     const wizardRef = useRef(null);
 
+
+    //Load data for edit booking 
+    useEffect(() => {
+        if (id !== undefined) {
+            setCustomer(booking?.obtenerReserva.cliente);
+            setTypeBooking(booking?.obtenerReserva.tipo);
+            setUser(booking?.obtenerReserva.usuario.nombre);
+            setAmountAdult(booking?.obtenerReserva.numeroPersonas.adulto);
+            setAmountChildren(booking?.obtenerReserva.numeroPersonas.ninos);
+            setCheckIn(timestampToDateLocal(Number(bookingRoom?.obtenerReservaHabitacion[0]?.fechaEntrada), 'date'));
+            setCheckOut(timestampToDateLocal(Number(bookingRoom?.obtenerReservaHabitacion[0]?.fechaSalida), 'date'));
+            setPackageBookingList(booking?.obtenerReserva?.paquetes);
+        }
+    }, [booking, bookingRoom, id])
+
+    // Data for new boooking
     useEffect(() => {
         setUser(data_user?.obtenerUsuarioByCodigo || [])
     }, [data_user])
@@ -543,7 +564,7 @@ const NewBooking = () => {
         if (packageBooking) {
             const exist = packageBookingList.find(e => e.id === packageBooking.value.id)
             if (exist) {
-                infoAlert('Oops', 'Ya existe esta comodidad en la habitación', 'warning', 3000, 'top-end')
+                infoAlert('Oops', 'Ya existe este paquete en la reserva', 'warning', 3000, 'top-end')
                 setPackageBooking(null)
                 return
             }
@@ -559,7 +580,7 @@ const NewBooking = () => {
             setPackageBooking(null);
 
         } else {
-            infoAlert('Oops', 'No ha seleccionado una comodida', 'error', 3000, 'top-end')
+            infoAlert('Oops', 'No ha seleccionado un paquete', 'error', 3000, 'top-end')
         }
 
     };
@@ -695,11 +716,31 @@ const NewBooking = () => {
         }
     };
 
+    if (loading_booking && id) {
+        return (
+            <React.Fragment>
+                <div className="page-content">
+                    <Container fluid={true}>
+                        <Breadcrumbs title={!id ? 'Nueva Reserva' : 'Editar Reserva'} breadcrumbItem="Reservas" breadcrumbItemUrl={!id ? '/reception/availability' : '/reception/availability/booking'} />
+                        <Row>
+                            <div className="col text-center pt-3 pb-3">
+                                <div className="spinner-border" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </Row>
+                    </Container>
+                </div>
+            </React.Fragment>
+        );
+
+    };
+
     return (
         <React.Fragment>
             <div className="page-content " ref={wizardRef}>
                 <Container fluid={true}>
-                    <Breadcrumbs title="Nueva Reserva" breadcrumbItem="Reservas" breadcrumbItemUrl='/reception/availability' />
+                    <Breadcrumbs title={!id ? 'Nueva Reserva' : 'Editar Reserva'} breadcrumbItem="Reservas" breadcrumbItemUrl={!id ? '/reception/availability' : '/reception/availability/booking'} />
                     <Card className='col-md-12 p-2'>
                         <div className='d-flex col-md-12 justify-content-center '>
                             <nav className='d-flex col-md-12 justify-content-center shadow_wizard wizard_bar' {...stepperProps}>

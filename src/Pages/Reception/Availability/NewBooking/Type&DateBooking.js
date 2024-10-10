@@ -41,7 +41,7 @@ const TypeDateBooking = ({ ...props }) => {
                                             className="form-control"
                                             type="date"
                                             id="checkInDate"
-                                            value={checkIn}
+                                            value={checkIn || ''}
                                             disabled={!typeBooking}
                                             onChange={(e) => { setCheckIn(e.target.value) }}
                                             min={new Date().toISOString().split('T')[0]}
@@ -53,7 +53,7 @@ const TypeDateBooking = ({ ...props }) => {
                                             className="form-control"
                                             type="date"
                                             id="checkOutDate"
-                                            value={checkOut}
+                                            value={checkOut || ''}
                                             disabled={checkIn === ''}
                                             onChange={(e) => { setCheckOut(e.target.value) }}
                                             min={checkIn ? new Date(new Date(checkIn).setDate(new Date(checkIn).getDate() + 1)).toISOString().split('T')[0] : ''}
