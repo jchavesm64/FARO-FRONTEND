@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Card, CardBody, CardHeader, CardTitle, Col, Container, Row } from "reactstrap";
+import { Badge, Card, CardBody, CardHeader, CardTitle, Container, Row } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import { useQuery } from "@apollo/client";
 import { OBTENER_RESERVAS } from "../../../../services/ReservaService";
