@@ -20,6 +20,12 @@ import TableCleanlinessCheck from '../../Pages/CleanlinessCheck/TableCleanliness
 import TableInternTransfers from '../../Pages/InternTransfers/TableInternTransfers';
 import TableAssets from '../../Pages/Assets/TableAssets';
 import TableAssetMove from '../../Pages/AssetsMove/TableAssetMove';
+import TableOrders from '../../Pages/Restaurant/Orders/TableOrders';
+import TableFloors from '../../Pages/GeneralSettings/Floors/TableFloors';
+import TableTables from '../../Pages/GeneralSettings/Tables/TableTables';
+import TableMenuType from '../../Pages/GeneralSettings/MenuType/TableMenuType';
+import TableDishType from '../../Pages/GeneralSettings/DishType/TableDishType';
+import TablePaymentMethod from '../../Pages/GeneralSettings/PaymentMethod/TablePaymentMethod';
 
 const DataList = ({ ...props }) => {
     const { data, type, displayLength, onDelete } = props;
@@ -44,6 +50,7 @@ const DataList = ({ ...props }) => {
         for (let i = index; i < size; i++) {
             array.push(data[i])
         }
+
         return array
     }
 
@@ -139,6 +146,30 @@ const DataList = ({ ...props }) => {
                 {
                     type === 'assetMove' &&
                     <TableAssetMove {...props} data={datos} />
+                }
+                {
+                    type === 'orders' &&
+                    <TableOrders {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'floors' &&
+                    <TableFloors {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'tables' &&
+                    <TableTables {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'menuType' &&
+                    <TableMenuType {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'dishType' &&
+                    <TableDishType {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'paymentMethod' &&
+                    <TablePaymentMethod {...props} data={datos} onDelete={onDelete} />
                 }
             </div>
             {(data.length > displayLength) &&
