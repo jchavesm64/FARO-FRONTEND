@@ -44,6 +44,7 @@ import Menu from "../Pages/Restaurant/Menu/Menu";
 import NewMenu from "../Pages/Restaurant/Menu/NewMenu";
 import EditMenuContainer from "../Pages/Restaurant/Menu/EditMenuContainer";
 import RestaurantHome from "../Pages/Restaurant/RestaurantHome";
+import Orders from "../Pages/Restaurant/Orders/Orders";
 import CleaningJobs from "../Pages/CleaningJobs/CleaningJobs";
 
 import TaxManagement from "../Pages/TaxManagement/TaxManagement";
@@ -67,6 +68,21 @@ import InternTransfers from "../Pages/InternTransfers/InternTransfers";
 import EditCleanlinessCheckContainer from "../Pages/CleanlinessCheck/EditCleanlinessCheckContainer";
 import NewInternTransfer from "../Pages/InternTransfers/NewInternTransfer";
 import EditInternTransferContainer from "../Pages/InternTransfers/EditInternTransferContainer";
+import Floors from "../Pages/GeneralSettings/Floors/Floors";
+import NewFloor from "../Pages/GeneralSettings/Floors/NewFloor";
+import EditFloor from "../Pages/GeneralSettings/Floors/EditFloor";
+import Tables from "../Pages/GeneralSettings/Tables/Tables";
+import NewTable from "../Pages/GeneralSettings/Tables/NewTable";
+import EditTable from "../Pages/GeneralSettings/Tables/EditTable";
+import MenuType from "../Pages/GeneralSettings/MenuType/MenuType";
+import NewMenuType from "../Pages/GeneralSettings/MenuType/NewMenuType";
+import EditMenuType from "../Pages/GeneralSettings/MenuType/EditMenuType";
+import DishType from "../Pages/GeneralSettings/DishType/DishType";
+import NewDishType from "../Pages/GeneralSettings/DishType/NewDishType";
+import EditDishType from "../Pages/GeneralSettings/DishType/EditDishType";
+import PaymentMethod from "../Pages/GeneralSettings/PaymentMethod/PaymentMethod";
+import NewPaymentMethod from "../Pages/GeneralSettings/PaymentMethod/NewPaymentMethod";
+import EditPaymentMethod from "../Pages/GeneralSettings/PaymentMethod/EditPaymentMethod";
 
 import Assets from "../Pages/Assets/Assets";
 import NewAsset from "../Pages/Assets/NewAsset";
@@ -76,6 +92,8 @@ import AssetMove from "../Pages/AssetsMove/AssetMove";
 import NewAssetMove from "../Pages/AssetsMove/NewAssetMove";
 import NewSupplyType from "../Pages/GeneralSettings/SupplyType/NewSupplyType";
 import NewLocation from "../Pages/GeneralSettings/Locations/NewLocation";
+import CreateOrder from "../Pages/Restaurant/Orders/CreateOrder";
+
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -126,6 +144,8 @@ const authProtectedRoutes = [
   { path: "/restaurant/menu", component: <Menu /> },
   { path: "/restaurant/newmenu", component: <NewMenu /> },
   { path: "/restaurant/editmenu/:id", component: <EditMenuContainer /> },
+  { path: "/restaurant/orders", component: <Orders /> },
+  { path: "/restaurant/orders/new", component: <CreateOrder /> },
 
 
   { path: "/cleaningjobs", component: <CleaningJobs /> },
@@ -161,6 +181,21 @@ const authProtectedRoutes = [
   { path: "/locations", component: <Location /> },
   { path: "/editlocation/:id", component: <EditLocation /> },
   { path: "/newlocation", component: <NewLocation /> },
+  { path: "/floors", component: <Floors /> },
+  { path: "/newfloor", component: <NewFloor /> },
+  { path: "/editfloor/:id", component: <EditFloor /> },
+  { path: "/tables", component: <Tables /> },
+  { path: "/newtable", component: <NewTable /> },
+  { path: "/edittable/:id", component: <EditTable /> },
+  { path: "/menutype", component: <MenuType /> },
+  { path: "/newmenutype", component: <NewMenuType /> },
+  { path: "/editmenutype/:id", component: <EditMenuType /> },
+  { path: "/dishtype", component: <DishType /> },
+  { path: "/newdishtype", component: <NewDishType /> },
+  { path: "/editdishtype/:id", component: <EditDishType /> },
+  { path: "/paymentmethods", component: <PaymentMethod /> },
+  { path: "/newpaymentmethod", component: <NewPaymentMethod /> },
+  { path: "/editpaymentmethod/:id", component: <EditPaymentMethod /> },
 
   {
     path: "/",
