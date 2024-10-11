@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { SAVE_UBICACION } from "../../../services/UbicacionService";
 
 const NewLocation = () => {
-    document.title = "Proveeduría | FARO";
+    document.title = "Ubicaciones | FARO";
 
     const navigate = useNavigate();
     const [insertar] = useMutation(SAVE_UBICACION);
