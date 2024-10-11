@@ -8,8 +8,15 @@ export const OBTENER_MENUS = gql`
             descripcion
             estado
             precioCosto
-            precioVenta
-            tipo
+            porcentajeGanancia
+            tipoPlatillo{
+                id
+                nombre
+            }
+            tipoMenu{
+                id
+                nombre
+            }
         }
     }
 `;
@@ -22,8 +29,15 @@ export const OBTENER_MENU = gql`
             descripcion
             estado
             precioCosto
-            precioVenta
-            tipo
+            porcentajeGanancia
+            tipoPlatillo{
+                id
+                nombre
+            }
+            tipoMenu{
+                id
+                nombre
+            }
         }
     }
 `;

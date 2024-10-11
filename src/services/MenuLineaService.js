@@ -12,6 +12,7 @@ export const OBTENER_LINEAS_MENU = gql`
                 existencias
                 estado
                 tipo
+                precioCompra
             }
             menu{
                 id
@@ -19,8 +20,15 @@ export const OBTENER_LINEAS_MENU = gql`
                 descripcion
                 estado
                 precioCosto
-                precioVenta
-                tipo
+                porcentajeGanancia
+                tipoPlatillo{
+                    id
+                    nombre
+                }
+                tipoMenu{
+                    id
+                    nombre
+                }
             }
             cantidad
         }
@@ -43,7 +51,14 @@ export const OBTENER_LINEA_MENU = gql`
                 estado
                 precioCosto
                 precioVenta
-                tipo
+                tipoPlatillo{
+                    id
+                    nombre
+                }
+                tipoMenu{
+                    id
+                    nombre
+                }
             }
             cantidad
         }
