@@ -62,7 +62,6 @@ export const DELETE_ROL = gql`
     }
 `;
 
-
 export const SAVE_ROL = gql`
     mutation insertarRol($input:RolInput){
         insertarRol(input:$input){

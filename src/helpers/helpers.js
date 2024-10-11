@@ -102,3 +102,52 @@ export const tienePermisoEliminarModulo = (roles, modulo) => {
     });
     return false
 }
+
+export const convertDate = (fechaStr) => {
+    const currentYear = new Date().getFullYear();
+
+    const formatter = new Intl.DateTimeFormat('es', { month: 'long' }); //'es' se cambia para manejar el idioma selecionado
+
+    const regex = /(\d{1,2}) de (\w+)/;
+    const match = fechaStr.match(regex);
+
+    if (!match) {
+        throw new Error('Formato de fecha inválido. Usa el formato "DD de MMMM".');
+    }
+
+    const [, day, monthName] = match;
+
+    let monthIndex = -1;
+
+    for (let i = 0; i < 12; i++) {
+        const formattedMonth = formatter.formatToParts(new Date(currentYear, i)).find(part => part.type === 'month').value;
+        if (formattedMonth.toLowerCase() === monthName.toLowerCase()) {
+            monthIndex = i;
+            break;
+        }
+    }
+
+    if (monthIndex === -1) {
+        throw new Error('Nombre del mes inválido.');
+    }
+    const date = new Date(currentYear, monthIndex, day);
+
+    if (isNaN(date.getTime())) {
+        throw new Error('Fecha inválida.');
+    }
+
+    const monthFormatted = String(date.getMonth() + 1).padStart(2, '0');
+    const dayFormatted = String(date.getDate()).padStart(2, '0');
+
+    return `${currentYear}-${monthFormatted}-${dayFormatted}`;
+};
+
+export const timestampToDateLocal = (timestamp) => {
+    const date = new Date(timestamp);
+
+    const day = String(date.getUTCDate()).padStart(2, '0');  // Obtener el día y agregar ceros a la izquierda si es necesario
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');  // Obtener el mes (de 0 a 11) y agregar 1
+    const year = date.getUTCFullYear();
+
+    return `${day}/${month}/${year}`;
+};
