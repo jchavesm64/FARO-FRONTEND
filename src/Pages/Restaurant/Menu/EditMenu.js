@@ -10,23 +10,29 @@ import SpanSubtitleForm from "../../../components/Forms/SpanSubtitleForm";
 import { OBTENER_MATERIAS_PRIMAS } from "../../../services/MateriaPrimaService";
 import ButtonIconTable from "../../../components/Common/ButtonIconTable";
 import { ACTUALIZAR_LINEA_MENU, ELIMINAR_LINEA_MENU, INSERTAR_LINEA_MENU, OBTENER_LINEAS_MENU } from "../../../services/MenuLineaService";
+import { OBTENER_TIPOS_MENU } from "../../../services/TipoMenuService";
+import { OBTENER_TIPOS_PLATILLO } from "../../../services/TipoPlatilloService";
 import Swal from "sweetalert2";
 
 
 const EditMenu = ({ props, menu }) => {
     document.title = "Menu | FARO";
-
+    console.log(menu)
     const navigate = useNavigate();
 
     const [actualizar] = useMutation(ACTUALIZAR_MENU);
     const [insertarLinea] = useMutation(INSERTAR_LINEA_MENU);
     const { loading: load_materia_prima, error: error_productos, data: data_productos } = useQuery(OBTENER_MATERIAS_PRIMAS, { variables: { tipo: 'Restaurante' }, pollInterval: 1000 })
     const { loading: load_lineas_menu, error: error_lineas_menu, data: data_lineas_menu, refetch: refetch_lineas } = useQuery(OBTENER_LINEAS_MENU, { variables: { id: menu.id }, pollInterval: 1000 })
+    const { loading: load_tipos_menu, error: error_tipos_menu, data: data_tipos_menu } = useQuery(OBTENER_TIPOS_MENU, { pollInterval: 1000 })
+    const { loading: load_tipos_platillo, error: error_tipos_platillo, data: data_tipos_platillo } = useQuery(OBTENER_TIPOS_PLATILLO, { pollInterval: 1000 })
 
     const [nombre, setNombre] = useState('')
     const [descripcion, setDescripcion] = useState('')
-    const [tipo, setTipo] = useState(null)
-    const [precioVenta, setPrecioVenta] = useState(0)
+    const [tipoPlatillo, setTipoPlatillo] = useState(null)
+    const [tiposMenu, setTiposMenu] = useState([])
+    const [ganancia, setGanancia] = useState(0)
+    const [precioCosto, setPrecioCosto] = useState(0)
 
     const [producto, setProducto] = useState(null)
     const [cantidad, setCantidad] = useState(0)
@@ -35,48 +41,59 @@ const EditMenu = ({ props, menu }) => {
     const [idEditar, setIdEditar] = useState(-1)
 
     const [lineasMenu, setLineasMenu] = useState([])
+    const [dishTypes, setDishTypes] = useState([])
+    const [menuTypes, setMenuTypes] = useState([])
+
     const [desactivar] = useMutation(ELIMINAR_LINEA_MENU);
     const [actualizarLinea] = useMutation(ACTUALIZAR_LINEA_MENU);
 
+    useEffect(() => {
+        if (data_tipos_platillo?.obtenerTiposPlatillo) {
+            const datos = [];
+            data_tipos_platillo.obtenerTiposPlatillo.map(item => {
+                datos.push({
+                    label: item.nombre,
+                    value: item.id
+                });
+            });
+            setDishTypes(datos)
+        }
+    }, [data_tipos_platillo])
+
+    useEffect(() => {
+        if (data_tipos_menu?.obtenerTiposMenu) {
+            const datos = [];
+            data_tipos_menu.obtenerTiposMenu.map(item => {
+                datos.push({
+                    label: item.nombre,
+                    value: item.id
+                });
+            });
+            setMenuTypes(datos)
+        }
+    }, [data_tipos_menu])
+
+    useEffect(() => {
+        if (lineasMenu.length > 0) {
+            setPrecioCosto(lineasMenu.reduce((acc, l) => acc + (l.producto.precioCompra * l.cantidad), 0))
+        } else {
+            setPrecioCosto(0)
+        }
+    }, [lineasMenu])
 
     useEffect(() => {
         setNombre(menu.nombre)
         setDescripcion(menu.descripcion)
-        setTipo({ label: menu.tipo, value: menu.tipo })
-        setPrecioVenta(menu.precioVenta)
-
+        setTipoPlatillo({ label: menu.tipoPlatillo.nombre, value: menu.tipoPlatillo.id })
+        setTiposMenu(menu.tipoMenu.map(t => ({ label: t.nombre, value: t.id })))
+        setGanancia(menu.porcentajeGanancia)
     }, [menu])
 
     useEffect(() => {
+        console.log(data_lineas_menu)
         setLineasMenu(data_lineas_menu?.obtenerLineasMenu || [])
     }, [data_lineas_menu])
 
-    const menuTypes = [
-        {
-            label: "Entrada",
-            value: "Entrada"
-        },
-        {
-            label: "Plato fuerte",
-            value: "Plato fuerte"
-        },
-        {
-            label: "Guarnicion",
-            value: "Guarnicion"
-        },
-        {
-            label: "Postres",
-            value: "Postres"
-        },
-        {
-            label: "Menu Niño",
-            value: "Menu Niño"
-        },
-        {
-            label: "Bebidas",
-            value: "Bebidas"
-        }
-    ]
 
     const getProductos = () => {
         const datos = [];
@@ -109,10 +126,10 @@ const EditMenu = ({ props, menu }) => {
         setIdEditar(-1)
     }
 
-    const eliminarLinea = (index, id, name) => {
+    const eliminarLinea = (linea, index) => {
         Swal.fire({
             title: "Eliminar ingrediente",
-            text: `¿Está seguro de eliminar el ingrediente ${name}?`,
+            text: `¿Está seguro de eliminar el ingrediente ${linea.producto.nombre}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#0BB197",
@@ -121,11 +138,11 @@ const EditMenu = ({ props, menu }) => {
             confirmButtonText: "Sí, ¡eliminar!"
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const { data } = await desactivar({ variables: { id } });
+                const { data } = await desactivar({ variables: { id: linea.id } });
                 const { estado, message } = data.desactivarLineaMenu;
                 if (estado) {
-                    setLineasMenu(lineasMenu.filter((l, i) => i !== index))
                     infoAlert('Ingrediente eliminado', message, 'success', 3000, 'top-end')
+                    refetch_lineas();
                 } else {
                     infoAlert('Eliminar ingrediente', message, 'error', 3000, 'top-end')
                 }
@@ -133,12 +150,12 @@ const EditMenu = ({ props, menu }) => {
         });
     }
 
-    const editarLinea = (linea, index, id) => {
+    const editarLinea = (linea, index) => {
         setIndexEditar(index)
         setCantidad(linea.cantidad)
         setProducto({ value: linea.producto, label: linea.producto.nombre })
         setModoLinea('Editar')
-        setIdEditar(id)
+        setIdEditar(linea.id)
     }
 
     const disabledSaveLine = () => {
@@ -174,7 +191,7 @@ const EditMenu = ({ props, menu }) => {
                 infoAlert('Oops', message, 'error', 3000, 'top-end')
             }
 
-
+            obj.producto = producto.value
             setLineasMenu([...lineasMenu, obj])
 
         } else {
@@ -201,8 +218,10 @@ const EditMenu = ({ props, menu }) => {
     const [disableSave, setDisableSave] = useState(true);
 
     useEffect(() => {
-        setDisableSave(!nombre || nombre === null || nombre.trim().length === 0 || lineasMenu.length <= 0 || !tipo)
-    }, [nombre, lineasMenu, tipo])
+        setDisableSave(!nombre || nombre === null || nombre.trim().length === 0 ||
+            lineasMenu.length <= 0 || !tipoPlatillo || tipoPlatillo === null ||
+            ganancia < 0 || !tiposMenu || tiposMenu.length <= 0)
+    }, [nombre, lineasMenu, tipoPlatillo, ganancia, tiposMenu])
 
 
     const onSave = async () => {
@@ -212,9 +231,10 @@ const EditMenu = ({ props, menu }) => {
                 estado: 'ACTIVO',
                 nombre: nombre,
                 descripcion: descripcion,
-                precioCosto: 0,
-                precioVenta: precioVenta,
-                tipo: tipo.value
+                precioCosto: precioCosto,
+                tipoPlatillo: tipoPlatillo.value,
+                porcentajeGanancia: ganancia,
+                tipoMenu: tiposMenu.map(t => t.value)
             }
 
             const { data } = await actualizar({ variables: { id: menu.id, input }, errorPolicy: 'all' });
@@ -227,7 +247,7 @@ const EditMenu = ({ props, menu }) => {
             }
             setDisableSave(false)
         } catch (error) {
-            infoAlert('Oops', `Ocurrió un error inesperado al actaulizar el ${tipo.value}`, 'error', 3000, 'top-end')
+            infoAlert('Oops', `Ocurrió un error inesperado al actaulizar ${nombre}`, 'error', 3000, 'top-end')
             setDisableSave(false)
         }
     }
@@ -255,7 +275,14 @@ const EditMenu = ({ props, menu }) => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title='Editar plato' breadcrumbItem='Menú' breadcrumbItemUrl='/restaurant/menu' />
-
+                    <Row>
+                        <div className="col mb-3 text-end">
+                            <button disabled={disableSave} onClick={onSave} type="button" className="btn btn-primary waves-effect waves-light" >
+                                Guardar{" "}
+                                <i className="ri-save-line align-middle ms-2"></i>
+                            </button>
+                        </div>
+                    </Row>
                     <Row>
                         <div className="col-md-5 col-sm-12 mb-3">
                             <Row>
@@ -265,17 +292,33 @@ const EditMenu = ({ props, menu }) => {
                             </Row>
                             <Row>
                                 <div className="col mb-3">
-                                    <label htmlFor="tipo" className="form-label">* Tipo</label>
+                                    <label htmlFor="tipoPlatillo" className="form-label">* Tipo Platillo</label>
                                     <Select
-                                        id="tipo"
-                                        value={tipo}
+                                        id="tipoPlatillo"
+                                        value={tipoPlatillo}
                                         onChange={(e) => {
-                                            setTipo(e);
+                                            setTipoPlatillo(e);
                                         }}
-                                        options={menuTypes}
+                                        options={dishTypes}
                                         classNamePrefix="select2-selection"
                                         isSearchable={true}
                                         menuPosition="fixed"
+                                    />
+                                </div>
+                            </Row>
+                            <Row>
+                                <div className="col-md-12 col-sm-12 mb-3">
+                                    <label htmlFor="tipoPlatillo" className="form-label">* Tipos de Menu</label>
+                                    <Select
+                                        options={menuTypes}
+                                        classNamePrefix="select2-selection"
+                                        isMulti={true}
+                                        menuPosition="fixed"
+                                        value={tiposMenu}
+                                        placeholder="Seleccione los tipos de menu a los que pertenece"
+                                        onChange={(e) => { setTiposMenu(e) }}
+                                        isClearable={true}
+                                        isSearchable={true}
                                     />
                                 </div>
                             </Row>
@@ -293,16 +336,8 @@ const EditMenu = ({ props, menu }) => {
                             </Row>
                             <Row>
                                 <div className="col mb-3">
-                                    <label htmlFor="precioVenta" className="form-label">Precio venta</label>
-                                    <input className="form-control" type="number" id="precioVenta" value={precioVenta} onChange={(e) => setPrecioVenta(e.target.value)} />
-                                </div>
-                            </Row>
-                            <Row>
-                                <div className="col mb-3 text-end">
-                                    <button disabled={disableSave} onClick={onSave} type="button" className="btn btn-primary waves-effect waves-light" >
-                                        Guardar{" "}
-                                        <i className="ri-save-line align-middle ms-2"></i>
-                                    </button>
+                                    <label htmlFor="ganancia" className="form-label">* % de ganancia</label>
+                                    <input className="form-control" type="number" id="ganancia" value={ganancia} onChange={(e) => setGanancia(e.target.value)} />
                                 </div>
                             </Row>
                         </div>
@@ -354,7 +389,7 @@ const EditMenu = ({ props, menu }) => {
                                 </div>
                             </Row>
                             <Row>
-                                <div className='col mt-3 mb-3'>
+                                <div className='col mt-3'>
                                     <div className="table-responsive">
                                         <table className="table">
                                             <thead className="table-light">
@@ -362,6 +397,7 @@ const EditMenu = ({ props, menu }) => {
                                                     <th>Producto</th>
                                                     <th>Cantidad</th>
                                                     <th>Unidad</th>
+                                                    <th>Costo</th>
                                                     <th></th>
                                                 </tr>
                                             </thead>
@@ -372,10 +408,11 @@ const EditMenu = ({ props, menu }) => {
                                                             <td>{linea.producto.nombre}</td>
                                                             <td>{linea.cantidad}</td>
                                                             <td>{linea.producto.unidad}</td>
+                                                            <td>{'₡' + linea.producto.precioCompra * linea.cantidad}</td>
                                                             <td>
                                                                 <div className="d-flex justify-content-end mx-1 my-1">
-                                                                    <ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={() => { editarLinea(linea, index, linea.id) }} />
-                                                                    <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { eliminarLinea(index, linea.id, linea.producto.nombre) }} />
+                                                                    <ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={() => { editarLinea(linea, index) }} />
+                                                                    <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { eliminarLinea(linea, index) }} />
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -384,6 +421,14 @@ const EditMenu = ({ props, menu }) => {
                                             </tbody>
                                         </table>
                                     </div>
+                                </div>
+                            </Row>
+                            <Row className="d-flex align-center">
+                                <div className="bg-white col-12">
+                                    {'Total: ₡ ' + lineasMenu.reduce((acc, l) => acc + (l.producto.precioCompra * l.cantidad), 0)}
+                                </div>
+                                <div className="bg-white col-12">
+                                    {'Precio de venta: ₡ ' + (precioCosto + (precioCosto * (ganancia / 100))).toFixed(2)}
                                 </div>
                             </Row>
                         </div>

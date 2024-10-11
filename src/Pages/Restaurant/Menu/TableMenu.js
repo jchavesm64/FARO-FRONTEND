@@ -22,6 +22,7 @@ const TableMenu = ({ ...props }) => {
                         <th>Tipo</th>
                         <th>Nombre</th>
                         <th>Precio costo</th>
+                        <th>Precio Venta</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -29,9 +30,10 @@ const TableMenu = ({ ...props }) => {
                     {
                         data.map((menuItem, i) => (
                             <tr key={`menu-${i}`}>
-                                <td>{menuItem.tipo}</td>
+                                <td>{menuItem.tipoPlatillo.nombre}</td>
                                 <td>{menuItem.nombre}</td>
                                 <td>₡{menuItem.precioCosto}</td>
+                                <td>₡{(menuItem.precioCosto + (menuItem.precioCosto * (menuItem.porcentajeGanancia / 100))).toFixed(2)}</td>
                                 <td>
                                     <div className="d-flex">
                                         <Link to={`/restaurant/editmenu/${menuItem.id}`}>
