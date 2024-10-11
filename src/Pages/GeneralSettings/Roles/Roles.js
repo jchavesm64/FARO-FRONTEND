@@ -16,7 +16,7 @@ const Roles = ({ ...props }) => {
     const [page, setPage] = useState(1);
     const [displayLength, setDisplayLength] = useState(10);
     const [filter, setFilter] = useState('')
-    const { loading: load_roles, error: error_roles, data: data_roles } = useQuery(OBTENER_ROLES, { pollInterval: 1000 })
+    const { loading: load_roles, error: error_roles, data: data_roles, refetch } = useQuery(OBTENER_ROLES, { pollInterval: 1000 })
     const [desactivar] = useMutation(DELETE_ROL);
 
     const onDeleteRol = (id, name) => {
@@ -35,6 +35,7 @@ const Roles = ({ ...props }) => {
                 const { estado, message } = data.desactivarRol;
                 if (estado) {
                     infoAlert('Rol eliminado', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar Rol', message, 'error', 3000, 'top-end')
                 }

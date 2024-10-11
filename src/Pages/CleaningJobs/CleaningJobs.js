@@ -14,7 +14,7 @@ const CleaningJobs = ({ ...props }) => {
     document.title = "Puestos de limpieza | FARO";
 
     const [filter, setFilter] = useState('')
-    const { loading: load_puesto_limpieza, error: error_puesto_limpieza, data: data_puesto_limpieza } = useQuery(OBTENER_PUESTO_LIMPIEZAS, { pollInterval: 1000 })
+    const { loading: load_puesto_limpieza, error: error_puesto_limpieza, data: data_puesto_limpieza, refetch } = useQuery(OBTENER_PUESTO_LIMPIEZAS, { pollInterval: 1000 })
     const [desactivar] = useMutation(DELETE_PUESTO_LIMPIEZA);
 
 
@@ -62,6 +62,7 @@ const CleaningJobs = ({ ...props }) => {
                 const { estado, message } = data.desactivarPuestoLimpieza;
                 if (estado) {
                     infoAlert('Puesto de limpieza eliminado', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar puesto de limpieza', message, 'error', 3000, 'top-end')
                 }

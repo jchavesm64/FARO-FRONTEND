@@ -13,7 +13,7 @@ import { convertirDataActivosExcel, exportAndDownloadExcel } from '../../helpers
 const Assets = () => {
     document.title = "Activos | FARO";
 
-    const { loading: load_activos, error: error_activos, data: data_activos } = useQuery(OBTENER_ACTIVOS, { pollInterval: 1000 })
+    const { loading: load_activos, error: error_activos, data: data_activos, refetch } = useQuery(OBTENER_ACTIVOS, { pollInterval: 1000 })
     const [desactivar] = useMutation(ELIMINAR_ACTIVO);
 
     const [filter, setFilter] = useState('')
@@ -65,9 +65,10 @@ const Assets = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 const { data } = await desactivar({ variables: { id } });
-                const { estado, message } = data.desactivarRol;
+                const { estado, message } = data.desactivarActivo;
                 if (estado) {
                     infoAlert('Activo eliminado', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar Activo', message, 'error', 3000, 'top-end')
                 }

@@ -14,7 +14,7 @@ const Suppliers = ({ ...props }) => {
     document.title = "Proveedores | FARO";
 
     const [filter, setFilter] = useState('')
-    const { loading: load_proveedores, error: error_proveedores, data: data_proveedores } = useQuery(OBTENER_PROVEEDORES, { pollInterval: 1000 })
+    const { loading: load_proveedores, error: error_proveedores, data: data_proveedores, refetch } = useQuery(OBTENER_PROVEEDORES, { pollInterval: 1000 })
     const [desactivar] = useMutation(DELETE_PROVEEDOR);
 
 
@@ -67,6 +67,7 @@ const Suppliers = ({ ...props }) => {
                 const { estado, message } = data.desactivarProveedor;
                 if (estado) {
                     infoAlert('Proveedor eliminado', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar proveedor', message, 'error', 3000, 'top-end')
                 }

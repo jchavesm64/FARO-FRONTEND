@@ -14,7 +14,7 @@ const Menu = ({ ...props }) => {
     document.title = "Menu | FARO";
 
     const [filter, setFilter] = useState('')
-    const { loading: load_menu, error: error_menu, data: data_menu } = useQuery(OBTENER_MENUS, { pollInterval: 1000 })
+    const { loading: load_menu, error: error_menu, data: data_menu, refetch } = useQuery(OBTENER_MENUS, { pollInterval: 1000 })
     const [desactivar] = useMutation(ELIMINAR_MENU);
 
     function getFilteredByKey(key, value) {
@@ -57,9 +57,10 @@ const Menu = ({ ...props }) => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 const { data } = await desactivar({ variables: { id } });
-                const { estado, message } = data.desactivarAlmacen;
+                const { estado, message } = data.desactivarMenu;
                 if (estado) {
                     infoAlert('Elemento eliminado', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar elemento de menú', message, 'error', 3000, 'top-end')
                 }
