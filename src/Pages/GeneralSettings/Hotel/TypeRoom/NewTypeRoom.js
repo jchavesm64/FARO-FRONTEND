@@ -13,9 +13,10 @@ const NewTypeRoom = () => {
     const navigate = useNavigate();
     const [insertar] = useMutation(SAVE_TIPO_HABITACION);
 
-    const [name, setName] = useState('')
-    const [description, setDescripcion] = useState('')
-    const [basePrice, setBasePrice] = useState(0)
+    const [name, setName] = useState('');
+    const [description, setDescripcion] = useState('');
+    const [basePrice, setBasePrice] = useState(0);
+    //const [image, setImage]=useState(null);
 
     const [disableSave, setDisableSave] = useState(true);
 

@@ -16,6 +16,7 @@ const NewCustomer = (props) => {
     document.title = "Clientes | FARO";
 
     const navigate = useNavigate();
+    const stateBooking = props.props?.stateBooking !== undefined ? props.props.stateBooking : false;
 
     const [customerType, setCustomerType] = useState(null);
     const [customerId, setCustomerId] = useState('')
@@ -29,6 +30,8 @@ const NewCustomer = (props) => {
     const [street, setStreet] = useState('')
     const [postalCode, setPostalCode] = useState('')
     const [address, setAddress] = useState('')
+
+
 
 
     const [code, setCode] = useState(null);
@@ -272,8 +275,8 @@ const NewCustomer = (props) => {
             const { estado, message } = data.insertarCliente;
             if (estado) {
                 infoAlert('Excelente', message, 'success', 3000, 'top-end');
-                
-                if (props.props.stateBooking) {
+
+                if (stateBooking) {
                     props.props.addNewCustomer(input)
                 } else {
 
@@ -291,9 +294,9 @@ const NewCustomer = (props) => {
 
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className={!stateBooking ? "page-content" : ""}>
                 <Container fluid={true}>
-                    <Breadcrumbs title="Cliente nuevo" breadcrumbItem="Clientes" breadcrumbItemUrl='/customers' />
+                    {!stateBooking && <Breadcrumbs title="Cliente nuevo" breadcrumbItem="Clientes" breadcrumbItemUrl='/customers' />}
                     <Row>
                         <div className="col mb-3 text-end">
                             <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
