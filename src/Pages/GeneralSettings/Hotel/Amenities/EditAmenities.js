@@ -107,7 +107,7 @@ const EditAmenities = () => {
                                 <SpanSubtitleForm subtitle='Información de la ubicación' />
                             </div>
                         </Row>
-                        <Row className='d-flex justify-content-between shadow_service rounded-5'>
+                        <Row className='d-flex justify-content-between shadow_service rounded-5 p-3'>
                             <Col className="col-md-6  d-flex justify-content-center flex-wrap">
                                 <div className="col-md-11 col-sm-9 m-2">
                                     <label htmlFor="type" className="form-label">* Nombre del tipo de comodidad</label>
