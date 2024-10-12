@@ -1,13 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import Select from "react-select";
-import { Button, Card, CardBody, Col, Container, Row } from "reactstrap";
+import { Button, Card, CardBody, Col, Container, Modal, ModalBody, ModalHeader, Row } from "reactstrap";
 import ListInfo from "../../../../components/Common/ListInfo";
 import ListSection from "../../../../components/Common/ListSelection";
+import EditPackage from "../../../GeneralSettings/Hotel/AdminPackage/EditPackage";
 
 const Packages = ({ ...props }) => {
 
-    const { handlePackage, getPackage, addPackage, deletePackage, setDisabledButton, packageBooking, packageBookingList } = props.props;
+    const { handlePackage, getPackage, addPackage, deletePackage, setDisabledButton, updatePackageBooking, packageBooking, packageBookingList } = props.props;
     setDisabledButton(false);
+
+    const [modal, setModal] = useState(false);
+    const [filter, setFilter] = useState(null)
+    const toggle = () => setModal(!modal);
+
+    const showModalEditPackage = (data) => {
+        setFilter(data)
+        setModal(true);
+    };
+
+    const updatePackage = (packageUpdate) => {
+        updatePackageBooking(packageUpdate)
+        setModal(false);
+    };
+
+    //solucionar problema a la hora de editar el paquete
+
 
     return (
         <React.Fragment>
@@ -42,7 +60,7 @@ const Packages = ({ ...props }) => {
                                                 </div>
                                             </div>
                                             <Row>
-                                                <ListInfo data={packageBookingList} headers={['Paquete ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={deletePackage} mainKey={'nombre'} secondKey={'precio'} />
+                                                <ListInfo data={packageBookingList} headers={['Paquete ', 'Precio']} keys={['nombre', 'precio']} enableEdit={true} enableDelete={true} actionDelete={deletePackage} actionEdit={showModalEditPackage} mainKey={'nombre'} secondKey={'precio'} />
                                             </Row>
                                         </CardBody>
                                     </Card>
@@ -68,7 +86,7 @@ const Packages = ({ ...props }) => {
                                                                     <strong>Tipo:</strong> <span className="fs-5 span_package_color">{pack.tipo}</span>
                                                                 </label>
                                                                 <label className="fs-5 m-0 ms-4 label_package_color">
-                                                                    <strong>Temporada:</strong> <span className="fs-5 span_package_color">{pack.temporadas.nombre}</span>
+                                                                    <strong>Temporada:</strong> <span className="fs-5 span_package_color">{pack.temporadas?.nombre}</span>
                                                                 </label>
                                                                 <ListSection
                                                                     title="Servicios"
@@ -101,6 +119,13 @@ const Packages = ({ ...props }) => {
                             </Card>
                         </Col>
                     </Row>
+
+                    <Modal key='modalCustomer' isOpen={modal} toggle={toggle} size='xl'>
+                        <ModalHeader key='modalheader' toggle={toggle}><span className="fs-4 m-0 span_package_color">Información adicional del cliente</span></ModalHeader>
+                        <ModalBody key='modalbody'>
+                            <EditPackage idBooking={filter?.id} updatePackageBookin={updatePackage} />
+                        </ModalBody>
+                    </Modal>
                 </Container>
             </div>
         </React.Fragment>

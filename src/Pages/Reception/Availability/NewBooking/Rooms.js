@@ -14,7 +14,7 @@ const Rooms = ({ ...props }) => {
         const valIndividualBooking = () => {
             if (typeBooking !== 'IN') return false;
 
-            if (roomsBooking.length >= 1) return true;
+            if (roomsBooking.length >= 4) return true;
         };
         setEnableRooms(valIndividualBooking)
     }, [typeBooking, roomsBooking])

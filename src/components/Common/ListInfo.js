@@ -13,7 +13,11 @@ const ListInfo = ({ data, headers, keys, enableDelete, actionDelete, enableEdit,
             actionDelete(element[mainKey], element[secondKey])
         }
 
-    }
+    };
+
+    const onEdit = (element) => {
+        actionEdit(element)
+    };
 
     return (
         <div className="col table-responsive">
@@ -46,7 +50,7 @@ const ListInfo = ({ data, headers, keys, enableDelete, actionDelete, enableEdit,
                                     (enableEdit || enableDelete) &&
                                     <th className="d-flex justify-content-center">
                                         {
-                                            enableEdit && <ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={actionEdit} />
+                                            enableEdit && <ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={() => onEdit(line)} />
                                         }
                                         {
                                             enableDelete && <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onDelete(line) }} />

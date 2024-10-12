@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, ButtonGroup, Card, Col, Container, Row } from "reactstrap";
 import { typesBooking } from '../../../../constants/routesConst';
 
@@ -6,7 +6,13 @@ const TypeDateBooking = ({ ...props }) => {
 
     const { handleTypeBookingChange, setCheckIn, setCheckOut, setAmountAdult, setAmountChildren, setDisabledButton, typeBooking, checkIn, checkOut, amountAdult, amountChildren } = props.props
 
+    const [previousBookin, setPreviousBookin] = useState(false);
+
     useEffect(() => { setDisabledButton(!typeBooking || checkIn === "" || checkOut === "" || amountAdult === 0) }, [setDisabledButton, typeBooking, checkIn, checkOut, amountAdult, amountChildren])
+
+    const handleOnClickPreviousBooking = () => {
+        setPreviousBookin(!previousBookin)
+    };
 
     return (
         <React.Fragment>
@@ -32,6 +38,21 @@ const TypeDateBooking = ({ ...props }) => {
                                 </ButtonGroup>
                             </Col>
                         </Row>
+                        {typeBooking === 'BL' &&
+                            <Row>
+                                <div className="form-check ms-3 mt-4    p-0 ps-4">
+                                    <label htmlFor="isPreviousBookin" className="form-check-label ms-1">Cargar reserva anterior</label>
+                                    <input
+                                        className="form-check-input p-0"
+                                        type="checkbox"
+                                        id="isPreviousBookin"
+                                        readOnly
+                                        checked={previousBookin}
+                                        onClick={() => { handleOnClickPreviousBooking() }}
+                                    />
+                                </div>
+                            </Row>}
+
                         <Row className="m-3 col-md-12 d-flex flex-row flex-nowrap">
                             <Card className="d-flex flex-row flex-nowrap justify-content-center ">
                                 <Col className="p-1 col-md-5 border shadow_wizard m-2" >

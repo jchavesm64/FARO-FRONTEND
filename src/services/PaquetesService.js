@@ -31,7 +31,8 @@ export const OBTENER_PAQUETE = gql`
             servicios
             tours
             temporadas{
-               fechaInicio
+                id
+                fechaInicio
                 fechaFin
                 nombre
                 tipo

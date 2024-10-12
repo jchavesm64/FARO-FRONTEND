@@ -190,17 +190,17 @@ const NewBooking = () => {
         }));
 
         // Actualizar paxkageBookingList con la cantidad calculada para cada servicio
-        const updatedPakageBookingList = packageBookingList.map(packageItem => ({
+        /* const updatedPakageBookingList = packageBookingList.map(packageItem => ({
             ...packageItem,
             servicios: packageItem.servicios.map(service => ({
                 ...service,
                 cantidad: calAmountService(service, checkIn, checkOut, amountAdult, amountChildren)
             }))
-        }));
+        })); */
 
         // Actualizar los estados
         setExtraService(updatedExtraService);
-        setPackageBookingList(updatedPakageBookingList);
+        //setPackageBookingList(updatedPakageBookingList);
 
     }, [amountAdult, amountChildren, checkIn, checkOut])
 
@@ -570,8 +570,7 @@ const NewBooking = () => {
             const servicePackageUpdate = {
                 ...packageBooking.value,
                 servicios: packageBooking.value.servicios.map(servicio => ({
-                    ...servicio,
-                    cantidad: calAmountService(servicio)
+                    ...servicio
                 }))
             };
 
@@ -586,7 +585,16 @@ const NewBooking = () => {
 
     const deletePackage = (nombre) => {
         setPackageBookingList(packageBookingList.filter(a => a.nombre !== nombre));
-    }
+    };
+
+    const updatePackageBooking = (pack) => {
+        debugger
+        const updataPackage = packageBookingList.map(p =>
+            p.nombre === pack.nombre ? { ...p, ...pack } : p
+
+        );
+        setPackageBookingList(updataPackage)
+    };
 
     const stepsFromWizard = useMemo(() => stepsWizardMenuBooking, []);
 
@@ -633,7 +641,7 @@ const NewBooking = () => {
     }, [wizardRef]);
 
     const handleSaveNote = (updatedNote) => {
-        
+
         const update = notes.map(note => {
             if (note.area.id === updatedNote.area.id) {
                 return {
@@ -783,7 +791,7 @@ const NewBooking = () => {
                         }
                         {steps[state.currentStep].label === 'Paquetes' &&
                             <div>
-                                <Packages props={{ handlePackage, getPackage, addPackage, deletePackage, setDisabledButton, packageBooking, packageBookingList }} />
+                                <Packages props={{ handlePackage, getPackage, addPackage, deletePackage, setDisabledButton, updatePackageBooking, packageBooking, packageBookingList }} />
                             </div>
                         }
                         {steps[state.currentStep].label === 'Habitaciones' &&

@@ -12,7 +12,7 @@ import { OBTENER_PAQUETE, UPDATE_PAQUETE } from "../../../../services/PaquetesSe
 import { OBTENER_TEMPORADAS } from "../../../../services/TemporadaService";
 import TabeListService from "../../../../components/Common/TableListService";
 
-const EditPackage = () => {
+const EditPackage = ({ props, idBooking, updatePackageBookin }) => {
     document.title = "Administrador de paquetes | FARO";
 
     const navigate = useNavigate();
@@ -21,7 +21,7 @@ const EditPackage = () => {
     const { data: Tours } = useQuery(OBTENER_TOURS, { pollInterval: 1000 });
     const { data: services } = useQuery(OBTENER_SERVICIO, { pollInterval: 1000 });
     const { data: seasons } = useQuery(OBTENER_TEMPORADAS, { pollInterval: 1000 });
-    const { loading: loading_paquete, error: error_paquete, data: data_paquete, startPolling, stopPolling } = useQuery(OBTENER_PAQUETE, { variables: { id: id }, pollInterval: 1000 });
+    const { loading: loading_paquete, error: error_paquete, data: data_paquete, startPolling, stopPolling } = useQuery(OBTENER_PAQUETE, { variables: { id: id ? id : idBooking }, pollInterval: 1000 });
     const [actualizar] = useMutation(UPDATE_PAQUETE);
 
     const [disableSave, setDisableSave] = useState(true);
@@ -80,7 +80,6 @@ const EditPackage = () => {
 
     useEffect(() => {
         if (data_paquete) {
-            console.log(data_paquete)
             setName(data_paquete.obtenerPaquete.nombre);
             setDescription(data_paquete.obtenerPaquete.descripcion);
             setToursList(data_paquete.obtenerPaquete.tours);
@@ -220,7 +219,9 @@ const EditPackage = () => {
 
         setServiceList(newServiceList);
     };
+
     const onClickSave = async () => {
+
         try {
             setDisableSave(true);
             const input = {
@@ -228,22 +229,31 @@ const EditPackage = () => {
                 nombre: name,
                 servicios: serviceList,
                 tours: toursList,
-                temporadas: season.value.id,
+                temporadas: !idBooking ? season.value.id : season.value,
                 descripcion: description,
                 precio: price,
                 estado: 'ACTIVO'
             };
+            console.log(season)
+            if (!idBooking) {
+                const { data } = await actualizar({ variables: { id: !idBooking ? id : idBooking, input }, errorPolicy: 'all' });
+                const { estado, message } = data.actualizarPaquete;
+                if (estado) {
 
-            const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' });
-            const { estado, message } = data.actualizarPaquete;
-            if (estado) {
-                infoAlert('Excelente', message, 'success', 3000, 'top-end');
-                cleanData();
-                navigate('/hotelsettings/hotelpackages');
+                    infoAlert('Excelente', message, 'success', 3000, 'top-end');
+                    cleanData();
+
+                    navigate('/hotelsettings/hotelpackages');
+
+                } else {
+                    infoAlert('Oops', message, 'error', 3000, 'top-end')
+                }
+                setDisableSave(false)
             } else {
-                infoAlert('Oops', message, 'error', 3000, 'top-end')
+                infoAlert('Excelente', "Paquete actualizado para la reserva", 'success', 3000, 'top-end');
+                updatePackageBookin(input)
+                cleanData();
             }
-            setDisableSave(false)
 
         } catch (error) {
             infoAlert('Oops', 'Ocurrió un error inesperado al guardar el paquete', 'error', 3000, 'top-end')
@@ -278,9 +288,9 @@ const EditPackage = () => {
 
     return (
         <React.Fragment>
-            <div className="page-content" >
+            <div className={!idBooking && "page-content"} >
                 <Container fluid={true}>
-                    <Breadcrumbs title="Nuevo paquete" breadcrumbItem="Paquetes" breadcrumbItemUrl='/hotelsettings/hotelpackages' />
+                    {!idBooking && <Breadcrumbs title="Editar paquete" breadcrumbItem="Paquetes" breadcrumbItemUrl='/hotelsettings/hotelpackages' />}
                     <Card className='p-4'>
                         <Row >
                             <div className="col mb-3 text-end">
