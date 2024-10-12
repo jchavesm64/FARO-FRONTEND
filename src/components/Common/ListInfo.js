@@ -15,7 +15,6 @@ const ListInfo = ({ data, headers, keys, enableDelete, actionDelete, enableEdit,
 
     }
 
-
     return (
         <div className="col table-responsive">
             <table className="table table-hover table-striped mb-0">

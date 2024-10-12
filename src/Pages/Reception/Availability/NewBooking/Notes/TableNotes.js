@@ -15,6 +15,7 @@ const TableAreas = ({ ...props }) => {
         }
     };
 
+    console.log(data)
     // se desactiva la busqueda, se debe retomar despues 
     /* const handleSearchAreas = (data) => {
         props.props.getFilteredAreaByKey(data)
@@ -39,24 +40,14 @@ const TableAreas = ({ ...props }) => {
                 <thead>
                     <tr>
                         <th className='text-center'>Nombre</th>
-                        <th className='text-center'>Fecha</th>
                         <th>Nota</th>
+                        <th className='text-center'>Fecha</th>
                     </tr>
                 </thead>
                 <tbody>
                     {data?.map((item, i) => (
                         <tr key={`area-${i}`}>
                             <td className='text-center col-md-3'>{item.area.nombre}</td>
-                            <td className='text-center col-md-2'>
-                                <input
-                                    className="form-control"
-                                    type="date"
-                                    id="checkInDate"
-                                    value={item.fecha}
-                                    onChange={(e) => { setDate(e.target.value) }}
-                                    min={new Date().toISOString().split('T')[0]}
-                                />
-                            </td>
                             <td>
                                 <div className='col-md-10 col-sm-12 m-2'>
                                     <textarea
@@ -67,6 +58,20 @@ const TableAreas = ({ ...props }) => {
                                         onChange={(e) => handleNoteChange(item.area.id, e.target.value, date)}
                                     />
                                 </div>
+                            </td>
+                            <td className='col-md-3'>
+                                <input
+                                    className="form-control"
+                                    type="date"
+                                    id="checkInDate"
+                                    disabled={!item.nota}
+                                    value={item.fecha}
+                                    onChange={(e) => {
+                                        setDate(e.target.value)
+                                        handleNoteChange(item.area.id, item.nota, date)
+                                    }}
+                                    min={new Date().toISOString().split('T')[0]}
+                                />
                             </td>
 
                         </tr>

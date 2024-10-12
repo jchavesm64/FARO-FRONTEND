@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { useNavigate, useParams } from "react-router-dom";
 import { OBTENER_COMODIDADES_BY_ID, UPDATE_COMODIDAD } from "../../../../services/ComodidadesService";
 import { infoAlert } from "../../../../helpers/alert";
-import { Container, Row } from "reactstrap";
+import { Card, Col, Container, Row } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import SpanSubtitleForm from "../../../../components/Forms/SpanSubtitleForm";
 
@@ -93,39 +93,37 @@ const EditAmenities = () => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Nuevo tipo de comodidad" breadcrumbItem="Tipo de comodidad" breadcrumbItemUrl='/hotelsettings/amenities' />
-                    <Row>
-                        <div className="col mb-3 text-end">
-                            <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
-                                Guardar{" "}
-                                <i className="ri-save-line align-middle ms-2"></i>
-                            </button>
-                        </div>
-                    </Row>
-                    <Row>
-                        <div className="col-md-12 col-sm-12">
-                            <Row>
-                                <div className="col mb-3">
-                                    <SpanSubtitleForm subtitle='Información de la ubicación' />
-                                </div>
-                            </Row>
-                            <Row>
-                                <div className="col-md-6 col-sm-12 mb-3">
+                    <Card className='p-4'>
+                        <Row>
+                            <div className="col mb-3 text-end">
+                                <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
+                                    Guardar{" "}
+                                    <i className="ri-save-line align-middle ms-2"></i>
+                                </button>
+                            </div>
+                        </Row>
+                        <Row>
+                            <div className="col mb-3">
+                                <SpanSubtitleForm subtitle='Información de la ubicación' />
+                            </div>
+                        </Row>
+                        <Row className='d-flex justify-content-between shadow_service rounded-5'>
+                            <Col className="col-md-6  d-flex justify-content-center flex-wrap">
+                                <div className="col-md-11 col-sm-9 m-2">
                                     <label htmlFor="type" className="form-label">* Nombre del tipo de comodidad</label>
                                     <input className="form-control" type="text" id="type" value={name} onChange={(e) => { setName(e.target.value) }} />
                                 </div>
-                            </Row>
-                            <Row>
-                                <div className="col-md-6 col-sm-12 mb-3">
+                                <div className="col-md-11 col-sm-9 m-2">
                                     <label htmlFor="type" className="form-label">* Descripción del tipo de comodidad</label>
                                     <input className="form-control" type="text" id="type" value={description} onChange={(e) => { setDescripcion(e.target.value) }} />
                                 </div>
-                            </Row>
-                        </div>
-                    </Row>
+                            </Col>
+                        </Row>
+                    </Card>
                 </Container>
             </div>
         </React.Fragment>
-    )
+    );
 }
 
 export default EditAmenities;

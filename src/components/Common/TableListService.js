@@ -1,7 +1,9 @@
 import React from 'react'
-import ButtonIconTable from '../../../../../components/Common/ButtonIconTable';
+import ButtonIconTable from './ButtonIconTable';
+import { UncontrolledTooltip } from 'reactstrap';
 
-const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enableAmount, actionAmount, mainKey, secondKey, type }) => {
+const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enableAmount, actionAmount, mainKey, secondKey, type, amount }) => {
+
 
     const onDelete = (element) => {
         if (!secondKey) {
@@ -16,7 +18,6 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
         actionAmount(type, amount, service);
     };
 
-
     return (
         <div className="col table-responsive">
             <table className="table table-hover table-striped mb-0">
@@ -29,7 +30,7 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
                         }
                         {
                             (enableAmount) &&
-                            <th>Extra</th>
+                            <th>{amount}</th>
                         }
                         {
                             (enableDelete) &&
@@ -42,32 +43,41 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
                         data.map((line, index) => (
                             <tr key={index}>
                                 {
-                                    keys.map((key, indexKey) => (
-                                        <td key={`${index}-${key}`}>
-                                            {line[key]}
-                                        </td>
-                                    ))
+                                    keys.map((key, indexKey) => {
+                                        const cellId = `cell-${index}-${indexKey}`;
+                                        return (
+                                            <td key={cellId} className="hover-cell" id={cellId}>
+                                                {`${line[key].slice(0, 14)}...`}
+                                                <UncontrolledTooltip target={cellId} >
+                                                    {line[key]}
+                                                </UncontrolledTooltip>
+                                            </td>
+                                        );
+                                    })
                                 }
                                 {
                                     (enableAmount) &&
-                                    <td >
+                                    <td  >
                                         {
-                                            enableAmount &&
-                                            <input
-                                                className="form-control text-center "
-                                                type="number"
-                                                id="checkInDate"
-                                                value={line?.extra !== undefined ? line?.extra : 0}
-                                                onChange={(e) => { onUpdateAmount(e.target.value, line) }}
-                                                min="0"
-                                            />
+                                            (enableAmount && line.tipo?.cuantificable === 'true') ?
+                                                (
+                                                    <div className='col-md-4' >
+                                                        <input
+                                                            className="form-control text-center "
+                                                            type="number"
+                                                            id="checkInDate"
+                                                            value={line?.extra !== undefined ? line?.extra : 1}
+                                                            onChange={(e) => { onUpdateAmount(e.target.value, line) }}
+                                                            min="0"
+                                                        />
+                                                    </div>
+                                                ) : (<span>Servicio no es cuantificable.</span>)
                                         }
                                     </td>
                                 }
                                 {
                                     (enableDelete) &&
                                     <td className="d-flex justify-content-center">
-
                                         {
                                             enableDelete && <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onDelete(line) }} />
                                         }

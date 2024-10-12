@@ -432,7 +432,6 @@ const NewBooking = () => {
     };
 
     const updateAmountService = (type, amount, service) => {
-        debugger
         if (type === 'booking') {
             setExtraService(prevServices =>
                 prevServices.map(s =>
@@ -634,7 +633,7 @@ const NewBooking = () => {
     }, [wizardRef]);
 
     const handleSaveNote = (updatedNote) => {
-
+        
         const update = notes.map(note => {
             if (note.area.id === updatedNote.area.id) {
                 return {
