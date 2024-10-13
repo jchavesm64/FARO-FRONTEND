@@ -9,14 +9,14 @@ import { infoAlert } from "../../../../helpers/alert";
 import { OBTENER_SERVICIO_BY_ID, UPDATE_SERVICIO } from "../../../../services/ServiciosExtraService";
 import { OBTENER_TIPOSSERVICIOS } from "../../../../services/TipoServicioService";
 
-const EditExtraService = () => {
+const EditExtraService = ({ idBooking, updateServiceBooking }) => {
     document.title = "Servicios Extra | FARO";
 
     const navigate = useNavigate();
-
     const { id } = useParams();
+
     const { data: typesService } = useQuery(OBTENER_TIPOSSERVICIOS, { pollInterval: 1000 });
-    const { loading: loading_extraservice, error: error_extraservice, data: data_extraservice, startPolling, stopPolling } = useQuery(OBTENER_SERVICIO_BY_ID, { variables: { id: id }, pollInterval: 1000 });
+    const { loading: loading_extraservice, error: error_extraservice, data: data_extraservice, startPolling, stopPolling } = useQuery(OBTENER_SERVICIO_BY_ID, { variables: { id: id ? id : idBooking }, pollInterval: 1000 });
     const [actualizar] = useMutation(UPDATE_SERVICIO);
 
     useEffect(() => {
@@ -27,14 +27,13 @@ const EditExtraService = () => {
     }, [startPolling, stopPolling]);
 
     const [name, setName] = useState('');
-    const [description, setDescripcion] = useState('');
+    const [description, setDescription] = useState('');
     const [price, setPrice] = useState(0);
     const [typeService, setTypeService] = useState(null);
-    console.log(data_extraservice)
     useEffect(() => {
         if (data_extraservice) {
             setName(data_extraservice.obtenerServicio.nombre);
-            setDescripcion(data_extraservice.obtenerServicio.descripcion);
+            setDescription(data_extraservice.obtenerServicio.descripcion);
             setPrice(data_extraservice.obtenerServicio.precio);
             setTypeService({
                 "value": data_extraservice.obtenerServicio.tipo,
@@ -62,6 +61,13 @@ const EditExtraService = () => {
         return data;
     };
 
+    const cleanData = () => {
+        setName('');
+        setPrice(0);
+        setDescription('');
+        setTypeService(null)
+    };
+
     const handleTypeService = (a) => {
         setTypeService(a);
     };
@@ -73,20 +79,25 @@ const EditExtraService = () => {
                 nombre: name,
                 descripcion: description,
                 precio: price,
-                tipo: typeService.value.id,
+                tipo: !idBooking ? typeService.value.id : typeService.value,
                 estado: "ACTIVO"
             }
 
-            const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' })
-            const { estado, message } = data.actualizarServicio;
-            if (estado) {
-                infoAlert('Excelente', message, 'success', 3000, 'top-end')
-                navigate('/hotelsettings/extraservices');
+            if (!idBooking) {
+                const { data } = await actualizar({ variables: { id: !idBooking ? id : idBooking, input }, errorPolicy: 'all' })
+                const { estado, message } = data.actualizarServicio;
+                if (estado) {
+                    infoAlert('Excelente', message, 'success', 3000, 'top-end')
+                    navigate('/hotelsettings/extraservices');
+                } else {
+                    infoAlert('Oops', message, 'error', 3000, 'top-end')
+                }
             } else {
-                infoAlert('Oops', message, 'error', 3000, 'top-end')
+                infoAlert('Excelente', "Servicio actualizado para la reserva", 'success', 3000, 'top-end');
+                updateServiceBooking(input);
+                cleanData();
             }
         } catch (error) {
-            console.log(error)
             infoAlert('Oops', 'Ocurrió un error inesperado al guardar el servicio', 'error', 3000, 'top-end')
             setDisableSave(false)
         }
@@ -118,9 +129,9 @@ const EditExtraService = () => {
 
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className={!idBooking && "page-content"}>
                 <Container fluid={true}>
-                    <Breadcrumbs title="Editar servicio" breadcrumbItem="Servicio" breadcrumbItemUrl='/hotelsettings/extraservices' />
+                    {!idBooking && <Breadcrumbs title="Editar servicio" breadcrumbItem="Servicio" breadcrumbItemUrl='/hotelsettings/extraservices' />}
                     <Card className='p-4'>
                         <Row>
                             <div className="col mb-3 text-end">
@@ -160,7 +171,7 @@ const EditExtraService = () => {
                                 </div>
                                 <div className="col-md-11 col-sm-9 m-2">
                                     <label htmlFor="type" className="form-label">* Descripción del servicio</label>
-                                    <input className="form-control" type="text" id="type" value={description} onChange={(e) => { setDescripcion(e.target.value) }} />
+                                    <input className="form-control" type="text" id="type" value={description} onChange={(e) => { setDescription(e.target.value) }} />
                                 </div>
 
                             </Col>

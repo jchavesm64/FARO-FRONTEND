@@ -24,9 +24,6 @@ const Packages = ({ ...props }) => {
         setModal(false);
     };
 
-    //solucionar problema a la hora de editar el paquete
-
-
     return (
         <React.Fragment>
             <div className="page-content p-4 border m-2">
@@ -93,6 +90,7 @@ const Packages = ({ ...props }) => {
                                                                     items={pack.servicios}
                                                                     label="Nombre"
                                                                     emptyMessage="Sin datos"
+                                                                    showExtra={true}
                                                                 />
                                                                 <ListSection
                                                                     title="Tours"
@@ -121,7 +119,7 @@ const Packages = ({ ...props }) => {
                     </Row>
 
                     <Modal key='modalCustomer' isOpen={modal} toggle={toggle} size='xl'>
-                        <ModalHeader key='modalheader' toggle={toggle}><span className="fs-4 m-0 span_package_color">Información adicional del cliente</span></ModalHeader>
+                        <ModalHeader key='modalheader' toggle={toggle}><span className="fs-4 m-0 span_package_color">Editar paquete</span></ModalHeader>
                         <ModalBody key='modalbody'>
                             <EditPackage idBooking={filter?.id} updatePackageBookin={updatePackage} />
                         </ModalBody>

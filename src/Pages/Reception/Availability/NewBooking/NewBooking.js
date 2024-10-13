@@ -67,9 +67,7 @@ const NewBooking = () => {
 
     const [stateBooking, setStateBooking] = useState(false);
 
-    const [serviceBookingCheck, setServiceBookingCheck] = useState(false);
-    const [serviceTourCheck, setServiceTourCheck] = useState(false);
-    const [serviceRoomCheck, setServiceRoomCheck] = useState(false);
+    
     const [typeBooking, setTypeBooking] = useState(null);
 
     const [packageBooking, setPackageBooking] = useState(null);
@@ -338,23 +336,6 @@ const NewBooking = () => {
         return total
     }
 
-    const handleChangeServiceBooking = () => {
-        setServiceBookingCheck(!serviceBookingCheck);
-        setExtraService([])
-    };
-
-    const handleChangeTourRoom = () => {
-        setServiceTourCheck(!serviceTourCheck);
-        setTours([])
-    };
-
-    const handleChangeServiceRoom = () => {
-        setServiceRoomCheck(!serviceRoomCheck);
-        setExtraServiceRoom([])
-        setServicesPerRoom([])
-        setSelectRoom(null)
-    };
-
     const handleService = (a, type) => {
         if (type === 'general') setServicesBooking(a);
         if (type === 'room') setServicesRoom(a);
@@ -588,12 +569,28 @@ const NewBooking = () => {
     };
 
     const updatePackageBooking = (pack) => {
-        debugger
         const updataPackage = packageBookingList.map(p =>
             p.nombre === pack.nombre ? { ...p, ...pack } : p
 
         );
         setPackageBookingList(updataPackage)
+    };
+
+    const updateServiceBooking = (service, type) => {
+        console.log(service)
+        if (type === 'perService') {
+            const updataService = extraService.map(s =>
+                s.nombre === service.nombre ? { ...s, ...service } : s
+
+            );
+            setExtraService(updataService)
+        } else if (type === 'perRoom') {
+            const updateService = extraServiceRoom.map(s =>
+                s.nombre === service.nombre ? { ...s, ...service } : s
+
+            );
+            setExtraServiceRoom(updateService)
+        }
     };
 
     const stepsFromWizard = useMemo(() => stepsWizardMenuBooking, []);
@@ -748,7 +745,7 @@ const NewBooking = () => {
             <div className="page-content " ref={wizardRef}>
                 <Container fluid={true}>
                     <Breadcrumbs title={!id ? 'Nueva Reserva' : 'Editar Reserva'} breadcrumbItem="Reservas" breadcrumbItemUrl={!id ? '/reception/availability' : '/reception/availability/booking'} />
-                    <Card className='col-md-12 p-2'>
+                    <Card className='p-4'>
                         <div className='d-flex col-md-12 justify-content-center '>
                             <nav className='d-flex col-md-12 justify-content-center shadow_wizard wizard_bar' {...stepperProps}>
                                 {stepsProps?.map((step, index) => (
@@ -802,9 +799,7 @@ const NewBooking = () => {
                         {steps[state.currentStep].label === 'Servicios y Tours' &&
                             <div>
                                 <ToursService props={{
-                                    handleChangeServiceBooking,
-                                    handleChangeServiceRoom,
-                                    handleChangeTourRoom,
+                                    updateServiceBooking,
                                     handleService,
                                     handleTour,
                                     deleteServiceBooking,
@@ -822,13 +817,10 @@ const NewBooking = () => {
                                     ServicesRoom,
                                     roomsBooking,
                                     selectRoom,
-                                    serviceBookingCheck,
-                                    serviceRoomCheck,
                                     ServicesBooking,
                                     extraService,
                                     extraServiceRoom,
                                     options,
-                                    serviceTourCheck,
                                     tours,
                                     toursList,
                                     servicesPerRoom,

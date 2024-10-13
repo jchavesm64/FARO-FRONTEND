@@ -12,7 +12,7 @@ import { OBTENER_PAQUETE, UPDATE_PAQUETE } from "../../../../services/PaquetesSe
 import { OBTENER_TEMPORADAS } from "../../../../services/TemporadaService";
 import TabeListService from "../../../../components/Common/TableListService";
 
-const EditPackage = ({ props, idBooking, updatePackageBookin }) => {
+const EditPackage = ({ props, idBooking, updatePackageBooking }) => {
     document.title = "Administrador de paquetes | FARO";
 
     const navigate = useNavigate();
@@ -23,6 +23,13 @@ const EditPackage = ({ props, idBooking, updatePackageBookin }) => {
     const { data: seasons } = useQuery(OBTENER_TEMPORADAS, { pollInterval: 1000 });
     const { loading: loading_paquete, error: error_paquete, data: data_paquete, startPolling, stopPolling } = useQuery(OBTENER_PAQUETE, { variables: { id: id ? id : idBooking }, pollInterval: 1000 });
     const [actualizar] = useMutation(UPDATE_PAQUETE);
+
+    useEffect(() => {
+        startPolling(1000)
+        return () => {
+            stopPolling()
+        }
+    }, [startPolling, stopPolling]);
 
     const [disableSave, setDisableSave] = useState(true);
 
@@ -35,13 +42,6 @@ const EditPackage = ({ props, idBooking, updatePackageBookin }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState(0);
-
-    useEffect(() => {
-        startPolling(1000)
-        return () => {
-            stopPolling()
-        }
-    }, [startPolling, stopPolling])
 
     const typePackages = [
         {
@@ -234,7 +234,6 @@ const EditPackage = ({ props, idBooking, updatePackageBookin }) => {
                 precio: price,
                 estado: 'ACTIVO'
             };
-            console.log(season)
             if (!idBooking) {
                 const { data } = await actualizar({ variables: { id: !idBooking ? id : idBooking, input }, errorPolicy: 'all' });
                 const { estado, message } = data.actualizarPaquete;
@@ -251,7 +250,7 @@ const EditPackage = ({ props, idBooking, updatePackageBookin }) => {
                 setDisableSave(false)
             } else {
                 infoAlert('Excelente', "Paquete actualizado para la reserva", 'success', 3000, 'top-end');
-                updatePackageBookin(input)
+                updatePackageBooking(input)
                 cleanData();
             }
 

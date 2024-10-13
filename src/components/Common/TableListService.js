@@ -2,7 +2,7 @@ import React from 'react'
 import ButtonIconTable from './ButtonIconTable';
 import { UncontrolledTooltip } from 'reactstrap';
 
-const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enableAmount, actionAmount, mainKey, secondKey, type, amount }) => {
+const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enableAmount, enableEdit, actionEdit, actionAmount, mainKey, secondKey, type, amount }) => {
 
 
     const onDelete = (element) => {
@@ -16,6 +16,10 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
 
     const onUpdateAmount = (amount, service) => {
         actionAmount(type, amount, service);
+    };
+
+    const onEdit = (element) => {
+        actionEdit(element,type)
     };
 
     return (
@@ -47,7 +51,7 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
                                         const cellId = `cell-${index}-${indexKey}`;
                                         return (
                                             <td key={cellId} className="hover-cell" id={cellId}>
-                                                {`${line[key].slice(0, 14)}...`}
+                                                {typeof (line[key]) === 'number' ? `${line[key]}` : `${line[key]?.slice(0, 14)}...`}
                                                 <UncontrolledTooltip target={cellId} >
                                                     {line[key]}
                                                 </UncontrolledTooltip>
@@ -76,8 +80,11 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
                                     </td>
                                 }
                                 {
-                                    (enableDelete) &&
+                                    (enableEdit || enableDelete) &&
                                     <td className="d-flex justify-content-center">
+                                        {
+                                            enableEdit && <ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={() => onEdit(line)} />
+                                        }
                                         {
                                             enableDelete && <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onDelete(line) }} />
                                         }
