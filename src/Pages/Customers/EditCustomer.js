@@ -334,7 +334,7 @@ const EditCustomer = ({ props, customer, booking, editCustomer }) => {
 
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className={!booking && "page-content"}>
                 <Container fluid={true}>
                     {!booking && <Breadcrumbs title="Editar cliente" breadcrumbItem="Clientes" breadcrumbItemUrl='/customers' />}
                     <Row>

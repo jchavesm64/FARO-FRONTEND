@@ -294,7 +294,18 @@ const Summary = ({ ...props }) => {
 
                                     </Row>
                                 </Card>
-
+                                <Row className="mt-4">
+                                    <Col >
+                                        <Button
+                                            color="primary"
+                                            size="lg"
+                                            className="position-fixed send_booking_wizard"
+                                            onClick={() => onClickSave()}
+                                        >
+                                            Realizar Reserva
+                                        </Button>
+                                    </Col>
+                                </Row>
                             </Col>
                         </Row>
                     </div >

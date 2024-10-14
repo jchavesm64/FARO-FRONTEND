@@ -11,12 +11,12 @@ const SearchCustomer = ({ ...props }) => {
     const [modal, setModal] = useState(false);
     const [editCustomer, setEditCustomer] = useState(false);
 
-    const toggle = () => setModal(!modal);
+    const toggle = () => { setModal(!modal); setEditCustomer(false) };
 
     const addNewCustomer = (data) => {
         setCustomer(data);
         setFilter('');
-        setEditCustomer(false);
+        toggle();
     };
 
     useEffect(() => { setDisabledButton(!customer) }, [setDisabledButton, customer])
@@ -27,20 +27,19 @@ const SearchCustomer = ({ ...props }) => {
 
     const onClickEdit = () => {
         setEditCustomer(!editCustomer);
-        setModal(false);
+        
     }
 
     const handleCustomer = (customer) => {
-        selectClient(customer)
+        selectClient(customer);
     };
-
 
     return (
         <React.Fragment>
-            <div className="page-content p-4 border m-2">
+            <div className="page-content p-4 m-2">
                 <Container fluid={true}>
-                    <Card className='p-1'>
-                        <Row className='d-flex justify-content-between p-3'>
+                    <Card className='p-1 '>
+                        <Row className='d-flex justify-content-between p-3 pb-0'>
                             <div className="col-md-12 mb-1">
                                 <label> Busca el cliente</label>
                                 <input
@@ -53,9 +52,9 @@ const SearchCustomer = ({ ...props }) => {
                             </div>
 
                         </Row>
-                        <Row >
+                        <Row className='col-md-12 d-flex align-items-center flex-wrap ps-4'>
                             {customers?.length > 0 ? (
-                                <ul className="list-group form-control ontent-scroll p-3 mb-3 border" style={{ zIndex: 1000, maxHeight: '300px', overflowY: 'auto' }}>
+                                <ul className="list-group form-control ontent-scroll p-3 mb-3 border rounded-3" style={{ zIndex: 1000, maxHeight: '300px', overflowY: 'auto' }}>
                                     {customers.map((customer, index) => (
                                         <li
                                             key={customer.id}
@@ -69,7 +68,7 @@ const SearchCustomer = ({ ...props }) => {
                                 </ul>
 
                             ) : filter !== '' && (
-                                <Row className='d-flex justify-content-between shadow_service rounded-5 p-3'>
+                                <Row className='d-flex justify-content-between  p-3'>
                                     <label>No existe el cliente, ¿Desea agregar uno?</label>
                                     <Card className='col-xl-12 col-md-12 p-0'>
                                         <CardBody className="p-0">
@@ -79,32 +78,7 @@ const SearchCustomer = ({ ...props }) => {
                                 </Row>
                             )}
                         </Row>
-                        <Row >
-                            {customers?.length > 0 ? (
-                                <ul className="list-group form-control ontent-scroll p-3 mb-3 border" style={{ zIndex: 1000, maxHeight: '300px', overflowY: 'auto' }}>
-                                    {customers.map((customer, index) => (
-                                        <li
-                                            key={customer.id}
-                                            onClick={() => handleCustomer(customer)}
-                                            className='ist-group-item list-group-item-action rounded p-2 search_customer_wizard'
-
-                                        >
-                                            {customer.nombre}
-                                        </li>
-                                    ))}
-                                </ul>
-
-                            ) : filter !== '' && (
-                                <Row className='d-flex justify-content-between shadow_service rounded-5 p-3'>
-                                    <label>No existe el cliente, ¿Desea agregar uno?</label>
-                                    <Card className='col-xl-12 col-md-12 p-0'>
-                                        <CardBody className="p-0">
-                                            <NewCustomer props={{ addNewCustomer, stateBooking }} />
-                                        </CardBody>
-                                    </Card>
-                                </Row>
-                            )}
-                        </Row>
+                        
                         {customer ? (
                             <div className='mt-1'>
                                 <Row className="m-2 col-md-12 d-flex flex-row flex-nowrap justify-content-center">
@@ -150,67 +124,72 @@ const SearchCustomer = ({ ...props }) => {
                                 <label>Debe buscar un cliente</label>
                             </div>
                         )}
-                        {editCustomer && (
-                            <Row className='d-flex justify-content-between shadow_service rounded-5 p-3'>
-                                <Card className='col-xl-12 col-md-12 p-0'>
-                                    <CardBody className="p-0">
-                                        <EditCustomer props={props} customer={customer} booking={true} editCustomer={addNewCustomer} />
-                                    </CardBody>
-                                </Card>
-                            </Row>
-                        )}
 
-                        <Modal key='modalCustomer' isOpen={modal} toggle={toggle} size='lg'>
+                        <Modal key='modalCustomer' isOpen={modal} toggle={toggle} size={editCustomer ? 'xl' : 'lg'}>
                             <ModalHeader key='modalheader' toggle={toggle}><span className="fs-4 m-0 span_package_color">Información adicional del cliente</span></ModalHeader>
                             <ModalBody key='modalbody'>
                                 <Card className='p-4'>
                                     <Row className='d-flex justify-content-between shadow_service rounded-5 p-3'>
-                                        <Col className="col-md-12  d-flex justify-content-center flex-wrap ">
-                                            <div key='modaldivmain' className="col-md-12 border-bottom mb-3 d-flex flex-column">
-                                                <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
-                                                    <strong>Nombre de facturación: </strong> <span className="fs-5 label_package_color">{customer?.nombreFacturacion}</span>
-                                                </label>
-                                                <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
-                                                    <strong>Tipo de cliente: </strong> <span className="fs-5 label_package_color">{customer?.tipo}</span>
-                                                </label>
-                                                <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
-                                                    <strong>Ciudad: </strong>
-                                                    <span className="fs-5 label_package_color">{customer?.ciudad}</span>
-                                                </label>
-                                                <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
-                                                    <strong>Cantón: </strong>
-                                                    <span className="fs-5 label_package_color">{customer?.city}</span>
-                                                </label>
-                                                <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
-                                                    <strong>Calle: </strong>
-                                                    <span className="fs-5 label_package_color">{customer?.calle}</span>
-                                                </label>
-                                                <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
-                                                    <strong>Dirección: </strong>
-                                                    <span className="fs-5 label_package_color">{customer?.direccion}</span>
-                                                </label>
-                                                <ListSection
-                                                    title="Correos"
-                                                    items={customer?.correos}
-                                                    label="Email"
-                                                    emptyMessage="Sin datos"
-                                                />
-                                                <ListSection
-                                                    title="Teléfonos"
-                                                    items={customer?.telefonos}
-                                                    label="Teléfono"
-                                                    emptyMessage="Sin datos"
-                                                />
-                                            </div>
-                                        </Col>
-                                        <Col>
-                                            <div className=" text-end">
-                                                <button type="button" className="btn btn-primary waves-effect waves-light" onClick={() => onClickEdit()}>
-                                                    Editar cliente{" "}
-                                                    <i className="mdi mdi-account-search align-middle ms-2"></i>
-                                                </button>
-                                            </div>
-                                        </Col>
+
+                                        {editCustomer ? (
+                                            <Row className='d-flex justify-content-between shadow_service  p-3'>
+                                                <Card className='col-xl-12 col-md-12 p-0'>
+                                                    <CardBody className="p-0">
+                                                        <EditCustomer props={props} customer={customer} booking={true} editCustomer={addNewCustomer} />
+                                                    </CardBody>
+                                                </Card>
+                                            </Row>
+                                        ) : (
+                                            <Row className='d-flex justify-content-between   p-3'>
+                                                <Col className="col-md-12  d-flex justify-content-center flex-wrap ">
+                                                    <div key='modaldivmain' className="col-md-12 border-bottom mb-3 d-flex flex-column">
+                                                        <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
+                                                            <strong>Nombre de facturación: </strong> <span className="fs-5 label_package_color">{customer?.nombreFacturacion}</span>
+                                                        </label>
+                                                        <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
+                                                            <strong>Tipo de cliente: </strong> <span className="fs-5 label_package_color">{customer?.tipo}</span>
+                                                        </label>
+                                                        <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
+                                                            <strong>Ciudad: </strong>
+                                                            <span className="fs-5 label_package_color">{customer?.ciudad}</span>
+                                                        </label>
+                                                        <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
+                                                            <strong>Cantón: </strong>
+                                                            <span className="fs-5 label_package_color">{customer?.city}</span>
+                                                        </label>
+                                                        <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
+                                                            <strong>Calle: </strong>
+                                                            <span className="fs-5 label_package_color">{customer?.calle}</span>
+                                                        </label>
+                                                        <label key='labelmodalmain' className="fs-5 m-0 ms-4 span_package_color ">
+                                                            <strong>Dirección: </strong>
+                                                            <span className="fs-5 label_package_color">{customer?.direccion}</span>
+                                                        </label>
+                                                        <ListSection
+                                                            title="Correos"
+                                                            items={customer?.correos}
+                                                            label="Email"
+                                                            emptyMessage="Sin datos"
+                                                        />
+                                                        <ListSection
+                                                            title="Teléfonos"
+                                                            items={customer?.telefonos}
+                                                            label="Teléfono"
+                                                            emptyMessage="Sin datos"
+                                                        />
+                                                    </div>
+                                                </Col>
+
+                                                <Col>
+                                                    <div className=" text-end">
+                                                        <button type="button" className="btn btn-primary waves-effect waves-light" onClick={() => onClickEdit()}>
+                                                            Editar cliente{" "}
+                                                            <i className="mdi mdi-account-search align-middle ms-2"></i>
+                                                        </button>
+                                                    </div>
+                                                </Col>
+                                            </Row>
+                                        )}
                                     </Row>
                                 </Card>
                             </ModalBody>

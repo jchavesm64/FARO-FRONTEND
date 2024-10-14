@@ -67,7 +67,7 @@ const NewBooking = () => {
 
     const [stateBooking, setStateBooking] = useState(false);
 
-    
+
     const [typeBooking, setTypeBooking] = useState(null);
 
     const [packageBooking, setPackageBooking] = useState(null);
@@ -413,7 +413,8 @@ const NewBooking = () => {
     };
 
     const updateAmountService = (type, amount, service) => {
-        if (type === 'booking') {
+
+        if (type === 'perService') {
             setExtraService(prevServices =>
                 prevServices.map(s =>
                     s.id === service.id
@@ -577,7 +578,6 @@ const NewBooking = () => {
     };
 
     const updateServiceBooking = (service, type) => {
-        console.log(service)
         if (type === 'perService') {
             const updataService = extraService.map(s =>
                 s.nombre === service.nombre ? { ...s, ...service } : s
@@ -591,6 +591,14 @@ const NewBooking = () => {
             );
             setExtraServiceRoom(updateService)
         }
+    };
+
+    const updateTourBooking = (tour) => {
+        
+        const updateTour = toursList.map(t =>
+            t.nombre === tour.nombre ? { ...t, ...tour } : t
+        );
+        setToursList(updateTour); 
     };
 
     const stepsFromWizard = useMemo(() => stepsWizardMenuBooking, []);
@@ -638,7 +646,6 @@ const NewBooking = () => {
     }, [wizardRef]);
 
     const handleSaveNote = (updatedNote) => {
-
         const update = notes.map(note => {
             if (note.area.id === updatedNote.area.id) {
                 return {
@@ -800,6 +807,7 @@ const NewBooking = () => {
                             <div>
                                 <ToursService props={{
                                     updateServiceBooking,
+                                    updateTourBooking,
                                     handleService,
                                     handleTour,
                                     deleteServiceBooking,

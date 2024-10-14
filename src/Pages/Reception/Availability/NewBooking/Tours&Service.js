@@ -5,11 +5,13 @@ import ListInfo from "../../../../components/Common/ListInfo";
 import ListSection from "../../../../components/Common/ListSelection";
 import TabeListService from "../../../../components/Common/TableListService";
 import EditExtraService from "../../../GeneralSettings/Hotel/ExtraService/EditExtraService";
+import EditTour from "../../../GeneralSettings/Hotel/Tours/EditTour";
 
 const ToursService = ({ ...props }) => {
 
     const {
         updateServiceBooking,
+        updateTourBooking,
         handleService,
         handleTour,
         deleteServiceBooking,
@@ -54,7 +56,7 @@ const ToursService = ({ ...props }) => {
     const [modal, setModal] = useState(false);
     const [filter, setFilter] = useState(null)
     const [type, setType] = useState('')
-    const toggle = () => setModal(!modal);
+    const toggle = () => { setModal(!modal); setType('') };
 
     const showModalEditService = (data, type) => {
         setType(type)
@@ -62,10 +64,22 @@ const ToursService = ({ ...props }) => {
         setModal(true);
     };
 
+    const showModalEditTour = (data) => {
+        setFilter(data);
+        setModal(true);
+    }
+
     const updateService = (packageUpdate) => {
         updateServiceBooking(packageUpdate, type)
-        setModal(false);
+        toggle();
+        setFilter(null);
     };
+
+    const updateTour = (tour) => {
+        updateTourBooking(tour);
+        toggle();
+        setFilter(null);
+    }
 
     return (
         <React.Fragment>
@@ -409,7 +423,7 @@ const ToursService = ({ ...props }) => {
                                                                             </div>
                                                                         </div>
                                                                         <Row>
-                                                                            <ListInfo data={toursList} headers={['Tour ', 'Precio']} keys={['nombre', 'precio']} enableEdit={false} enableDelete={true} actionDelete={deleteTour} mainKey={'nombre'} secondKey={'precio'} />
+                                                                            <ListInfo data={toursList} headers={['Tour ', 'Precio']} keys={['nombre', 'precio']} enableEdit={true} actionEdit={showModalEditTour} enableDelete={true} actionDelete={deleteTour} mainKey={'nombre'} secondKey={'precio'} />
                                                                         </Row>
                                                                     </CardBody>
                                                                 </Card>
@@ -480,15 +494,14 @@ const ToursService = ({ ...props }) => {
                                     </div>
                                 </div>
                             </div>
-
                         </Col>
 
                     </Row>
 
                     <Modal key='modalCustomer' isOpen={modal} toggle={toggle} size='xl'>
-                        <ModalHeader key='modalheader' toggle={toggle}><span className="fs-4 m-0 span_package_color">Editar servicio</span></ModalHeader>
+                        <ModalHeader key='modalheader' toggle={toggle}><span className="fs-4 m-0 span_package_color">{type !== '' ? 'Editar sevicio' : 'Editar tour'}</span></ModalHeader>
                         <ModalBody key='modalbody'>
-                            <EditExtraService idBooking={filter?.id} updateServiceBooking={updateService} />
+                            {type !== '' ? <EditExtraService idBooking={filter?.id} updateServiceBooking={updateService} /> : (<EditTour idBooking={filter?.id} updateTourBooking={updateTour} />)}
                         </ModalBody>
                     </Modal>
                 </Container>

@@ -12,7 +12,7 @@ import { OBTENER_PAQUETE, UPDATE_PAQUETE } from "../../../../services/PaquetesSe
 import { OBTENER_TEMPORADAS } from "../../../../services/TemporadaService";
 import TabeListService from "../../../../components/Common/TableListService";
 
-const EditPackage = ({ props, idBooking, updatePackageBooking }) => {
+const EditPackage = ({ props, idBooking, updatePackage }) => {
     document.title = "Administrador de paquetes | FARO";
 
     const navigate = useNavigate();
@@ -234,6 +234,7 @@ const EditPackage = ({ props, idBooking, updatePackageBooking }) => {
                 precio: price,
                 estado: 'ACTIVO'
             };
+            debugger
             if (!idBooking) {
                 const { data } = await actualizar({ variables: { id: !idBooking ? id : idBooking, input }, errorPolicy: 'all' });
                 const { estado, message } = data.actualizarPaquete;
@@ -250,7 +251,7 @@ const EditPackage = ({ props, idBooking, updatePackageBooking }) => {
                 setDisableSave(false)
             } else {
                 infoAlert('Excelente', "Paquete actualizado para la reserva", 'success', 3000, 'top-end');
-                updatePackageBooking(input)
+                updatePackage(input)
                 cleanData();
             }
 

@@ -121,7 +121,7 @@ const Packages = ({ ...props }) => {
                     <Modal key='modalCustomer' isOpen={modal} toggle={toggle} size='xl'>
                         <ModalHeader key='modalheader' toggle={toggle}><span className="fs-4 m-0 span_package_color">Editar paquete</span></ModalHeader>
                         <ModalBody key='modalbody'>
-                            <EditPackage idBooking={filter?.id} updatePackageBookin={updatePackage} />
+                            <EditPackage idBooking={filter?.id} updatePackage={updatePackage} />
                         </ModalBody>
                     </Modal>
                 </Container>

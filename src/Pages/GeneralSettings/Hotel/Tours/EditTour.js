@@ -6,14 +6,15 @@ import { useMutation, useQuery } from "@apollo/client";
 import Select from "react-select";
 import { OBTENER_TOUR, UPDATE_TOUR } from "../../../../services/TourService";
 import { infoAlert } from "../../../../helpers/alert";
+import { typeTours } from "../../../../constants/routesConst";
 
 
-const EditTour = () => {
+const EditTour = ({ idBooking, updateTourBooking }) => {
     document.title = "Tours | FARO";
     const navigate = useNavigate();
 
     const { id } = useParams();
-    const { loading: loadingTour, error: errorTour, data: dataTour, startPolling, stopPolling } = useQuery(OBTENER_TOUR, { variables: { id: id }, pollInterval: 1000 });
+    const { loading: loadingTour, error: errorTour, data: dataTour, startPolling, stopPolling } = useQuery(OBTENER_TOUR, { variables: { id: id ? id : idBooking }, pollInterval: 1000 });
     const [actualizar] = useMutation(UPDATE_TOUR);
 
     useEffect(() => {
@@ -30,46 +31,17 @@ const EditTour = () => {
     const [price, setPrice] = useState(0);
     const [description, setDescription] = useState('');
 
-    const typeTours = [
-        {
-            label: 'Educativos',
-            value: 'Educativos'
-        },
-        {
-            label: 'Temáticos',
-            value: 'Temáticos'
-        },
-        {
-            label: 'Aventura',
-            value: 'Aventura'
-        },
-        {
-            label: 'Relax',
-            value: 'Relax'
-        },
-        {
-            label: 'Urbanos',
-            value: 'Urbanos'
-        },
-        {
-            label: 'Naturales',
-            value: 'Naturales'
-        },
-        {
-            label: 'Culturales',
-            value: 'Culturales'
-        }
-    ];
+
 
     useEffect(() => {
         if (dataTour) {
             setTypeTour({
-                label: dataTour.obtenerTour.tipo,
-                value: dataTour.obtenerTour.tipo
+                label: dataTour?.obtenerTour?.tipo,
+                value: dataTour?.obtenerTour?.tipo
             });
-            setName(dataTour.obtenerTour.nombre);
-            setPrice(dataTour.obtenerTour.precio);
-            setDescription(dataTour.obtenerTour.descripcion);
+            setName(dataTour?.obtenerTour?.nombre);
+            setPrice(dataTour?.obtenerTour?.precio);
+            setDescription(dataTour?.obtenerTour?.descripcion);
         }
     }, [dataTour])
 
@@ -95,18 +67,23 @@ const EditTour = () => {
                 descripcion: description,
                 estado: "ACTIVO"
             };
-
-            const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' });
-            const { estado, message } = data.actualizarTour;
-            if (estado) {
-                infoAlert('Excelente', message, 'success', 3000, 'top-end');
-                cleanData();
-                navigate('/hotelsettings/tours');
+            
+            if (!idBooking) {
+                const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' });
+                const { estado, message } = data.actualizarTour;
+                if (estado) {
+                    infoAlert('Excelente', message, 'success', 3000, 'top-end');
+                    cleanData();
+                    navigate('/hotelsettings/tours');
+                } else {
+                    infoAlert('Oops', message, 'error', 3000, 'top-end')
+                }
+                setDisableSave(false)
             } else {
-                infoAlert('Oops', message, 'error', 3000, 'top-end')
+                infoAlert('Excelente', "Servicio actualizado para la reserva", 'success', 3000, 'top-end');
+                updateTourBooking(input);
+                cleanData();
             }
-            setDisableSave(false)
-
         } catch (error) {
             infoAlert('Oops', 'Ocurrió un error inesperado al guardar el tour', 'error', 3000, 'top-end')
             setDisableSave(false)
@@ -138,9 +115,9 @@ const EditTour = () => {
 
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className={!idBooking && "page-content"}>
                 <Container fluid={true}>
-                    <Breadcrumbs title="Nuevo Tour" breadcrumbItem="Tour" breadcrumbItemUrl='/hotelsettings/tours' />
+                    {!idBooking && <Breadcrumbs title="Nuevo Tour" breadcrumbItem="Tour" breadcrumbItemUrl='/hotelsettings/tours' />}
                     <Card className='p-4'>
                         <Row>
                             <div className="col mb-3 text-end">

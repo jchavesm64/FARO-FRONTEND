@@ -338,7 +338,7 @@ const ReceptionHome = () => {
                                     </label>
                                     <label className="fs-6 m-0 ms-4 span_package_color">
                                         <strong className="mdi mdi-percent me-1" />
-                                        <strong>Porcentaje de disponibilidad: </strong> <span className="fs-6 label_package_color">{`${dataModal.percent}%`}</span>
+                                        <strong>Porcentaje de ocupación: </strong> <span className="fs-6 label_package_color">{`${dataModal.percent}%`}</span>
 
                                     </label>
                                     <label className="fs-6 m-0 ms-4 span_package_color">
