@@ -25,6 +25,7 @@ const Orders = ({ ...props }) => {
     const [isTransferMode, setIsTransferMode] = useState(false);
     const [comandaData, setComandaData] = useState([]);
     const [comandaId, setComandaId] = useState(null);
+    const [comandaCreatedAt, setComandaCreatedAt] = useState(null);
     const { loading: loadingPisos, error: errorPisos, data: dataPisos, refetch: refecthPisos } = useQuery(OBTENER_PISOS);
 
     const { loading: loadingMesas, error: errorMesas, data: dataMesas, refetch: refetchMesas } = useQuery(OBTENER_MESAS_POR_PISO, {
@@ -159,13 +160,15 @@ const Orders = ({ ...props }) => {
                         nombre: platillo.nombre,
                         cantidad: platillo.cantidad,
                         precio: platillo.precio,
-                        descuento: platillo.descuento
+                        descuento: platillo.descuento,
+                        entregados: platillo.entregados
                     });
                 }
                 )
             });
             if (!isEqual(newOrders, comandaData)) {
                 setComandaId(dataComandas.obtenerComandaPorMesa?.id);
+                setComandaCreatedAt(dataComandas.obtenerComandaPorMesa?.fecha);
                 setComandaData(newOrders);
 
                 setTables(prevTables =>
@@ -191,6 +194,7 @@ const Orders = ({ ...props }) => {
             setIsTransferMode(false);
             setComandaId(null);  // Reset comandaId
             setComandaData(null);  // Reset comandaData
+            setComandaCreatedAt(null);  // Reset comandaCreatedAt
             return;
         }
 
@@ -251,6 +255,7 @@ const Orders = ({ ...props }) => {
                     infoAlert('Comanda eliminada', messageComanda, 'success', 3000, 'top-end')
                     setComandaId(null);
                     setComandaData([]);
+                    setComandaCreatedAt(null);
 
                     await refetchMesas();
                     await refetchComanda({ id: selectedTable.id });
@@ -291,6 +296,7 @@ const Orders = ({ ...props }) => {
                         // Reset states
                         setSelectedTable(null);
                         setComandaId(null);
+                        setComandaCreatedAt(null);
                         setComandaData([]);
 
                         // Refetch data
@@ -385,6 +391,7 @@ const Orders = ({ ...props }) => {
                                         transferMode={isTransferMode}
                                         onCreateOrder={onCreateOrder}
                                         onBill={onBill}
+                                        createdAt={comandaCreatedAt}
                                     />
                                 </CardBody>
                             </Card>
