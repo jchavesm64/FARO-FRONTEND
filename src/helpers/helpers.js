@@ -21,6 +21,8 @@ export const getFechaTZ = (modo, fecha) => {
                 return moment.tz(fecha, 'America/Costa_Rica').format('hh:mm a');
             case 'fechaHora':
                 return moment.tz(fecha, 'America/Costa_Rica').format('DD-MM-YYYY hh:mm a');
+            case 'fechaHoraSegundos':
+                return moment.tz(fecha, 'America/Costa_Rica').format('DD-MM-YYYY hh:mm:ss a');
             default:
                 return moment.tz(fecha, 'America/Costa_Rica').format('DD-MM-YYYY');
         }
