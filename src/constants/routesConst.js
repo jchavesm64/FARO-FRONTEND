@@ -87,6 +87,11 @@ export const restaurantRoutes = [
         icon: 'mdi mdi-text-box-multiple-outline',
         link: "/restaurant/orders"
     },
+    {
+        label: "Ordenes Pendientes",
+        icon: 'mdi mdi-clock-outline',
+        link: "/restaurant/pendingorders"
+    },
     // { 
     //     label: "Sesiones", 
     //     icon: 'mdi mdi-network-pos',
@@ -249,6 +254,7 @@ export const sidebarRoutes = [
             { sublabel: "Gestión de menú", link: "/restaurant/menu" },
             { sublabel: "Inventario", link: "/stock/Restaurante" },
             { sublabel: "Comandas", link: "/restaurant/orders" },
+            { sublabel: "Ordenes Pendientes", link: "/restaurant/pendingorders" },
             // { sublabel: "Gestión de mesas", link: "/restaurant/tables" },
             // { sublabel: "Configuración", link: "/restaurant/settings" },
         ],
