@@ -45,6 +45,9 @@ import NewMenu from "../Pages/Restaurant/Menu/NewMenu";
 import EditMenuContainer from "../Pages/Restaurant/Menu/EditMenuContainer";
 import RestaurantHome from "../Pages/Restaurant/RestaurantHome";
 import Orders from "../Pages/Restaurant/Orders/Orders";
+import CreateOrder from "../Pages/Restaurant/Orders/CreateOrder";
+import PendingOrders from "../Pages/Restaurant/PendingOrders/PendingOrders";
+
 import CleaningJobs from "../Pages/CleaningJobs/CleaningJobs";
 
 import ReceptionHome from "../Pages/Reception/ReceptionHome";
@@ -131,7 +134,6 @@ import InvoiceIssued from "../Pages/Invoices/Issued";
 import InvoiceParameters from "../Pages/Invoices/Parameters";
 import InvoiceCreditNote from "../Pages/Invoices/CreditNote";
 import InvoiceCompany from "../Pages/Invoices/Company";
-import CreateOrder from "../Pages/Restaurant/Orders/CreateOrder";
 
 
 const authProtectedRoutes = [
@@ -185,6 +187,7 @@ const authProtectedRoutes = [
   { path: "/restaurant/editmenu/:id", component: <EditMenuContainer /> },
   { path: "/restaurant/orders", component: <Orders /> },
   { path: "/restaurant/orders/new", component: <CreateOrder /> },
+  { path: "/restaurant/pendingorders", component: <PendingOrders /> },
 
   { path: "/reception", component: <ReceptionHome /> },
   { path: "/reception/availability", component: <AvailabilityNewBooking /> },
