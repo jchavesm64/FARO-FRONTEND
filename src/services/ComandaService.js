@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-export const OBTENER_COMANDAS = gql`
+/*export const OBTENER_COMANDAS = gql`
     query obtenerComandas{
         obtenerComandass{
             id
@@ -44,6 +44,34 @@ export const OBTENER_COMANDAS = gql`
                     moneda
                 }
                 estado
+            }
+        }
+    }
+`;*/
+
+export const OBTENER_COMANDAS = gql`
+    query {
+        obtenerComandas {
+            id
+            fecha
+            observaciones
+            mesa {
+                id
+                numero
+                piso {
+                    id
+                    nombre
+                }
+                tipo
+            }
+            subcuentas {
+                id
+                platillos {
+                    id
+                    cantidad
+                    nombre
+                    entregados
+                }
             }
         }
     }
@@ -129,6 +157,7 @@ export const OBTENER_COMANDA_POR_MESA = gql`
                     nombre
                     precio
                     descuento
+                    entregados
                 }
                 descuento
                 total
