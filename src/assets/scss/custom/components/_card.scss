@@ -140,3 +140,19 @@
     }
     font-size: large;
 }
+
+.card-pending-orders{
+    border: 1px solid $gray-400;
+}
+
+.card-pending-orders .green-bar {
+    border-radius: 0.4rem 0.4rem 0 0;
+    background-color: $success;
+    color: white;
+    padding: 5px 10px;
+}
+
+.card-pending-orders .card-content {
+    background-color: white;
+    border-radius: 0.4rem;
+}
