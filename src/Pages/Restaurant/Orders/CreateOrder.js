@@ -8,7 +8,7 @@ import { OBTENER_MENUS } from "../../../services/MenuService";
 import { useMutation, useQuery } from "@apollo/client";
 import Select from "react-select";
 import { infoAlert } from "../../../helpers/alert";
-import { OBTENER_COMANDA_POR_MESA, SAVE_COMANDA } from "../../../services/ComandaService";
+import { OBTENER_COMANDA_POR_MESA, SAVE_COMANDA, UPDATE_COMANDA } from "../../../services/ComandaService";
 import { SAVE_SUBCUENTA } from "../../../services/SubcuentaService";
 import { UPDATE_MESA } from "../../../services/MesaService";
 
@@ -29,6 +29,7 @@ const CreateOrder = ({ ...props }) => {
     const [insertarComanda] = useMutation(SAVE_COMANDA);
     const [insertarSubcuenta] = useMutation(SAVE_SUBCUENTA);
     const [actualizarMesa] = useMutation(UPDATE_MESA);
+    const [actualizarComanda] = useMutation(UPDATE_COMANDA);
 
     const [category, setCategory] = useState(null);
     const [selectedItems, setSelectedItems] = useState([]);
@@ -85,6 +86,7 @@ const CreateOrder = ({ ...props }) => {
     useEffect(() => {
         if (data_order?.obtenerComandaPorMesa) {
             setOrderId(data_order.obtenerComandaPorMesa.id);
+            setObservations(data_order.obtenerComandaPorMesa.observaciones);
         }
     }, [data_order]);
 
@@ -247,14 +249,14 @@ const CreateOrder = ({ ...props }) => {
         try {
             setDisableSave(true)
             let newOrderId = orderId;
+            const order = {
+                mesa: table.id,
+                observaciones: observations,
+                preFactura: false,
+                estado: "GENERADA",
+            }
             if (!orderId) {
-                const order = {
-                    mesa: table.id,
-                    fecha: new Date(),
-                    observaciones: observations,
-                    preFactura: false,
-                    estado: "GENERADA",
-                }
+                order['fecha'] = new Date();
                 const { data } = await insertarComanda({ variables: { input: order }, errorPolicy: 'all' });
                 const { estado, message, data: comandaData } = data.insertarComanda;
                 if (!estado) {
@@ -265,7 +267,8 @@ const CreateOrder = ({ ...props }) => {
                 setOrderId(comandaData.id);
                 newOrderId = comandaData.id;
             }
-
+            console.log("Order", order)
+            await actualizarComanda({ variables: { id: newOrderId, input: order }, errorPolicy: 'all' });
             const { data } = await actualizarMesa({ variables: { id: table.id, input: { disponibilidad: "OCUPADA" } }, errorPolicy: 'all' });
             const { estado, message } = data.actualizarMesa;
             if (!estado) {
