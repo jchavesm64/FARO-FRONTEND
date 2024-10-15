@@ -21,6 +21,7 @@ const TableOrders = ({ ...props }) => {
                         <th>Producto</th>
                         <th>Precio</th>
                         <th>Cantidad</th>
+                        <th>Entregados</th>
                         <th>Total</th>
                         <th></th>
                     </tr>
@@ -31,7 +32,8 @@ const TableOrders = ({ ...props }) => {
                             <tr key={`menu-${i}`}>
                                 <td>{order.nombre}</td>
                                 <td>₡{order.precio}</td>
-                                <td>{order.cantidad}</td>
+                                <td className='text-center'>{order.cantidad}</td>
+                                <td className='text-center'>{order.entregados}</td>
                                 <td>₡{order.precio * order.cantidad}</td>
                                 <td>
                                     <div className="d-flex">
