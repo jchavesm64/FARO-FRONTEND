@@ -135,6 +135,15 @@ export const UPDATE_SUBCUENTA = gql`
     }
 `;
 
+export const UPDATE_SERVED = gql`
+    mutation actualizarEntregados($input:actualizarEntregadosInput){
+        actualizarEntregados(input:$input){
+            estado
+            message
+        }
+    }
+`;
+
 export const DELETE_SUBCUENTA = gql`
     mutation desactivarSubcuenta($id:ID){
         desactivarSubcuenta(id:$id){
