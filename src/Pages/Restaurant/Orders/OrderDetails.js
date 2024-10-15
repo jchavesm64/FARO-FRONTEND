@@ -4,16 +4,14 @@ import { Row, Col, Button } from 'reactstrap';
 import SpanSubtitleForm from "../../../components/Forms/SpanSubtitleForm";
 import DataList from "../../../components/Common/DataList";
 
-const OrderDetails = ({ table, onDelete, onDeleteOrder, onTransfer, transferMode, onCreateOrder, onBill }) => {
-    const { elapsedTime, start } = useTimer();
+const OrderDetails = ({ table, onDelete, onDeleteOrder, onTransfer, transferMode, onCreateOrder, onBill, createdAt }) => {
+    /*const { elapsedTime, start } = useTimer();
 
     React.useEffect(() => {
         if (table && table.orders && table.orders.length > 0) {
-            // Assuming the first order's creation time is the start time for the whole table
-            //start(new Date(table.orders[0].createdAt));
-            console.log('Table', table);
+            //start(new Date(createdAt));
         }
-    }, [table, start]);
+    }, [table, start]);*/
 
     const formatTotal = (orders) => {
         if (!orders) return '₡0,00';
@@ -36,7 +34,7 @@ const OrderDetails = ({ table, onDelete, onDeleteOrder, onTransfer, transferMode
             <SpanSubtitleForm subtitle={table ? `Total: ${formatTotal(table?.orders)}` : `Por favor selecciona una mesa o silla`} />
             <Row className="mb-3">
                 <Col md={12}>
-                    <span>{table ? `Tiempo transcurrido: ${elapsedTime}` : `\u00A0`}</span>
+                    {/*<span>{table ? `Tiempo transcurrido: ${elapsedTime}` : `\u00A0`}</span>*/}
                     {transferMode &&
                         <>
                             <br />
