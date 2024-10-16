@@ -38,11 +38,11 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
                         }
                         {
                             (enableAmount) &&
-                            <th>{amount}</th>
+                            <th key={amount}>{amount}</th>
                         }
                         {
                             (enableDelete) &&
-                            <th className='text-center'>Acciones</th>
+                            <th key='actions' className='text-center'>Acciones</th>
                         }
                     </tr>
                 </thead>

@@ -321,7 +321,6 @@ const NewBooking = () => {
 
     const totalPerRoom = (type) => {
         const total = (type.amountBooking * type.type.precioBase) + currentSeason.precio;
-
         return total
     }
 
@@ -359,9 +358,6 @@ const NewBooking = () => {
     }
 
     const addExtraService = (s, extra, type) => {
-
-        console.log(s);
-
         if (!s) {
             infoAlert('Oops', 'No ha seleccionado un servicio', 'error', 3000, 'top-end');
             return;

@@ -5,26 +5,25 @@ const ListSection = ({ title, items, label, icon, emptyMessage, showExtra, showA
         {items.length ? (
             <div>
                 {items.map((item, index) => (
-                    <div key={index} className="ms-4 col-md-12 " >
-                        <span className="fs-5 span_package_color" >
+                    <div id={`data${index}`} key={`data${index}`} className="ms-4 col-md-12 " >
+                        <span id={`list${item.nombre}${index}`} key={`list${item.nombre}${index}`} className="fs-5 span_package_color" >
                             {label === '•' ? (label) : (`${label}: `)}
-                            <span className="label_package_color ">
+                            <span id={`name${item.nombre}`} key={`name${item.nombre}`} className="label_package_color ">
                                 {item.nombre || item.numeroHabitacion || item.email || item.telefono || "Sin información"}
                             </span>
-                            {showAmount && <span className="span_package_color">
+                            {showAmount && <span id={`amount${item.nombre}`} key={`amount${item.nombre}`} className="span_package_color">
                                 {(item.cantidad !== 0 && item.cantidad !== undefined) && (<span> x{parseInt(item.cantidad) + parseInt(item.extra !== undefined ? item.extra : 0)} </span>)}
                             </span>}
-                            {showExtra && <span className="span_package_color">
+                            {showExtra && <span id={`extra${item.nombre}`} key={`extra${item.nombre}`} className="span_package_color">
                                 {(item.extra !== 0 && item.extra !== undefined) && (<span> x{parseInt(item.extra)} </span>)}
                             </span>
                             }
-
                         </span>
                     </div>
                 ))}
             </div>
         ) : (
-            <span className="fs-5 span_package_color">{emptyMessage}</span>
+            <span id="message" key='message' className="fs-5 span_package_color">{emptyMessage}</span>
         )}
     </label>
 );

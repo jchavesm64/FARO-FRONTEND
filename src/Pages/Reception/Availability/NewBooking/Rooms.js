@@ -84,23 +84,25 @@ const Rooms = ({ ...props }) => {
                                                 <div className='border border-secondary rounded p-1'>
                                                     {amountTypeRooms.map(type => (
                                                         type.amountBooking !== 0 && (
-                                                            <div className='col-md-11 border m-2 shadow_wizard rounded p-3 d-flex justify-content-between'>
-                                                                <div key={`row${type.type.nombre}`} className="m-0 col-md-11 p-1">
-                                                                    <label className="fs-4 m-0 span_package_color">
+                                                            <div id={`data${type.type.nombre}`} key={`data${type.type.nombre}`} className='col-md-11 border m-2 shadow_wizard rounded p-3 d-flex justify-content-between'>
+                                                                <div id={`row${type.type.nombre}`} key={`row${type.type.nombre}`} className="m-0 col-md-11 p-1">
+                                                                    <label id={`label${type.type.nombre}`} key={`label${type.type.nombre}`} className="fs-4 m-0 span_package_color">
                                                                         <strong>Tipo de habitación:</strong> <span className="fs-5 label_package_color">{type.type.nombre}</span>
                                                                     </label>
 
-                                                                    <div className="col-md-11 m-1 d-flex flex-wrap flex-column">
-                                                                        <label className="fs-5 m-0 ms-4 span_package_color">
+                                                                    <div id={`card${type.type.nombre}`} key={`card${type.type.nombre}`} className="col-md-11 m-1 d-flex flex-wrap flex-column">
+                                                                        <label id={`rowselect${type.type.nombre}`} key={`rowselect${type.type.nombre}`} className="fs-5 m-0 ms-4 span_package_color">
                                                                             <strong>Habitaciones selecionadas:</strong> <span className="fs-5 label_package_color">{type.amountBooking}</span>
                                                                         </label>
                                                                         <ListSection
+                                                                            key={`list1`}
                                                                             title="Habitaciones"
                                                                             items={roomsBooking.filter(rooms => rooms.tipoHabitacion.nombre === type.type.nombre)}
                                                                             label="n.º de habitación"
                                                                             emptyMessage="Sin datos"
                                                                         />
                                                                         <ListSection
+                                                                            key={`list2`}
                                                                             title="Comodidades por habitación"
                                                                             items={roomsBooking.find(rooms => rooms.tipoHabitacion.nombre === type.type.nombre).comodidades}
                                                                             label="Comodidad"
