@@ -17,6 +17,7 @@ const Booking = () => {
         setBooking(data_booking?.obtenerReservas || [])
     }, [data_booking]);
 
+    console.log(data_booking?.obtenerReservas)
 
     return (
         <React.Fragment>

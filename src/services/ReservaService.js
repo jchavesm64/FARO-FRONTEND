@@ -8,53 +8,10 @@ export const OBTENER_RESERVAS = gql`
                 adulto
                 ninos
             }
-            serviciosGrupal{
-                nombre
-                descripcion
-                precio
-                tipo{
-                    nombre
-                    cuantificable
-                    icon
-                    horadia
-                }
-                
-            }
+            serviciosGrupal
             tipo
-            tours{
-                tipo
-                nombre
-                precio
-                descripcion
-            }
-            paquetes{
-                tipo
-                nombre
-                servicios{
-                    id
-                    nombre
-                    descripcion
-                    precio
-                    tipo{
-                        nombre
-                        cuantificable
-                        horadia
-                    }
-                }
-                tours{
-                    nombre
-                }
-                temporadas{
-                    fechaInicio
-                    fechaFin
-                    nombre
-                    tipo
-                    precio 
-                }
-                descripcion
-                precio
-            }
-
+            tours
+            paquetes
             cliente {
                 id
                 tipo
@@ -67,6 +24,14 @@ export const OBTENER_RESERVAS = gql`
                 calle
                 cp
                 direccion
+                telefonos{
+                    telefono,
+                    ext,
+                    descripcion
+                }
+                correos{
+                    email
+                }
             }
             usuario{
                 nombre
@@ -89,56 +54,10 @@ export const OBTENER_RESERVA = gql`
                 adulto
                 ninos
             }
-            serviciosGrupal{
-                id
-                nombre
-                descripcion
-                precio
-                estado
-                tipo{
-                    nombre
-                    cuantificable
-                    icon
-                    horadia
-                }
-                
-            }
+            serviciosGrupal
             tipo
-            tours{
-                tipo
-                nombre
-                precio
-                descripcion
-            }
-            paquetes{
-                id
-                tipo
-                nombre
-                servicios{
-                    id
-                    nombre
-                    descripcion
-                    precio
-                    tipo{
-                        nombre
-                        cuantificable
-                        horadia
-                    }
-                }
-                tours{
-                    nombre
-                }
-                temporadas{
-                    fechaInicio
-                    fechaFin
-                    nombre
-                    tipo
-                    precio 
-                }
-                descripcion
-                precio
-            }
-
+            tours
+            paquetes
             cliente {
                 id
                 tipo
@@ -151,6 +70,14 @@ export const OBTENER_RESERVA = gql`
                 calle
                 cp
                 direccion
+                telefonos{
+                    telefono,
+                    ext,
+                    descripcion
+                }
+                correos{
+                    email
+                }
             }
             usuario{
                 nombre

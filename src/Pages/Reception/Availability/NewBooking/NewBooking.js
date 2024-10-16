@@ -50,6 +50,8 @@ const NewBooking = () => {
     const { loading: loading_booking, data: booking } = useQuery(OBTENER_RESERVA, { variables: { id: id }, skip: !id, pollInterval: 1000 });
     const { data: bookingRoom } = useQuery(OBTENER_RESERVAHABITACION, { variables: { id: booking?.obtenerReserva.id }, skip: !id, pollInterval: 1000 })
 
+    console.log(booking);
+
     const [insertar] = useMutation(SAVE_RESERVA);
 
     const [user, setUser] = useState([])
@@ -191,7 +193,7 @@ const NewBooking = () => {
 
     }, [amountAdult, amountChildren, checkIn, checkOut])
 
-    function calculateNights() {
+    const calculateNights = () => {
         const startDateObj = new Date(checkIn);
         const endDateObj = new Date(checkOut);
         const timeDifference = endDateObj - startDateObj;
@@ -207,7 +209,7 @@ const NewBooking = () => {
         setTypeBooking(type);
     };
 
-    function getFilteredByKey(key, value) {
+    const getFilteredByKey = (key, value) => {
         const valName = key.nombre.toLowerCase()
         const valCode = key.codigo.toLowerCase()
         const val = value.toLowerCase()
@@ -355,7 +357,7 @@ const NewBooking = () => {
         const data = getServices().filter(item => !extra.includes(item.value.id));
 
         return data;
-    }
+    };
 
     const addExtraService = (s, extra, type) => {
         if (!s) {
@@ -495,7 +497,7 @@ const NewBooking = () => {
 
     const deleteServiceRoom = (nombre) => {
         setExtraServiceRoom(extraServiceRoom.filter(a => a.nombre !== nombre));
-    }
+    };
 
     const getTour = () => {
         const data = [];
@@ -746,9 +748,9 @@ const NewBooking = () => {
                     ninos: amountChildren
                 },
                 total: null,
-                serviciosGrupal: extraService?.map(s => s.id),
-                paquetes: packageBookingList.map(p => p.id),
-                tours: toursList.map(t => t.id),
+                serviciosGrupal: extraService || [],
+                paquetes: packageBookingList || [],
+                tours: toursList || [],
                 notas: notes.filter(note => note.nota !== ""),
                 metodoPago: null,
                 politicas: null,

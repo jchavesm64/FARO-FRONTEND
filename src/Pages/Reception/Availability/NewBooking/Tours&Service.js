@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Select from "react-select";
 import { Button, Card, CardBody, Col, Container, Modal, Row, ModalBody, ModalHeader, FormGroup } from "reactstrap";
 import ListInfo from "../../../../components/Common/ListInfo";

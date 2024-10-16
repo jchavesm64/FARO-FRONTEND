@@ -98,13 +98,13 @@ const SearchCustomer = ({ ...props }) => {
                                                 </label>
                                                 <ListSection
                                                     title="Correos"
-                                                    items={customer.correos.slice(0, 3)}
+                                                    items={customer?.correos.slice(0, 3)}
                                                     label="Email"
                                                     emptyMessage="Sin datos"
                                                 />
                                                 <ListSection
                                                     title="Teléfonos"
-                                                    items={customer.telefonos.slice(0, 3)}
+                                                    items={customer?.telefonos.slice(0, 3)}
                                                     label="Teléfono"
                                                     emptyMessage="Sin datos"
                                                 />
