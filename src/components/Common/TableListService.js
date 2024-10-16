@@ -23,7 +23,7 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
     };
 
     const onCalendar = (element) => {
-        actionCalendar(element);
+        actionCalendar(element, type);
     };
 
     return (
@@ -87,7 +87,7 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
                                     (enableEdit || enableDelete || enableCalendar) &&
                                     <td className="d-flex justify-content-center">
                                         {
-                                            enableCalendar && <ButtonIconTable icon='mdi mdi-calendar-range' color='info' onClick={() => { onCalendar(line) }} />
+                                            (enableCalendar && line.tipo?.cuantificable === 'true') && <ButtonIconTable icon='mdi mdi-calendar-range' color='info' onClick={() => { onCalendar(line) }} />
                                         }
                                         {
                                             enableEdit && <ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={() => onEdit(line)} />

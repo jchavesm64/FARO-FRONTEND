@@ -31,7 +31,7 @@ const TableDate = ({ ...props }) => {
                                 }
 
                                 {
-                                    (enableDelete) &&
+                                    (enableDelete ) &&
                                     <td className="d-flex justify-content-center">
 
                                         {

@@ -49,8 +49,6 @@ const ToursService = ({ ...props }) => {
         typeBooking
     } = props.props;
 
-
-
     setDisabledButton(false);
 
     const [isOpenServicePerBooking, setIsOpenServicePerBooking] = useState(false);
@@ -67,20 +65,20 @@ const ToursService = ({ ...props }) => {
 
     const [modal, setModal] = useState(false);
     const [filter, setFilter] = useState(null);
-    const [extraDate, setExtraDate] = useState(null);
+    const [extraDate, setExtraDate] = useState([]);
     const [type, setType] = useState('');
     const toggle = () => { setModal(!modal); setType(''); setExtraDate(0); };
 
     const showModalEditService = (data, type) => {
-        setType(type)
-        setFilter(data)
+        setType(type);
+        setFilter(data);
         setModal(true);
     };
 
     const showModalEditTour = (data) => {
         setFilter(data);
         setModal(true);
-    }
+    };
 
     const updateService = (packageUpdate) => {
         updateServiceBooking(packageUpdate, type)
@@ -94,7 +92,8 @@ const ToursService = ({ ...props }) => {
         setFilter(null);
     };
 
-    const showModalCalendar = (data) => {
+    const showModalCalendar = (data, type) => {
+        setType(type);
         setExtraDate(data);
         setModal(true);
     };
@@ -108,7 +107,7 @@ const ToursService = ({ ...props }) => {
     };
 
     const deleteDate = (index) => {
-        setExtraDate(deleteDateServiceExtra(index, extraDate, 'booking'));
+        setExtraDate(deleteDateServiceExtra(index, extraDate, type));
     };
 
     return (
@@ -305,7 +304,7 @@ const ToursService = ({ ...props }) => {
                                                                                     </div>
                                                                                 </div>
                                                                                 <Row>
-                                                                                    <TabeListService data={extraServiceRoom} headers={['Servicio', 'Precio']} keys={['nombre', 'precio']} enableAmount={true} enableDelete={true} actionDelete={deleteServiceRoom} enableEdit={true} actionEdit={showModalEditService} actionAmount={updateAmountService} mainKey={'nombre'} type='perRoom' amount='Extra' />
+                                                                                    <TabeListService data={extraServiceRoom} headers={['Servicio', 'Precio']} keys={['nombre', 'precio']} enableAmount={true} enableDelete={true} actionDelete={deleteServiceRoom} enableEdit={true} actionEdit={showModalEditService} actionAmount={updateAmountService} mainKey={'nombre'} type='perRoom' amount='Extra' actionCalendar={showModalCalendar} enableCalendar={true} />
                                                                                 </Row>
                                                                                 <div className="col-12 mt-2">
                                                                                     <Button type="submit" className="btn btn-outline-primary" onClick={() => { addExtraServicePerRoom() }}>
@@ -562,7 +561,7 @@ const ToursService = ({ ...props }) => {
                                                 <FormGroup className=' m-0' disabled={true}>
                                                     <DatePicker
                                                         startDate={new Date()}
-                                                        onChange={(e) => handleAddDate(e, extraDate, 'booking')}
+                                                        onChange={(e) => handleAddDate(e, extraDate, type)}
                                                         inline
                                                         className="form-control"
                                                         minDate={getFecha(checkIn)}

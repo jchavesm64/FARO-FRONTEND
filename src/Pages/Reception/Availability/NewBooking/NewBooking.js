@@ -360,6 +360,8 @@ const NewBooking = () => {
 
     const addExtraService = (s, extra, type) => {
 
+        console.log(s);
+
         if (!s) {
             infoAlert('Oops', 'No ha seleccionado un servicio', 'error', 3000, 'top-end');
             return;
@@ -378,7 +380,7 @@ const NewBooking = () => {
             {
                 ...s.value,
                 cantidad: calAmountService(s.value),
-                extra: 1,
+                extra: s.value.tipo?.cuantificable === 'true' ? 1 : 0,
                 useExtra: []
             }
         ];
@@ -399,9 +401,8 @@ const NewBooking = () => {
 
     const addDateServiceExtra = (update, service, type) => {
 
-        if (type === 'booking') {
+        if (type === 'perService') {
             let updatedService;
-
             setExtraService(prevData =>
                 prevData.map(item => {
                     if (item.id === service.id) {
@@ -411,21 +412,32 @@ const NewBooking = () => {
                     return item;
                 })
             );
-
+            return updatedService;
+        } else if (type === 'perRoom') {
+            let updatedService;
+            setExtraServiceRoom(prevData =>
+                prevData.map(item => {
+                    if (item.id === service.id) {
+                        updatedService = { ...item, useExtra: [...item.useExtra, update] };
+                        return updatedService;
+                    }
+                    return item;
+                })
+            );
             return updatedService;
         };
 
     };
 
     const deleteDateServiceExtra = (index, service, type) => {
-        if (type === 'booking') {
-            let updatedService;
 
+        if (type === 'perService') {
+            let updatedService;
             setExtraService(prevData =>
                 prevData.map(item => {
                     if (item.id === service.id) {
-                        const newUseExtra = [...item.useExtra]; 
-                        newUseExtra.splice(index, 1); 
+                        const newUseExtra = [...item.useExtra];
+                        newUseExtra.splice(index, 1);
                         updatedService = { ...item, useExtra: newUseExtra };
                         return updatedService;
                     }
@@ -433,9 +445,24 @@ const NewBooking = () => {
                 })
             );
 
-            return updatedService; // Retorna el servicio actualizado
-        }
-    }
+            return updatedService;
+        } else {
+            let updatedService;
+            setExtraServiceRoom(prevData =>
+                prevData.map(item => {
+                    if (item.id === service.id) {
+                        const newUseExtra = [...item.useExtra];
+                        newUseExtra.splice(index, 1);
+                        updatedService = { ...item, useExtra: newUseExtra };
+                        return updatedService;
+                    }
+                    return item;
+                })
+            );
+
+            return updatedService;
+        };
+    };
 
     const deleteServiceBooking = (nombre) => {
         setExtraService(extraService.filter(a => a.nombre !== nombre))
