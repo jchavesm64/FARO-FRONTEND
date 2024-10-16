@@ -1,11 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Select from "react-select";
-import { Button, Card, CardBody, Col, Container, Modal, Row, ModalBody, ModalHeader } from "reactstrap";
+import { Button, Card, CardBody, Col, Container, Modal, Row, ModalBody, ModalHeader, FormGroup } from "reactstrap";
 import ListInfo from "../../../../components/Common/ListInfo";
 import ListSection from "../../../../components/Common/ListSelection";
 import TabeListService from "../../../../components/Common/TableListService";
 import EditExtraService from "../../../GeneralSettings/Hotel/ExtraService/EditExtraService";
 import EditTour from "../../../GeneralSettings/Hotel/Tours/EditTour";
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import DataList from "../../../../components/Common/DataList";
+import { getFecha } from "../../../../helpers/helpers";
+import { infoAlert } from "../../../../helpers/alert";
+
 
 const ToursService = ({ ...props }) => {
 
@@ -26,6 +32,10 @@ const ToursService = ({ ...props }) => {
         addExtraServicePerRoom,
         setDisabledButton,
         updateAmountService,
+        addDateServiceExtra,
+        deleteDateServiceExtra,
+        checkIn,
+        checkOut,
         ServicesRoom,
         roomsBooking,
         selectRoom,
@@ -38,6 +48,8 @@ const ToursService = ({ ...props }) => {
         servicesPerRoom,
         typeBooking
     } = props.props;
+
+
 
     setDisabledButton(false);
 
@@ -54,9 +66,10 @@ const ToursService = ({ ...props }) => {
     };
 
     const [modal, setModal] = useState(false);
-    const [filter, setFilter] = useState(null)
-    const [type, setType] = useState('')
-    const toggle = () => { setModal(!modal); setType('') };
+    const [filter, setFilter] = useState(null);
+    const [extraDate, setExtraDate] = useState(null);
+    const [type, setType] = useState('');
+    const toggle = () => { setModal(!modal); setType(''); setExtraDate(0); };
 
     const showModalEditService = (data, type) => {
         setType(type)
@@ -79,12 +92,30 @@ const ToursService = ({ ...props }) => {
         updateTourBooking(tour);
         toggle();
         setFilter(null);
-    }
+    };
+
+    const showModalCalendar = (data) => {
+        setExtraDate(data);
+        setModal(true);
+    };
+
+    const handleAddDate = (update, service, type) => {
+        if (extraDate.useExtra.length < extraDate?.extra) {
+            setExtraDate(addDateServiceExtra(update, service, type));
+        } else {
+            infoAlert('Oops', 'Ya completó las fechas para los servicios extra', 'warning', 3000, 'top-end')
+        };
+    };
+
+    const deleteDate = (index) => {
+        setExtraDate(deleteDateServiceExtra(index, extraDate, 'booking'));
+    };
 
     return (
         <React.Fragment>
             <div className="page-content p-3 border m-2 ">
                 <Container fluid={true}>
+
                     <Row className='d-flex justify-content-between shadow_service rounded-5 p-4'>
                         <Col className='col-md-12  d-flex justify-content-center flex-column align-items-center'>
 
@@ -144,7 +175,7 @@ const ToursService = ({ ...props }) => {
                                                                             </div>
                                                                         </div>
                                                                         <Row>
-                                                                            <TabeListService data={extraService} headers={['Servicio', 'Precio']} keys={['nombre', 'precio']} enableAmount={true} enableDelete={true} actionDelete={deleteServiceBooking} enableEdit={true} actionEdit={showModalEditService} actionAmount={updateAmountService} mainKey={'nombre'} type='perService' amount='Extra' />
+                                                                            <TabeListService data={extraService} headers={['Servicio', 'Precio']} keys={['nombre', 'precio']} enableAmount={true} enableDelete={true} actionDelete={deleteServiceBooking} enableEdit={true} actionEdit={showModalEditService} actionAmount={updateAmountService} mainKey={'nombre'} type='perService' amount='Extra' actionCalendar={showModalCalendar} enableCalendar={true} />
                                                                         </Row>
                                                                     </CardBody>
                                                                 </Card>
@@ -182,7 +213,7 @@ const ToursService = ({ ...props }) => {
                                                                                                     <strong>Servicio:</strong>
                                                                                                     <span className="fs-5 label_package_color"> {service.nombre}</span>
                                                                                                     <span className="span_package_color fs-5">
-                                                                                                        {(service.cantidad !== 0 && service.cantidad !== undefined) && (<span> x{parseInt(service.cantidad) + parseInt(service?.extra !== undefined ? service.extra : 0)} </span>)}
+                                                                                                        {(service.cantidad !== 0 && service.cantidad !== undefined) && (<span> x{parseInt(service?.extra !== undefined ? service.extra : 0)} </span>)}
                                                                                                     </span>
                                                                                                 </label>
 
@@ -346,7 +377,8 @@ const ToursService = ({ ...props }) => {
                                                                                                         items={service.service}
                                                                                                         label="nombre"
                                                                                                         emptyMessage="Sin datos"
-                                                                                                        showExtra={false}
+                                                                                                        showExtra={true}
+                                                                                                        showAmount={false}
                                                                                                     />
 
                                                                                                 </div>
@@ -498,17 +530,58 @@ const ToursService = ({ ...props }) => {
 
                     </Row>
 
-                    <Modal key='modalCustomer' isOpen={modal} toggle={toggle} size='xl'>
-                        <ModalHeader key='modalheader' toggle={toggle}><span className="fs-4 m-0 span_package_color">{type !== '' ? 'Editar sevicio' : 'Editar tour'}</span></ModalHeader>
-                        <ModalBody key='modalbody'>
-                            {type !== '' ? <EditExtraService idBooking={filter?.id} updateServiceBooking={updateService} /> : (<EditTour idBooking={filter?.id} updateTourBooking={updateTour} />)}
-                        </ModalBody>
+                    <Modal key='modalCustomer' isOpen={modal} toggle={toggle} size={extraDate === 0 ? 'xl' : 'lg'}>
+                        <ModalHeader key='modalheader' toggle={toggle}>
+                            {!extraDate ?
+                                <span className="fs-4 m-0 span_package_color">
+                                    {type !== '' ? 'Editar sevicio' : 'Editar tour'}
+                                </span> : (
+                                    <span className="fs-4 m-0 span_package_color">
+                                        Fechas para el uso de cada servicio extra
+                                    </span>
+                                )}
+                        </ModalHeader>
+                        {!extraDate === 0 ?
+                            <ModalBody key='modalbody'>
+                                {type !== '' ? <EditExtraService idBooking={filter?.id} updateServiceBooking={updateService} /> : (<EditTour idBooking={filter?.id} updateTourBooking={updateTour} />)}
+                            </ModalBody> : (
+                                <ModalBody key='modalbody'>
+                                    <Card className='p-4'>
+                                        <Row>
+                                            <div className="d-flex flex-column">
+                                                <label className="fs-5 m-0 ms-1 mb-2 span_package_color">
+                                                    <strong>Servicio:</strong> <span className="fs-5 label_package_color">{extraDate?.nombre}</span>
+                                                </label>
+                                                <label className="fs-5 m-0 ms-1 mb-2 span_package_color">
+                                                    <strong>Extra:</strong> <span className="fs-5 label_package_color">{extraDate?.extra}</span>
+                                                </label>
+                                            </div>
+                                        </Row>
+                                        <Row className='d-flex justify-content-between shadow_service rounded-5 p-3'>
+                                            <Col className="col-md-6 d-flex  flex-wrap justify-content-center align-items-center p-0">
+                                                <FormGroup className=' m-0' disabled={true}>
+                                                    <DatePicker
+                                                        startDate={new Date()}
+                                                        onChange={(e) => handleAddDate(e, extraDate, 'booking')}
+                                                        inline
+                                                        className="form-control"
+                                                        minDate={getFecha(checkIn)}
+                                                        maxDate={getFecha(checkOut)}
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                            <Col className="col-md-6  d-flex justify-content-center flex-wrap">
+                                                <DataList data={extraDate ? extraDate?.useExtra : []} type="tableDate" displayLength={3} enableDelete={true} deleteAction={deleteDate} />
+                                            </Col>
+                                        </Row>
+                                    </Card>
+                                </ModalBody>
+                            )}
                     </Modal>
                 </Container>
             </div>
         </React.Fragment>
     );
 };
-
 export default ToursService;
 

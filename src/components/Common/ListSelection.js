@@ -1,4 +1,4 @@
-const ListSection = ({ title, items, label, icon, emptyMessage, showExtra }) => (
+const ListSection = ({ title, items, label, icon, emptyMessage, showExtra, showAmount }) => (
     <label className="fs-5 m-0 ms-4 label_package_color">
         <strong className={`${icon} me-1 span_package_color`} />
         <strong>{title}: </strong>
@@ -11,9 +11,9 @@ const ListSection = ({ title, items, label, icon, emptyMessage, showExtra }) => 
                             <span className="label_package_color ">
                                 {item.nombre || item.numeroHabitacion || item.email || item.telefono || "Sin información"}
                             </span>
-                            <span className="span_package_color">
+                            {showAmount && <span className="span_package_color">
                                 {(item.cantidad !== 0 && item.cantidad !== undefined) && (<span> x{parseInt(item.cantidad) + parseInt(item.extra !== undefined ? item.extra : 0)} </span>)}
-                            </span>
+                            </span>}
                             {showExtra && <span className="span_package_color">
                                 {(item.extra !== 0 && item.extra !== undefined) && (<span> x{parseInt(item.extra)} </span>)}
                             </span>

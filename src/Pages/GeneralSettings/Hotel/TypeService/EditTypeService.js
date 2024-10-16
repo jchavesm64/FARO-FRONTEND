@@ -89,7 +89,7 @@ const EditTypeService = () => {
             };
             const { data } = await actualizar({ variables: { id, input }, errorPolicy: 'all' });
             const { estado, message } = data.actualizarTipoServicio;
-            console.log(data)
+            
             if (estado) {
                 infoAlert('Excelente', message, 'success', 3000, 'top-end')
                 navigate('/hotelsettings/typeservice');

@@ -2,7 +2,7 @@ import React from 'react'
 import ButtonIconTable from './ButtonIconTable';
 import { UncontrolledTooltip } from 'reactstrap';
 
-const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enableAmount, enableEdit, actionEdit, actionAmount, mainKey, secondKey, type, amount }) => {
+const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enableAmount, enableEdit, actionEdit, actionAmount, mainKey, secondKey, type, amount, actionCalendar, enableCalendar }) => {
 
 
     const onDelete = (element) => {
@@ -19,7 +19,11 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
     };
 
     const onEdit = (element) => {
-        actionEdit(element,type)
+        actionEdit(element, type)
+    };
+
+    const onCalendar = (element) => {
+        actionCalendar(element);
     };
 
     return (
@@ -80,8 +84,11 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
                                     </td>
                                 }
                                 {
-                                    (enableEdit || enableDelete) &&
+                                    (enableEdit || enableDelete || enableCalendar) &&
                                     <td className="d-flex justify-content-center">
+                                        {
+                                            enableCalendar && <ButtonIconTable icon='mdi mdi-calendar-range' color='info' onClick={() => { onCalendar(line) }} />
+                                        }
                                         {
                                             enableEdit && <ButtonIconTable icon='mdi mdi-pencil' color='warning' onClick={() => onEdit(line)} />
                                         }
@@ -96,7 +103,7 @@ const TabeListService = ({ data, headers, keys, enableDelete, actionDelete, enab
                 </tbody>
             </table>
         </div>
-    )
+    );
 }
 
 export default TabeListService

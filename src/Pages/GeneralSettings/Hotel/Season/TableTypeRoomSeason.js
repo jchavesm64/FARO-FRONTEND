@@ -7,12 +7,6 @@ const TableTypeRoomSeason = ({ ...props }) => {
 
     const { getFilteredTypeRoomByKey, handlePriceChange, priceTypeRoom } = props.props
 
-    console.log(priceTypeRoom);
-
-    console.log(priceTypeRoom['Actualizado']?.price);
-
-    //data?.forEach((type) => console.log(type.nombre))
-
     const handlePriceChangeTable = (e, name) => {
         handlePriceChange(e, name);
     };

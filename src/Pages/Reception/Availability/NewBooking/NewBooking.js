@@ -187,18 +187,7 @@ const NewBooking = () => {
             cantidad: calAmountService(service, checkIn, checkOut, amountAdult, amountChildren)
         }));
 
-        // Actualizar paxkageBookingList con la cantidad calculada para cada servicio
-        /* const updatedPakageBookingList = packageBookingList.map(packageItem => ({
-            ...packageItem,
-            servicios: packageItem.servicios.map(service => ({
-                ...service,
-                cantidad: calAmountService(service, checkIn, checkOut, amountAdult, amountChildren)
-            }))
-        })); */
-
-        // Actualizar los estados
         setExtraService(updatedExtraService);
-        //setPackageBookingList(updatedPakageBookingList);
 
     }, [amountAdult, amountChildren, checkIn, checkOut])
 
@@ -389,7 +378,8 @@ const NewBooking = () => {
             {
                 ...s.value,
                 cantidad: calAmountService(s.value),
-                extra: 1
+                extra: 1,
+                useExtra: []
             }
         ];
 
@@ -406,6 +396,46 @@ const NewBooking = () => {
         }
 
     };
+
+    const addDateServiceExtra = (update, service, type) => {
+
+        if (type === 'booking') {
+            let updatedService;
+
+            setExtraService(prevData =>
+                prevData.map(item => {
+                    if (item.id === service.id) {
+                        updatedService = { ...item, useExtra: [...item.useExtra, update] };
+                        return updatedService;
+                    }
+                    return item;
+                })
+            );
+
+            return updatedService;
+        };
+
+    };
+
+    const deleteDateServiceExtra = (index, service, type) => {
+        if (type === 'booking') {
+            let updatedService;
+
+            setExtraService(prevData =>
+                prevData.map(item => {
+                    if (item.id === service.id) {
+                        const newUseExtra = [...item.useExtra]; 
+                        newUseExtra.splice(index, 1); 
+                        updatedService = { ...item, useExtra: newUseExtra };
+                        return updatedService;
+                    }
+                    return item;
+                })
+            );
+
+            return updatedService; // Retorna el servicio actualizado
+        }
+    }
 
     const deleteServiceBooking = (nombre) => {
         setExtraService(extraService.filter(a => a.nombre !== nombre))
@@ -594,11 +624,11 @@ const NewBooking = () => {
     };
 
     const updateTourBooking = (tour) => {
-        
+
         const updateTour = toursList.map(t =>
             t.nombre === tour.nombre ? { ...t, ...tour } : t
         );
-        setToursList(updateTour); 
+        setToursList(updateTour);
     };
 
     const stepsFromWizard = useMemo(() => stepsWizardMenuBooking, []);
@@ -822,6 +852,10 @@ const NewBooking = () => {
                                     addExtraServicePerRoom,
                                     setDisabledButton,
                                     updateAmountService,
+                                    addDateServiceExtra,
+                                    deleteDateServiceExtra,
+                                    checkIn,
+                                    checkOut,
                                     ServicesRoom,
                                     roomsBooking,
                                     selectRoom,
