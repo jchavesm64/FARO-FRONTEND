@@ -99,7 +99,7 @@ const EditLocation = () => {
                         <div className="col-md-12 col-sm-12">
                             <Row>
                                 <div className="col mb-3">
-                                    <SpanSubtitleForm subtitle='Información del Tipo de Proveeduría' />
+                                    <SpanSubtitleForm subtitle='Información de la Ubicación' />
                                 </div>
                             </Row>
                             <Row>

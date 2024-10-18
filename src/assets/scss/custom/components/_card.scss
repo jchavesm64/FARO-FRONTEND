@@ -103,3 +103,56 @@
     color: $primary;
 }
 
+.card-floor{
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.14);
+    border-radius: 6px;
+    color: $black;
+    background: $white;
+    background-color: $white;
+    max-width: 875px !important;
+    max-height: 555px !important;
+    background-size: 40px 40px;
+    background-image: radial-gradient(circle, $black 1px, rgba(0, 0, 0, 0) 1px);
+    margin: 0px;
+    &.floor-full-height{
+        height: calc(100vh - 205px) !important;
+        overflow: auto;
+        max-height: 80vh;
+    }
+    &.floor-container{
+        overflow: auto;
+        height: 500px;
+        text-align: center;
+    }
+}
+
+.card-menu-category{
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    &.active{
+        background-color: $cyan-800;
+        color: $white;
+    }
+    font-size: large;
+}
+
+.card-pending-orders{
+    border: 1px solid $gray-400;
+}
+
+.card-pending-orders .green-bar {
+    border-radius: 0.4rem 0.4rem 0 0;
+    background-color: $success;
+    color: white;
+    padding: 5px 10px;
+}
+
+.card-pending-orders .card-content {
+    background-color: white;
+    border-radius: 0.4rem;
+}

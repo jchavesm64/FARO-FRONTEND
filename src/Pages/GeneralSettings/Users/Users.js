@@ -16,7 +16,7 @@ const Users = ({ ...props }) => {
     const [filter, setFilter] = useState('')
 
     const [displayLength, setDisplayLength] = useState(10);
-    const { loading: load_usuarios, error: error_usuarios, data: data_usuarios } = useQuery(OBTENER_USUARIOS_ACTIVOS, { pollInterval: 1000 })
+    const { loading: load_usuarios, error: error_usuarios, data: data_usuarios, refetch } = useQuery(OBTENER_USUARIOS_ACTIVOS, { pollInterval: 1000 })
     const [desactivar] = useMutation(DELETE_USER);
 
     const getData = () => {
@@ -63,6 +63,7 @@ const Users = ({ ...props }) => {
                 const { estado, message } = data.desactivarCliente;
                 if (estado) {
                     infoAlert('Usuario eliminado', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar Usuario', message, 'error', 3000, 'top-end')
                 }

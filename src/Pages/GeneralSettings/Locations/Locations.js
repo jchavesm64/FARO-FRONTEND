@@ -19,7 +19,7 @@ const Locations = ({ ...props }) => {
     const [displayLength, setDisplayLength] = useState(10);
     const [filter, setFilter] = useState('');
     const [modo, setModo] = useState('1')
-    const { loading, error, data: categorias } = useQuery(OBTENER_UBICACIONES, { pollInterval: 1000 });
+    const { loading, error, data: categorias, refetch } = useQuery(OBTENER_UBICACIONES, { pollInterval: 1000 });
     const [desactivar] = useMutation(DELETE_UBICACION);
     const [disableSave, setDisableSave] = useState(true);
 
@@ -39,6 +39,7 @@ const Locations = ({ ...props }) => {
                 const { estado, message } = data.desactivarUbicacion;
                 if (estado) {
                     infoAlert('Ubicación eliminada', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar Ubicación', message, 'error', 3000, 'top-end')
                 }

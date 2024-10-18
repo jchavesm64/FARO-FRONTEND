@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -22,15 +22,17 @@ const client = new ApolloClient({
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
-  <ApolloProvider client={client}>
-    <Provider store={configureStore({})}>
-      <React.Fragment>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </React.Fragment>
-    </Provider>
-  </ApolloProvider>,
+  <StrictMode>
+    <ApolloProvider client={client}>
+      <Provider store={configureStore({})}>
+        <React.Fragment>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </React.Fragment>
+      </Provider>
+    </ApolloProvider>
+  </StrictMode>,
 );
 
 reportWebVitals();

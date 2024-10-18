@@ -9,6 +9,8 @@ import { GUARDAR_MENU } from "../../../services/MenuService";
 import SpanSubtitleForm from "../../../components/Forms/SpanSubtitleForm";
 import { OBTENER_MATERIAS_PRIMAS } from "../../../services/MateriaPrimaService";
 import ButtonIconTable from "../../../components/Common/ButtonIconTable";
+import { OBTENER_TIPOS_PLATILLO } from "../../../services/TipoPlatilloService";
+import { OBTENER_TIPOS_MENU } from "../../../services/TipoMenuService";
 
 
 const NewMenu = (props) => {
@@ -18,10 +20,15 @@ const NewMenu = (props) => {
 
     const [insertar] = useMutation(GUARDAR_MENU);
     const { loading: load_materia_prima, error: error_productos, data: data_productos } = useQuery(OBTENER_MATERIAS_PRIMAS, { variables: { tipo: 'Restaurante' }, pollInterval: 1000 })
+    const { loading: load_tipos_platillo, error: error_tipos_platillo, data: data_tipos_platillo } = useQuery(OBTENER_TIPOS_PLATILLO, { pollInterval: 1000 })
+    const { loading: load_tipos_menu, error: error_tipos_menu, data: data_tipos_menu } = useQuery(OBTENER_TIPOS_MENU, { pollInterval: 1000 })
 
     const [nombre, setNombre] = useState('')
     const [descripcion, setDescripcion] = useState('')
-    const [tipo, setTipo] = useState(null)
+    const [tipoPlatillo, setTipoPlatillo] = useState(null)
+    const [tiposMenu, setTiposMenu] = useState([])
+    const [ganancia, setGanancia] = useState(0)
+    const [precioCosto, setPrecioCosto] = useState(0)
 
     const [producto, setProducto] = useState(null)
     const [cantidad, setCantidad] = useState(0)
@@ -29,33 +36,42 @@ const NewMenu = (props) => {
     const [indexEditar, setIndexEditar] = useState(null)
 
     const [lineasMenu, setLineasMenu] = useState([])
+    const [dishTypes, setDishTypes] = useState([])
+    const [menuTypes, setMenuTypes] = useState([])
 
-    const menuTypes = [
-        {
-            label: "Entrada",
-            value: "Entrada"
-        },
-        {
-            label: "Plato fuerte",
-            value: "Plato fuerte"
-        },
-        {
-            label: "Guarnicion",
-            value: "Guarnicion"
-        },
-        {
-            label: "Postres",
-            value: "Postres"
-        },
-        {
-            label: "Menu Niño",
-            value: "Menu Niño"
-        },
-        {
-            label: "Bebidas",
-            value: "Bebidas"
+    useEffect(() => {
+        if (lineasMenu.length > 0) {
+            setPrecioCosto(lineasMenu.reduce((acc, l) => acc + (l.producto.precioCompra * l.cantidad), 0))
+        } else {
+            setPrecioCosto(0)
         }
-    ]
+    }, [lineasMenu])
+
+    useEffect(() => {
+        if (data_tipos_platillo?.obtenerTiposPlatillo) {
+            const datos = [];
+            data_tipos_platillo.obtenerTiposPlatillo.map(item => {
+                datos.push({
+                    label: item.nombre,
+                    value: item.id
+                });
+            });
+            setDishTypes(datos)
+        }
+    }, [data_tipos_platillo])
+
+    useEffect(() => {
+        if (data_tipos_menu?.obtenerTiposMenu) {
+            const datos = [];
+            data_tipos_menu.obtenerTiposMenu.map(item => {
+                datos.push({
+                    label: item.nombre,
+                    value: item.id
+                });
+            });
+            setMenuTypes(datos)
+        }
+    }, [data_tipos_menu])
 
     const getProductos = () => {
         const datos = [];
@@ -132,6 +148,7 @@ const NewMenu = (props) => {
                     return obj
                 }
             }))
+
             limpiarLinea()
         }
     }
@@ -139,8 +156,10 @@ const NewMenu = (props) => {
     const [disableSave, setDisableSave] = useState(true);
 
     useEffect(() => {
-        setDisableSave(!nombre || nombre === null || nombre.trim().length === 0 || lineasMenu.length <= 0 || !tipo)
-    }, [nombre, lineasMenu, tipo])
+        setDisableSave(!nombre || nombre === null || nombre.trim().length === 0 ||
+            lineasMenu.length <= 0 || !tipoPlatillo || tipoPlatillo === null ||
+            ganancia < 0 || !tiposMenu || tiposMenu.length <= 0)
+    }, [nombre, lineasMenu, tipoPlatillo, ganancia, tiposMenu])
 
 
     const onSave = async () => {
@@ -150,8 +169,10 @@ const NewMenu = (props) => {
                 estado: 'ACTIVO',
                 nombre: nombre,
                 descripcion: descripcion,
-                precioCosto: 0,
-                tipo: tipo.value
+                precioCosto: precioCosto,
+                tipoPlatillo: tipoPlatillo.value,
+                porcentajeGanancia: ganancia,
+                tipoMenu: tiposMenu.map(t => t.value)
             }
 
             const lineasInput = lineasMenu.map((l, i) => {
@@ -172,7 +193,7 @@ const NewMenu = (props) => {
             setDisableSave(false)
         } catch (error) {
             console.log(error);
-            infoAlert('Oops', `Ocurrió un error inesperado al guardar el ${tipo.value}`, 'error', 3000, 'top-end')
+            infoAlert('Oops', `Ocurrió un error inesperado al guardar ${nombre}`, 'error', 3000, 'top-end')
         }
     }
 
@@ -216,17 +237,33 @@ const NewMenu = (props) => {
                             </Row>
                             <Row>
                                 <div className="col mb-3">
-                                    <label htmlFor="tipo" className="form-label">* Tipo</label>
+                                    <label htmlFor="tipoPlatillo" className="form-label">* Tipo Platillo</label>
                                     <Select
-                                        id="tipo"
-                                        value={tipo}
+                                        id="tipoPlatillo"
+                                        value={tipoPlatillo}
                                         onChange={(e) => {
-                                            setTipo(e);
+                                            setTipoPlatillo(e);
                                         }}
-                                        options={menuTypes}
+                                        options={dishTypes}
                                         classNamePrefix="select2-selection"
                                         isSearchable={true}
                                         menuPosition="fixed"
+                                    />
+                                </div>
+                            </Row>
+                            <Row>
+                                <div className="col-md-12 col-sm-12 mb-3">
+                                    <label htmlFor="tipoPlatillo" className="form-label">* Tipos de Menu</label>
+                                    <Select
+                                        options={menuTypes}
+                                        classNamePrefix="select2-selection"
+                                        isMulti={true}
+                                        menuPosition="fixed"
+                                        value={tiposMenu}
+                                        placeholder="Seleccione los tipos de menu a los que pertenece"
+                                        onChange={(e) => { setTiposMenu(e) }}
+                                        isClearable={true}
+                                        isSearchable={true}
                                     />
                                 </div>
                             </Row>
@@ -240,6 +277,12 @@ const NewMenu = (props) => {
                                 <div className="col mb-3">
                                     <label htmlFor="descripcion" className="form-label">Descripción</label>
                                     <textarea className="form-control" type="text" id="descripcion" value={descripcion} onChange={(e) => setDescripcion(e.target.value)}></textarea>
+                                </div>
+                            </Row>
+                            <Row>
+                                <div className="col mb-3">
+                                    <label htmlFor="ganancia" className="form-label">* % de ganancia</label>
+                                    <input className="form-control" type="number" id="ganancia" value={ganancia} onChange={(e) => setGanancia(e.target.value)} />
                                 </div>
                             </Row>
                         </div>
@@ -325,14 +368,12 @@ const NewMenu = (props) => {
                                     </div>
                                 </div>
                             </Row>
-                            <Row className="bg-white d-flex align-center">
-                                <div className="col-8 mb-3 bg-white">
-                                    <div>
-                                        {'Total: ₡'}
-                                    </div>
-                                    <div className="col-4 mb-3 bg-white">
-                                        {lineasMenu.reduce((acc, l) => acc + (l.producto.precioCompra * l.cantidad), 0)}
-                                    </div>
+                            <Row className="d-flex align-center">
+                                <div className="bg-white col-12">
+                                    {'Total: ₡ ' + lineasMenu.reduce((acc, l) => acc + (l.producto.precioCompra * l.cantidad), 0)}
+                                </div>
+                                <div className="bg-white col-12">
+                                    {'Precio de venta: ₡ ' + (precioCosto + (precioCosto * (ganancia / 100))).toFixed(2)}
                                 </div>
                             </Row>
                         </div>

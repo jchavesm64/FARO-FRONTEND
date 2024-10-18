@@ -15,7 +15,7 @@ const Warehouses = ({ ...props }) => {
     document.title = "Almacenes | FARO";
 
     const [filter, setFilter] = useState('')
-    const { loading: load_almacenes, error: error_almacens, data: data_almacenes } = useQuery(OBTENER_ALMACENES, { pollInterval: 1000 })
+    const { loading: load_almacenes, error: error_almacens, data: data_almacenes, refetch } = useQuery(OBTENER_ALMACENES, { pollInterval: 1000 })
     const [desactivar] = useMutation(ELIMINAR_ALMANCEN);
 
     function getFilteredByKey(key, value) {
@@ -60,6 +60,7 @@ const Warehouses = ({ ...props }) => {
                 const { estado, message } = data.desactivarAlmacen;
                 if (estado) {
                     infoAlert('Almacén eliminado', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar almacén', message, 'error', 3000, 'top-end')
                 }

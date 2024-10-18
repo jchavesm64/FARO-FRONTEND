@@ -73,7 +73,6 @@ export const convertDataCleanlinessCheck = (allData) => {
     return data;
 }
 
-
 export const convertDataInternTransfers = (allData) => {
     let data = [['Fecha de transferencia', 'Desde', 'Hasta', 'Usuario']];
     for (let i = 0; i < allData.length; i++) {
@@ -168,6 +167,18 @@ export const convertDataTaxesExcel = (allData) => {
         const value = allData[i];
 
         let row = [value.nombre, `${value.valor}%`]
+
+        data.push(row);
+    }
+    return data;
+}
+
+export const convertDataTablesExcel = (allData) => {
+    let data = [['Nombre', 'Tipo', 'Piso']];
+    for (let i = 0; i < allData.length; i++) {
+        const value = allData[i];
+
+        let row = [value.nombre, value.tipo, value.piso.nombre]
 
         data.push(row);
     }
@@ -334,6 +345,39 @@ export const convertirDataMovimientosActivosExcel = (allData) => {
     for (let i = 0; i < allData.length; i++) {
         const value = allData[i];
         let row = [i, value.tipo, value.consecutivo.consecutivo, value.beneficiario, getFechaTZ('fechaHora', value.fecha), value.activo.nombre, value.activo.referenciaInterna]
+
+        data.push(row);
+    }
+    return data;
+}
+
+export const convertirDataTipoMenuExcel = (allData) => {
+    let data = [['ID', 'Nombre']];
+    for (let i = 0; i < allData.length; i++) {
+        const value = allData[i];
+        let row = [i, value.nombre]
+
+        data.push(row);
+    }
+    return data;
+}
+
+export const convertirDataTipoPlatilloExcel = (allData) => {
+    let data = [['ID', 'Nombre']];
+    for (let i = 0; i < allData.length; i++) {
+        const value = allData[i];
+        let row = [i, value.nombre]
+
+        data.push(row);
+    }
+    return data;
+}
+
+export const convertirDataTipoMetodoPagoExcel = (allData) => {
+    let data = [['ID', 'Nombre']];
+    for (let i = 0; i < allData.length; i++) {
+        const value = allData[i];
+        let row = [i, value.nombre]
 
         data.push(row);
     }

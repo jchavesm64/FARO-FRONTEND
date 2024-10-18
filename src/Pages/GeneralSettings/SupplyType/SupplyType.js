@@ -18,7 +18,7 @@ const SupplyType = ({ ...props }) => {
     const [page, setPage] = useState(1);
     const [displayLength, setDisplayLength] = useState(10);
     const [filter, setFilter] = useState('');
-    const { loading, error, data: tipos } = useQuery(OBTENER_TIPO_PROVEDURIA, { pollInterval: 1000 });
+    const { loading, error, data: tipos, refetch } = useQuery(OBTENER_TIPO_PROVEDURIA, { pollInterval: 1000 });
     const [desactivar] = useMutation(DELETE_TIPO_PROVEDURIA);
 
     const onDeletSupply = (id, tipo) => {
@@ -37,6 +37,7 @@ const SupplyType = ({ ...props }) => {
                 const { estado, message } = data.desactivarTipoProveduria;
                 if (estado) {
                     infoAlert('Tipo de proveeduría eliminado', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar Tipo de proveeduría', message, 'error', 3000, 'top-end')
                 }
