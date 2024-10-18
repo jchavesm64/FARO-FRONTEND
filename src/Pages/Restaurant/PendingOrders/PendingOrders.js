@@ -206,11 +206,12 @@ const PendingOrders = ({ ...props }) => {
                     throw new Error();
                 }
             } catch (error) {
-                console.error(error);
                 infoAlert('Oops', 'Ocurrió un error al entregar los platillos. Por favor intenta de nuevo.', 'error', 3000, 'top-end');
                 return;
             }
         });
+
+        infoAlert('Excelente', 'Platillos Entregados de manera exitosa.', 'success', 1000, 'top-end');
 
         setLastServedArray(prev =>
             [...prev, ...servedWithTimestamp].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
@@ -219,7 +220,7 @@ const PendingOrders = ({ ...props }) => {
         setTemporaryServedArray([]);
     };
 
-    const getLastServed = () => {
+    /*const getLastServed = () => {
         return lastServedArray.map((item, index) => {
             return (
                 <Card key={index} className="mb-2 card-pending-orders">
@@ -238,7 +239,7 @@ const PendingOrders = ({ ...props }) => {
                 </Card>
             )
         })
-    }
+    }*/
 
     return (
         <React.Fragment>
@@ -246,7 +247,7 @@ const PendingOrders = ({ ...props }) => {
                 <Container fluid={true}>
                     <Breadcrumbs title='Ordenes Pendientes' breadcrumbItem='Restaurante' breadcrumbItemUrl='/restaurant' />
                     <Row>
-                        <div className="col-md-4 mb-3">
+                        <div className="col-md-6 mb-3">
                             <Card className="h-100">
                                 <CardBody>
                                     <Row className="text-center mb-3">
@@ -267,7 +268,7 @@ const PendingOrders = ({ ...props }) => {
                                 </CardBody>
                             </Card>
                         </div>
-                        <div className="col-md-4 mb-3">
+                        <div className="col-md-6 mb-3">
                             <Card className="h-100">
                                 <CardBody>
                                     <div className="text-center mb-3">
@@ -284,7 +285,7 @@ const PendingOrders = ({ ...props }) => {
                                 </CardBody>
                             </Card>
                         </div>
-                        <div className="col-md-4 mb-3">
+                        {/*<div className="col-md-4 mb-3">
                             <Card className="h-100">
                                 <CardBody className="d-flex flex-column m-0">
                                     <div className="text-center">
@@ -293,7 +294,7 @@ const PendingOrders = ({ ...props }) => {
                                     {getLastServed()}
                                 </CardBody>
                             </Card>
-                        </div>
+                        </div>*/}
                     </Row>
                 </Container>
             </div>

@@ -276,42 +276,6 @@ const CreateOrder = ({ ...props }) => {
                 setDisableSave(true)
                 return;
             }
-
-            /*const groupedItems = selectedItems.reduce((acc, item) => {
-                const subBillKey = item.subBill || 1;
-                if (!acc[subBillKey]) {
-                    acc[subBillKey] = [];
-                }
-                acc[subBillKey].push(item);
-                return acc;
-            }, {});
-            const subBills = Object.entries(groupedItems).map(([subBillKey, items], index) => ({
-                numero: index + 1,
-                comanda: newOrderId,
-                cliente: null, //TODO: Add client
-                fecha: new Date(),
-                platillos: items.map(item => ({
-                    id: item.id,
-                    cantidad: item.quantity,
-                    precio: item.price,
-                    descuento: 0
-                })),
-                descuento: 0,
-                total: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                moneda: "COLONES",
-                formaPago: null,
-                estado: "Pendiente"
-            }));
-            for (const subBill of subBills) {
-                console.log(subBill)
-                const { data } = await insertarSubcuenta({ variables: { input: subBill }, errorPolicy: 'all' });
-                const { estado, message } = data.insertarSubcuenta;
-                if (!estado) {
-                    infoAlert('Oops', message, 'error', 3000, 'top-end');
-                    setDisableSave(true)
-                    return;
-                }
-            }*/
             const subBill = {
                 numero: 1,
                 comanda: newOrderId,

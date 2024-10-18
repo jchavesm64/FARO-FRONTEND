@@ -17,7 +17,6 @@ import Swal from "sweetalert2";
 
 const EditMenu = ({ props, menu }) => {
     document.title = "Menu | FARO";
-    console.log(menu)
     const navigate = useNavigate();
 
     const [actualizar] = useMutation(ACTUALIZAR_MENU);
