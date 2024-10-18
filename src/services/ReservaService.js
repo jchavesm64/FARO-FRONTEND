@@ -8,52 +8,10 @@ export const OBTENER_RESERVAS = gql`
                 adulto
                 ninos
             }
-            serviciosGrupal{
-                nombre
-                descripcion
-                precio
-                tipo{
-                    nombre
-                    cuantificable
-                    icon
-                    horadia
-                }
-                
-            }
-            tours{
-                tipo
-                nombre
-                precio
-                descripcion
-            }
-            paquetes{
-                tipo
-                nombre
-                servicios{
-                    id
-                    nombre
-                    descripcion
-                    precio
-                    tipo{
-                        nombre
-                        cuantificable
-                        horadia
-                    }
-                }
-                tours{
-                    nombre
-                }
-                temporadas{
-                    fechaInicio
-                    fechaFin
-                    nombre
-                    tipo
-                    precio 
-                }
-                descripcion
-                precio
-            }
-
+            serviciosGrupal
+            tipo
+            tours
+            paquetes
             cliente {
                 id
                 tipo
@@ -66,6 +24,60 @@ export const OBTENER_RESERVAS = gql`
                 calle
                 cp
                 direccion
+                telefonos{
+                    telefono,
+                    ext,
+                    descripcion
+                }
+                correos{
+                    email
+                }
+            }
+            usuario{
+                nombre
+                cedula
+            }
+            fechaReserva
+            total
+            metodoPago
+            politicas
+            estado
+        }
+    }
+`;
+
+export const OBTENER_RESERVA = gql`
+    query obtenerReserva($id:ID){
+        obtenerReserva(id:$id){
+            id
+            numeroPersonas {
+                adulto
+                ninos
+            }
+            serviciosGrupal
+            tipo
+            tours
+            paquetes
+            cliente {
+                id
+                tipo
+                nombre
+                nombreFacturacion
+                codigo
+                pais
+                ciudad
+                city
+                calle
+                cp
+                direccion
+                telefonos{
+                    telefono,
+                    ext,
+                    descripcion
+                }
+                correos{
+                    email
+                }
             }
             usuario{
                 nombre

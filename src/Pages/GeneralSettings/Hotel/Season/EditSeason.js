@@ -199,30 +199,32 @@ const EditSeason = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Nueva temporada" breadcrumbItem="temporada" breadcrumbItemUrl='/hotelsettings/season' />
-                    <Row>
-                        <div className="col mb-0 text-end">
-                            <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
-                                Guardar{" "}
-                                <i className="ri-save-line align-middle ms-2"></i>
-                            </button>
-                        </div>
-                    </Row>
-                    <Row>
-                        <Col className="col-md-6 d-flex  flex-wrap">
-                            <div className="col-md-11 d-flex ">
-                                <div className="col-md-12 col-sm-12 m-1">
-                                    <label htmlFor="supplier" className="form-label">* Tipo de temporada</label>
-                                    <Select
-                                        id="supplier"
-                                        value={typeSeason}
-                                        onChange={(e) => {
-                                            setTypeSeason(e);
-                                        }}
-                                        options={seasonLimit()}
-                                        classNamePrefix="select2-selection"
-                                    />
-                                    <div className="col-md-12 d-flex mt-3">
+                    <Breadcrumbs title="Nueva temporada" breadcrumbItem="Temporada" breadcrumbItemUrl='/hotelsettings/season' />
+                    <Card className='p-4'>
+                        <Row>
+                            <div className="col mb-0 text-end">
+                                <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
+                                    Guardar{" "}
+                                    <i className="ri-save-line align-middle ms-2"></i>
+                                </button>
+                            </div>
+                        </Row>
+                        <Row className='d-flex justify-content-between shadow_service rounded-5'>
+                            <Col className="col-md-6  d-flex justify-content-center flex-wrap">
+                                <div className="col-md-11">
+                                    <div className="col-md-11 col-sm-9 m-2">
+                                        <label htmlFor="supplier" className="form-label">* Tipo de temporada</label>
+                                        <Select
+                                            id="supplier"
+                                            value={typeSeason}
+                                            onChange={(e) => {
+                                                setTypeSeason(e);
+                                            }}
+                                            options={seasonLimit()}
+                                            classNamePrefix="select2-selection"
+                                        />
+                                    </div>
+                                    <div className="col-md-11 col-sm-9 m-2 d-flex flex-nowrap">
                                         <div className="col-md-6 me-1">
                                             <label htmlFor="checkInDate" className="form-label ">Fecha de Inicio</label>
                                             <input
@@ -247,30 +249,29 @@ const EditSeason = () => {
                                             />
                                         </div>
                                     </div>
-                                    <div className="col-md-12 m-1">
+                                    <div className="col-md-11 col-sm-9 m-2">
                                         <label htmlFor="descripcion" className="form-label">Descripción</label>
                                         <textarea className="form-control" type="text" id="descripcion" disabled={!typeSeason} value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
                                     </div>
-                                </div>
-                            </div>
-                        </Col >
-                        <Col>
-                            <Row className="mt-3">
-                                <div className="col mb-3">
-                                    <Card>
-                                        <CardBody >
-                                            <DataList props={{ handlePriceChange, getFilteredTypeRoomByKey, priceTypeRoom }} data={filterTypeRooms.length > 0 ? filterTypeRooms : typeRooms} type="typeroomseason" displayLength={5} />
-                                        </CardBody>
-                                    </Card>
-                                </div>
-                            </Row>
 
-                        </Col>
-                    </Row>
+                                </div>
+                            </Col >
+                            <Col className="col-md-6 d-flex justify-content-center flex-wrap">
+                                <div className="col-md-12">
+                                    <CardBody >
+                                        <DataList props={{ handlePriceChange, getFilteredTypeRoomByKey, priceTypeRoom }} data={filterTypeRooms.length > 0 ? filterTypeRooms : typeRooms} type="typeroomseason" displayLength={5} />
+                                    </CardBody>
+
+                                </div>
+
+
+                            </Col>
+                        </Row>
+                    </Card>
                 </Container>
             </div>
         </React.Fragment>
-    )
+    );
 };
 
 export default EditSeason;

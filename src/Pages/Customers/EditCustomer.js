@@ -12,7 +12,7 @@ import { UPDATE_CLIENTE } from "../../services/ClienteService";
 import { useNavigate } from 'react-router-dom';
 import withRouter from "../../components/Common/withRouter";
 
-const EditCustomer = ({ props, customer }) => {
+const EditCustomer = ({ props, customer, booking, editCustomer }) => {
     const navigate = useNavigate();
 
     const getPais = (pais) => {
@@ -317,7 +317,11 @@ const EditCustomer = ({ props, customer }) => {
             const { estado, message } = data.actualizarCliente;
             if (estado) {
                 infoAlert('Excelente', message, 'success', 3000, 'top-end')
-                navigate('/customers');
+                if (booking) {
+                    editCustomer(input)
+                } else {
+                    navigate('/customers');
+                }
             } else {
                 infoAlert('Oops', message, 'error', 3000, 'top-end')
             }
@@ -330,9 +334,9 @@ const EditCustomer = ({ props, customer }) => {
 
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className={!booking && "page-content"}>
                 <Container fluid={true}>
-                    <Breadcrumbs title="Editar cliente" breadcrumbItem="Clientes" breadcrumbItemUrl='/customers' />
+                    {!booking && <Breadcrumbs title="Editar cliente" breadcrumbItem="Clientes" breadcrumbItemUrl='/customers' />}
                     <Row>
                         <div className="col mb-3 text-end">
                             <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>

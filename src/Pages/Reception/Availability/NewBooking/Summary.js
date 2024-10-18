@@ -18,8 +18,8 @@ const Summary = ({ ...props }) => {
                     <div className="m-2 p-2 ">
                         <Row>
                             <Col className='col-md-12'>
-                                <Card className='col-md-12 bg-light border ms-2 p-2  room_card_wizard'>
-                                    <div className="col-md-12">
+                                <Card className='col-md-12 '>
+                                    <Row className="col-md-12 bg-light border ms-2 p-2  ">
                                         <h3 key='summary' className="mt-2">Resumen de Reserva</h3>
                                         <div className="d-flex flex-column">
                                             <label className="fs-5 m-0 ms-1 mb-2 span_package_color">
@@ -29,7 +29,7 @@ const Summary = ({ ...props }) => {
                                                 <strong>Usuario:</strong> <span className="fs-5 label_package_color">{user.nombre}</span>
                                             </label>
                                         </div>
-                                        <Row className="col-md-12 bg-tertiary rounded p-2  room_card_wizard_details" >
+                                        <Col className="col-md-12 bg-tertiary rounded p-2  room_card_wizard_details" >
                                             {customer ? (
                                                 <div className="d-flex justify-content-center">
                                                     <Card className='col-md-11 d-flex align-content-center shadow_wizard '>
@@ -290,9 +290,9 @@ const Summary = ({ ...props }) => {
                                                     <label>Sin datos que mostrar</label>
                                                 </div>
                                             )}
-                                        </Row>
+                                        </Col>
 
-                                    </div>
+                                    </Row>
                                 </Card>
                                 <Row className="mt-4">
                                     <Col >

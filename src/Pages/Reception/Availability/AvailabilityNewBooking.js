@@ -5,7 +5,7 @@ import Breadcrumbs from "../../../components/Common/Breadcrumb";
 import { Link } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { OBTENER_HABITACIONES } from "../../../services/HabitacionesService";
-import { OBTENER_RESERVAHABITACION } from "../../../services/ReservaHabitacionService";
+import { OBTENER_RESERVAHABITACIONES } from "../../../services/ReservaHabitacionService";
 import DataList from "../../../components/Common/DataList";
 import { OBTENER_TIPOSHABITACION } from "../../../services/TipoHabitacionService";
 import { daysWeek } from "../../../constants/routesConst";
@@ -15,7 +15,7 @@ const ReceptionHome = () => {
 
     const { data: data_rooms } = useQuery(OBTENER_HABITACIONES, { pollInterval: 1000 });
     const { data: tiposHabitacion } = useQuery(OBTENER_TIPOSHABITACION, { pollInterval: 1000 });
-    const { data: data_reservaHabitacion } = useQuery(OBTENER_RESERVAHABITACION, { pollInterval: 1000 });
+    const { data: data_reservaHabitacion } = useQuery(OBTENER_RESERVAHABITACIONES, { pollInterval: 1000 });
 
     const [month, setMonth] = useState(new Date().getMonth());
     const [year, setYear] = useState(new Date().getFullYear());
@@ -258,7 +258,7 @@ const ReceptionHome = () => {
                                         className="btn btn-primary waves-effect waves-light shadow_calendar"
                                         style={{ width: '100%' }}
                                     >
-                                        Reservar{""}
+                                        Nueva reservar{""}
                                         <i className="mdi mdi-plus align-middle ms-2"></i>
                                     </button>
                                 </Link>
@@ -338,7 +338,7 @@ const ReceptionHome = () => {
                                     </label>
                                     <label className="fs-6 m-0 ms-4 span_package_color">
                                         <strong className="mdi mdi-percent me-1" />
-                                        <strong>Porcentaje de disponibilidad: </strong> <span className="fs-6 label_package_color">{`${dataModal.percent}%`}</span>
+                                        <strong>Porcentaje de ocupación: </strong> <span className="fs-6 label_package_color">{`${dataModal.percent}%`}</span>
 
                                     </label>
                                     <label className="fs-6 m-0 ms-4 span_package_color">

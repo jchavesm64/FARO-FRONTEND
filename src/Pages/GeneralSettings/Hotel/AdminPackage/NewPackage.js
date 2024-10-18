@@ -10,6 +10,9 @@ import { OBTENER_SERVICIO } from "../../../../services/ServiciosExtraService";
 import { useNavigate } from "react-router-dom";
 import { SAVE_PAQUETE } from "../../../../services/PaquetesService";
 import { OBTENER_TEMPORADAS } from "../../../../services/TemporadaService";
+import { typePackages } from "../../../../constants/routesConst";
+import TabeListService from "../../../../components/Common/TableListService";
+
 
 const NewPackage = () => {
     document.title = "Administrador de paquetes | FARO";
@@ -31,41 +34,6 @@ const NewPackage = () => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState(0);
-
-    const typePackages = [
-        {
-            label: 'Alojamiento',
-            value: 'Alojamiento'
-        },
-        {
-            label: 'Especiales',
-            value: 'Especiales'
-        },
-        {
-            label: 'Bienestar',
-            value: 'Bienestar'
-        },
-        {
-            label: 'Aventura',
-            value: 'Aventura'
-        },
-        {
-            label: 'Eventos',
-            value: 'Eventos'
-        },
-        {
-            label: 'Familiares',
-            value: 'Familiares'
-        },
-        {
-            label: 'Temporales',
-            value: 'Temporales'
-        },
-        {
-            label: 'Negocios',
-            value: 'Negocios'
-        }
-    ];
 
     const getTours = () => {
         const data = [];
@@ -162,11 +130,11 @@ const NewPackage = () => {
 
     const handlePrice = (a) => {
         setPrice(a)
-    }
+    };
 
     useEffect(() => {
         setDisableSave(!typePackage || price <= 0 || name === '' || (toursList.length === 0 && serviceList.length === 0) || !season)
-    }, [typePackage, price, name, toursList, serviceList, season])
+    }, [typePackage, price, name, toursList, serviceList, season]);
 
     const cleanData = () => {
         setTypePackage(null);
@@ -177,7 +145,18 @@ const NewPackage = () => {
         setServiceList([]);
         setToursList([]);
         setDescription('');
-    }
+    };
+
+    const updateAmountService = (type, amount, service) => {
+        const newServiceList = serviceList
+            .filter(s => !(Number(amount) === 0 && s.nombre === service.nombre)) // Eliminar si es 0
+            .map(s => s.id === service.id
+                ? { ...s, extra: amount !== '' ? Number(amount) : 0 }
+                : s
+            );
+
+        setServiceList(newServiceList);
+    };
 
     const onClickSave = async () => {
         try {
@@ -185,8 +164,8 @@ const NewPackage = () => {
             const input = {
                 tipo: typePackage.value,
                 nombre: name,
-                servicios: serviceList.map(s => s.id),
-                tours: toursList.map(t => t.id),
+                servicios: serviceList,
+                tours: toursList,
                 temporadas: season.value.id,
                 descripcion: description,
                 precio: price,
@@ -210,135 +189,135 @@ const NewPackage = () => {
         }
     };
 
-    console.log(serviceList);
-    
+
     return (
         <React.Fragment>
-            <div className="page-content" style={{ height: '55rem' }}>
+            <div className="page-content" >
                 <Container fluid={true}>
                     <Breadcrumbs title="Nuevo paquete" breadcrumbItem="Paquetes" breadcrumbItemUrl='/hotelsettings/hotelpackages' />
-                    <Row>
-                        <div className="col mb-3 text-end">
-                            <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
-                                Guardar{" "}
-                                <i className="ri-save-line align-middle ms-2"></i>
-                            </button>
-                        </div>
-                    </Row>
-                    <Row>
-                        <Col className="col-md-4">
-                            <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="season" className="form-label">* Temporada</label>
-                                <Select
-                                    id="season"
-                                    value={season}
-                                    onChange={(e) => {
-                                        handleSeason(e);
-                                    }}
-                                    options={getSeasons()}
-                                    placeholder="Temporadas"
-                                    classNamePrefix="select2-selection"
-                                />
+                    <Card className='p-4'>
+                        <Row >
+                            <div className="col mb-3 text-end">
+                                <button type="button" className="btn btn-primary waves-effect waves-light" disabled={disableSave} onClick={() => onClickSave()}>
+                                    Guardar{" "}
+                                    <i className="ri-save-line align-middle ms-2"></i>
+                                </button>
                             </div>
-                            <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="package" className="form-label">* Tipo de paquete</label>
-                                <Select
-                                    id="package"
-                                    value={typePackage}
-                                    onChange={(e) => {
-                                        setTypePackage(e);
-                                    }}
-                                    options={typePackages}
-                                    classNamePrefix="select2-selection"
-                                />
-                            </div>
-                            <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="name" className="form-label" >* Nombre del paquete</label>
-                                <input className="form-control" type="text" id="name" value={name} onChange={(e) => { setName(e.target.value) }} />
-                            </div>
-                            <div className="col-md-12 col-sm-12 m-1 p-0 mt-4">
-                                <Card className="p-0">
-                                    <CardBody>
-                                        <Row>
-                                            <div className="col mb-2">
-                                                <label htmlFor="service" className="form-label">* Servicios</label>
+                        </Row >
+                        <Row className='d-flex justify-content-between shadow_service rounded-5'>
+                            <Col className="col-md-6  d-flex justify-content-center flex-wrap">
+                                <div className="col-md-11 col-sm-9 m-2">
+                                    <label htmlFor="season" className="form-label">* Temporada</label>
+                                    <Select
+                                        id="season"
+                                        value={season}
+                                        onChange={(e) => {
+                                            handleSeason(e);
+                                        }}
+                                        options={getSeasons()}
+                                        placeholder="Temporadas"
+                                        classNamePrefix="select2-selection"
+                                    />
+                                </div>
+                                <div className="col-md-11 col-sm-9 m-2">
+                                    <label htmlFor="package" className="form-label">* Tipo de paquete</label>
+                                    <Select
+                                        id="package"
+                                        value={typePackage}
+                                        onChange={(e) => {
+                                            setTypePackage(e);
+                                        }}
+                                        options={typePackages}
+                                        classNamePrefix="select2-selection"
+                                    />
+                                </div>
+                                <div className="col-md-11 col-sm-9 m-2">
+                                    <label htmlFor="name" className="form-label" >* Nombre del paquete</label>
+                                    <input className="form-control" type="text" id="name" value={name} onChange={(e) => { setName(e.target.value) }} />
+                                </div>
+                                <div className="col-md-11 col-sm-9 m-1 p-0 mt-4">
+                                    <Card className="p-0 table_list">
+                                        <CardBody>
+                                            <Row>
+                                                <div className="col mb-2">
+                                                    <label htmlFor="service" className="form-label">* Servicios</label>
+                                                </div>
+                                            </Row>
+                                            <div className="row row-cols-lg-auto g-3 align-items-center">
+                                                <div className="col-xl-9 col-md-12 mb-2">
+                                                    <Select
+                                                        id="service"
+                                                        value={service}
+                                                        onChange={(e) => {
+                                                            handleService(e);
+                                                        }}
+                                                        options={getServices()}
+                                                        placeholder="Servicios"
+                                                        classNamePrefix="select2-selection"
+                                                    />
+                                                </div>
+                                                <div className="col-12 mb-1">
+                                                    <button type="submit" className="btn btn-outline-primary" onClick={() => { addService() }}>
+                                                        Agregar
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </Row>
-                                        <div className="row row-cols-lg-auto g-3 align-items-center">
-                                            <div className="col-xl-9 col-md-12 mb-2">
-                                                <Select
-                                                    id="service"
-                                                    value={service}
-                                                    onChange={(e) => {
-                                                        handleService(e);
-                                                    }}
-                                                    options={getServices()}
-                                                    placeholder="Servicios"
-                                                    classNamePrefix="select2-selection"
-                                                />
+                                            <Row>
+                                                <TabeListService data={serviceList} headers={['Servicio']} keys={['nombre']} enableAmount={true} enableDelete={true} actionDelete={eliminarService} actionAmount={updateAmountService} mainKey={'nombre'} type='package' amount='Cantidad' />
+                                            </Row>
+                                        </CardBody>
+                                    </Card>
+                                </div>
+                            </Col>
+                            <Col className="col-md-6 d-flex justify-content-center flex-wrap">
+                                <div className="col-md-11 col-sm-9 m-2">
+                                    <label htmlFor="price" className="form-label" >* Precio por paquete</label>
+                                    <input className="form-control" type="number" id="price" min="0" value={price} onChange={(e) => { handlePrice(e.target.value) }} />
+                                </div>
+                                <div className="col-md-11 col-sm-9 m-2">
+                                    <label htmlFor="descripcion" className="form-label">Descripción</label>
+                                    <textarea className="form-control" type="text" id="descripcion" value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
+                                </div>
+                                <div className="col-md-11 col-sm-9 m-1 p-0 ">
+                                    <Card className="p-0 table_list">
+                                        <CardBody >
+                                            <Row>
+                                                <div className="col mb-2">
+                                                    <label htmlFor="tour" className="form-label">* Tours</label>
+                                                </div>
+                                            </Row>
+                                            <div className="row row-cols-lg-auto g-3 align-items-center">
+                                                <div className="col-xl-9 col-md-12 mb-2">
+                                                    <Select
+                                                        id="tour"
+                                                        value={tour}
+                                                        onChange={(e) => {
+                                                            handleTours(e);
+                                                        }}
+                                                        options={getTours()}
+                                                        placeholder="Tours"
+                                                        classNamePrefix="select2-selection"
+                                                    />
+                                                </div>
+                                                <div className="col-12 mb-1">
+                                                    <button type="submit" className="btn btn-outline-primary" onClick={() => { addTour() }}>
+                                                        Agregar
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className="col-12 mb-1">
-                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addService() }}>
-                                                    Agregar
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <Row>
-                                            <ListInfo data={serviceList} headers={['Servicio', 'Descripción']} keys={['nombre', 'descripcion']} enableEdit={true} enableDelete={true} actionDelete={eliminarService} mainKey={'nombre'} secondKey={'descripcion'} />
-                                        </Row>
-                                    </CardBody>
-                                </Card>
-                            </div>
-                        </Col>
-                        <Col className="col-md-4">
-                            <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="price" className="form-label" >* Precio por paquete</label>
-                                <input className="form-control" type="number" id="price" min="0" value={price} onChange={(e) => { handlePrice(e.target.value) }} />
-                            </div>
-                            <div className="col-md-12 col-sm-12 m-2">
-                                <label htmlFor="descripcion" className="form-label">Descripción</label>
-                                <textarea className="form-control" type="text" id="descripcion" value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
-                            </div>
-                            <div className="col-md-12 col-sm-12 m-1 p-0 ">
-                                <Card className="p-0">
-                                    <CardBody >
-                                        <Row>
-                                            <div className="col mb-2">
-                                                <label htmlFor="tour" className="form-label">* Tours</label>
-                                            </div>
-                                        </Row>
-                                        <div className="row row-cols-lg-auto g-3 align-items-center">
-                                            <div className="col-xl-9 col-md-12 mb-2">
-                                                <Select
-                                                    id="tour"
-                                                    value={tour}
-                                                    onChange={(e) => {
-                                                        handleTours(e);
-                                                    }}
-                                                    options={getTours()}
-                                                    placeholder="Tours"
-                                                    classNamePrefix="select2-selection"
-                                                />
-                                            </div>
-                                            <div className="col-12 mb-1">
-                                                <button type="submit" className="btn btn-outline-primary" onClick={() => { addTour() }}>
-                                                    Agregar
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <Row>
-                                            <ListInfo data={toursList} headers={['Tour', 'Descripción']} keys={['nombre', 'descripcion']} enableEdit={false} enableDelete={true} actionDelete={eliminarTours} mainKey={'nombre'} secondKey={'descripcion'} />
-                                        </Row>
-                                    </CardBody>
-                                </Card>
-                            </div>
-                        </Col>
-                    </Row>
+                                            <Row>
+                                                <ListInfo data={toursList} headers={['Tour', 'Descripción']} keys={['nombre', 'descripcion']} enableEdit={false} enableDelete={true} actionDelete={eliminarTours} mainKey={'nombre'} secondKey={'descripcion'} />
+                                            </Row>
+                                        </CardBody>
+                                    </Card>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Card>
 
                 </Container>
             </div>
         </React.Fragment>
     )
 };
-
 export default NewPackage;

@@ -14,7 +14,7 @@ const Rooms = ({ ...props }) => {
         const valIndividualBooking = () => {
             if (typeBooking !== 'IN') return false;
 
-            if (roomsBooking.length >= 1) return true;
+            if (roomsBooking.length >= 4) return true;
         };
         setEnableRooms(valIndividualBooking)
     }, [typeBooking, roomsBooking])
@@ -42,7 +42,7 @@ const Rooms = ({ ...props }) => {
                                                         </span>
                                                     </div>
                                                     <div className="col-md-7 col-sm-12 ">
-                                                        <p className="mb-1 mt-1">Typo Habitación: <span>{type.type.nombre}</span></p>
+                                                        <p className="mb-1 mt-1">Tipo Habitación: <span>{type.type.nombre.slice(0, 20)}...</span></p>
                                                         <p className="mb-1 mt-1">Precio por noche: $<span>{type.type.precioBase + currentSeason.precio}</span></p>
                                                         <div className="d-flex flex-wrap description_room_wizard"> <p>Decripción: <span>{type.type.descripcion}</span></p></div>
                                                     </div>
@@ -84,23 +84,25 @@ const Rooms = ({ ...props }) => {
                                                 <div className='border border-secondary rounded p-1'>
                                                     {amountTypeRooms.map(type => (
                                                         type.amountBooking !== 0 && (
-                                                            <div className='col-md-11 border m-2 shadow_wizard rounded p-3 d-flex justify-content-between'>
-                                                                <div key={`row${type.type.nombre}`} className="m-0 col-md-11 p-1">
-                                                                    <label className="fs-4 m-0 span_package_color">
+                                                            <div id={`data${type.type.nombre}`} key={`data${type.type.nombre}`} className='col-md-11 border m-2 shadow_wizard rounded p-3 d-flex justify-content-between'>
+                                                                <div id={`row${type.type.nombre}`} key={`row${type.type.nombre}`} className="m-0 col-md-11 p-1">
+                                                                    <label id={`label${type.type.nombre}`} key={`label${type.type.nombre}`} className="fs-4 m-0 span_package_color">
                                                                         <strong>Tipo de habitación:</strong> <span className="fs-5 label_package_color">{type.type.nombre}</span>
                                                                     </label>
 
-                                                                    <div className="col-md-11 m-1 d-flex flex-wrap flex-column">
-                                                                        <label className="fs-5 m-0 ms-4 span_package_color">
+                                                                    <div id={`card${type.type.nombre}`} key={`card${type.type.nombre}`} className="col-md-11 m-1 d-flex flex-wrap flex-column">
+                                                                        <label id={`rowselect${type.type.nombre}`} key={`rowselect${type.type.nombre}`} className="fs-5 m-0 ms-4 span_package_color">
                                                                             <strong>Habitaciones selecionadas:</strong> <span className="fs-5 label_package_color">{type.amountBooking}</span>
                                                                         </label>
                                                                         <ListSection
+                                                                            key={`list1`}
                                                                             title="Habitaciones"
                                                                             items={roomsBooking.filter(rooms => rooms.tipoHabitacion.nombre === type.type.nombre)}
                                                                             label="n.º de habitación"
                                                                             emptyMessage="Sin datos"
                                                                         />
                                                                         <ListSection
+                                                                            key={`list2`}
                                                                             title="Comodidades por habitación"
                                                                             items={roomsBooking.find(rooms => rooms.tipoHabitacion.nombre === type.type.nombre).comodidades}
                                                                             label="Comodidad"

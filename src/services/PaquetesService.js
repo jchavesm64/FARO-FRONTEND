@@ -6,21 +6,8 @@ export const OBTENER_PAQUETES = gql`
             id
             tipo
             nombre
-            servicios{
-                id
-                nombre
-                descripcion
-                precio
-                tipo{
-                    nombre
-                    cuantificable
-                    horadia
-                }
-                estado
-            }
-            tours{
-                nombre
-            }
+            servicios
+            tours
             temporadas{
                fechaInicio
                 fechaFin
@@ -41,25 +28,11 @@ export const OBTENER_PAQUETE = gql`
             id
             tipo
             nombre
-            servicios{
-                id
-                nombre
-                descripcion
-                precio
-                tipo{
-                    id
-                    nombre
-                    cuantificable
-                    horadia
-                icon
-            }
-                estado
-            }
-            tours{
-                nombre
-            }
+            servicios
+            tours
             temporadas{
-               fechaInicio
+                id
+                fechaInicio
                 fechaFin
                 nombre
                 tipo

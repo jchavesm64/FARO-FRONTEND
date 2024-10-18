@@ -1,6 +1,6 @@
 import gql from 'graphql-tag'
 
-export const OBTENER_RESERVAHABITACION = gql`
+export const OBTENER_RESERVAHABITACIONES = gql`
     query obtenerReservaHabitaciones{
         obtenerReservaHabitaciones{
             id
@@ -13,4 +13,19 @@ export const OBTENER_RESERVAHABITACION = gql`
         }
     }
 `;
+
+export const OBTENER_RESERVAHABITACION = gql`
+    query obtenerReservaHabitacion($id:ID){
+        obtenerReservaHabitacion(id:$id){
+             id
+            habitacion{
+                id
+                numeroHabitacion
+            }
+            fechaEntrada
+            fechaSalida
+        }
+    }
+`;
+
 

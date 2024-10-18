@@ -192,6 +192,7 @@ const authProtectedRoutes = [
   { path: "/reception", component: <ReceptionHome /> },
   { path: "/reception/availability", component: <AvailabilityNewBooking /> },
   { path: "/reception/availability/newbooking", component: <NewBooking /> },
+  { path: "/reception/availability/editbooking/:id", component: <NewBooking /> },
   { path: "/reception/availability/booking", component: <Booking /> },
 
   { path: "/cleaningjobs", component: <CleaningJobs /> },

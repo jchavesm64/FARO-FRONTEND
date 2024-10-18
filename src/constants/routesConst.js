@@ -819,3 +819,69 @@ export const daysWeek = [
         label: 'Dom',
     }
 ]
+
+export const typePackages = [
+    {
+        label: 'Alojamiento',
+        value: 'Alojamiento'
+    },
+    {
+        label: 'Especiales',
+        value: 'Especiales'
+    },
+    {
+        label: 'Bienestar',
+        value: 'Bienestar'
+    },
+    {
+        label: 'Aventura',
+        value: 'Aventura'
+    },
+    {
+        label: 'Eventos',
+        value: 'Eventos'
+    },
+    {
+        label: 'Familiares',
+        value: 'Familiares'
+    },
+    {
+        label: 'Temporales',
+        value: 'Temporales'
+    },
+    {
+        label: 'Negocios',
+        value: 'Negocios'
+    }
+];
+
+export const typeTours = [
+    {
+        label: 'Educativos',
+        value: 'Educativos'
+    },
+    {
+        label: 'Temáticos',
+        value: 'Temáticos'
+    },
+    {
+        label: 'Aventura',
+        value: 'Aventura'
+    },
+    {
+        label: 'Relax',
+        value: 'Relax'
+    },
+    {
+        label: 'Urbanos',
+        value: 'Urbanos'
+    },
+    {
+        label: 'Naturales',
+        value: 'Naturales'
+    },
+    {
+        label: 'Culturales',
+        value: 'Culturales'
+    }
+];

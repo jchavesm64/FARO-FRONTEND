@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react'
-import { Button, Card, Container } from 'reactstrap';
+import { Button, Card, Container, Row } from 'reactstrap';
 import Breadcrumbs from '../../../../components/Common/Breadcrumb';
 import { stepsWizardMenuBooking } from '../../../../constants/routesConst';
 import { OBTENER_CLIENTES } from '../../../../services/ClienteService';
@@ -9,7 +9,7 @@ import { OBTENER_SERVICIO } from '../../../../services/ServiciosExtraService';
 import { infoAlert } from '../../../../helpers/alert';
 import { OBTENER_PAQUETES } from '../../../../services/PaquetesService';
 import { OBTENER_TEMPORADAS } from '../../../../services/TemporadaService';
-import { convertDate } from '../../../../helpers/helpers';
+import { convertDate, timestampToDateLocal } from '../../../../helpers/helpers';
 
 import SearchCustomer from './SearchCustomer';
 import TypeDateBooking from './Type&DateBooking';
@@ -23,14 +23,16 @@ import { useStepper } from 'headless-stepper';
 import { OBTENER_AREAS } from '../../../../services/AreasOperativasService';
 import { OBTENER_TOURS } from '../../../../services/TourService';
 import { useMutation, useQuery } from '@apollo/client';
-import { SAVE_RESERVA } from '../../../../services/ReservaService';
+import { OBTENER_RESERVA, SAVE_RESERVA } from '../../../../services/ReservaService';
 import { OBTENER_USUARIO_CODIGO } from '../../../../services/UsuarioService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { OBTENER_RESERVAHABITACION } from '../../../../services/ReservaHabitacionService';
 
 const NewBooking = () => {
     document.title = "Nueva Reserva | FARO";
 
     const navigate = useNavigate();
+    const { id } = useParams();
 
     const currentDate = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
 
@@ -44,6 +46,11 @@ const NewBooking = () => {
     const { data: data_tours } = useQuery(OBTENER_TOURS, { pollInterval: 1000 });
     const { data: data_user } = useQuery(OBTENER_USUARIO_CODIGO, { variables: { codigo: localStorage.getItem('cedula') }, pollInterval: 1000 });
     const { data: operativeAreas } = useQuery(OBTENER_AREAS, { pollInterval: 1000 });
+
+    const { loading: loading_booking, data: booking } = useQuery(OBTENER_RESERVA, { variables: { id: id }, skip: !id, pollInterval: 1000 });
+    const { data: bookingRoom } = useQuery(OBTENER_RESERVAHABITACION, { variables: { id: booking?.obtenerReserva.id }, skip: !id, pollInterval: 1000 })
+
+    console.log(booking);
 
     const [insertar] = useMutation(SAVE_RESERVA);
 
@@ -62,9 +69,7 @@ const NewBooking = () => {
 
     const [stateBooking, setStateBooking] = useState(false);
 
-    const [serviceBookingCheck, setServiceBookingCheck] = useState(false);
-    const [serviceTourCheck, setServiceTourCheck] = useState(false);
-    const [serviceRoomCheck, setServiceRoomCheck] = useState(false);
+
     const [typeBooking, setTypeBooking] = useState(null);
 
     const [packageBooking, setPackageBooking] = useState(null);
@@ -95,6 +100,22 @@ const NewBooking = () => {
     const [componentSize, setComponentSize] = useState({ width: 0 });
     const wizardRef = useRef(null);
 
+
+    //Load data for edit booking 
+    useEffect(() => {
+        if (id !== undefined) {
+            setCustomer(booking?.obtenerReserva.cliente);
+            setTypeBooking(booking?.obtenerReserva.tipo);
+            setUser(booking?.obtenerReserva.usuario.nombre);
+            setAmountAdult(booking?.obtenerReserva.numeroPersonas.adulto);
+            setAmountChildren(booking?.obtenerReserva.numeroPersonas.ninos);
+            setCheckIn(timestampToDateLocal(Number(bookingRoom?.obtenerReservaHabitacion[0]?.fechaEntrada), 'date'));
+            setCheckOut(timestampToDateLocal(Number(bookingRoom?.obtenerReservaHabitacion[0]?.fechaSalida), 'date'));
+            setPackageBookingList(booking?.obtenerReserva?.paquetes);
+        }
+    }, [booking, bookingRoom, id])
+
+    // Data for new boooking
     useEffect(() => {
         setUser(data_user?.obtenerUsuarioByCodigo || [])
     }, [data_user])
@@ -168,22 +189,11 @@ const NewBooking = () => {
             cantidad: calAmountService(service, checkIn, checkOut, amountAdult, amountChildren)
         }));
 
-        // Actualizar paxkageBookingList con la cantidad calculada para cada servicio
-        const updatedPakageBookingList = packageBookingList.map(packageItem => ({
-            ...packageItem,
-            servicios: packageItem.servicios.map(service => ({
-                ...service,
-                cantidad: calAmountService(service, checkIn, checkOut, amountAdult, amountChildren)
-            }))
-        }));
-
-        // Actualizar los estados
         setExtraService(updatedExtraService);
-        setPackageBookingList(updatedPakageBookingList);
 
     }, [amountAdult, amountChildren, checkIn, checkOut])
 
-    function calculateNights() {
+    const calculateNights = () => {
         const startDateObj = new Date(checkIn);
         const endDateObj = new Date(checkOut);
         const timeDifference = endDateObj - startDateObj;
@@ -199,7 +209,7 @@ const NewBooking = () => {
         setTypeBooking(type);
     };
 
-    function getFilteredByKey(key, value) {
+    const getFilteredByKey = (key, value) => {
         const valName = key.nombre.toLowerCase()
         const valCode = key.codigo.toLowerCase()
         const val = value.toLowerCase()
@@ -313,26 +323,8 @@ const NewBooking = () => {
 
     const totalPerRoom = (type) => {
         const total = (type.amountBooking * type.type.precioBase) + currentSeason.precio;
-
         return total
     }
-
-    const handleChangeServiceBooking = () => {
-        setServiceBookingCheck(!serviceBookingCheck);
-        setExtraService([])
-    };
-
-    const handleChangeTourRoom = () => {
-        setServiceTourCheck(!serviceTourCheck);
-        setTours([])
-    };
-
-    const handleChangeServiceRoom = () => {
-        setServiceRoomCheck(!serviceRoomCheck);
-        setExtraServiceRoom([])
-        setServicesPerRoom([])
-        setSelectRoom(null)
-    };
 
     const handleService = (a, type) => {
         if (type === 'general') setServicesBooking(a);
@@ -365,10 +357,9 @@ const NewBooking = () => {
         const data = getServices().filter(item => !extra.includes(item.value.id));
 
         return data;
-    }
+    };
 
     const addExtraService = (s, extra, type) => {
-
         if (!s) {
             infoAlert('Oops', 'No ha seleccionado un servicio', 'error', 3000, 'top-end');
             return;
@@ -387,7 +378,8 @@ const NewBooking = () => {
             {
                 ...s.value,
                 cantidad: calAmountService(s.value),
-                extra: 1
+                extra: s.value.tipo?.cuantificable === 'true' ? 1 : 0,
+                useExtra: []
             }
         ];
 
@@ -405,14 +397,79 @@ const NewBooking = () => {
 
     };
 
+    const addDateServiceExtra = (update, service, type) => {
+
+        if (type === 'perService') {
+            let updatedService;
+            setExtraService(prevData =>
+                prevData.map(item => {
+                    if (item.id === service.id) {
+                        updatedService = { ...item, useExtra: [...item.useExtra, update] };
+                        return updatedService;
+                    }
+                    return item;
+                })
+            );
+            return updatedService;
+        } else if (type === 'perRoom') {
+            let updatedService;
+            setExtraServiceRoom(prevData =>
+                prevData.map(item => {
+                    if (item.id === service.id) {
+                        updatedService = { ...item, useExtra: [...item.useExtra, update] };
+                        return updatedService;
+                    }
+                    return item;
+                })
+            );
+            return updatedService;
+        };
+
+    };
+
+    const deleteDateServiceExtra = (index, service, type) => {
+
+        if (type === 'perService') {
+            let updatedService;
+            setExtraService(prevData =>
+                prevData.map(item => {
+                    if (item.id === service.id) {
+                        const newUseExtra = [...item.useExtra];
+                        newUseExtra.splice(index, 1);
+                        updatedService = { ...item, useExtra: newUseExtra };
+                        return updatedService;
+                    }
+                    return item;
+                })
+            );
+
+            return updatedService;
+        } else {
+            let updatedService;
+            setExtraServiceRoom(prevData =>
+                prevData.map(item => {
+                    if (item.id === service.id) {
+                        const newUseExtra = [...item.useExtra];
+                        newUseExtra.splice(index, 1);
+                        updatedService = { ...item, useExtra: newUseExtra };
+                        return updatedService;
+                    }
+                    return item;
+                })
+            );
+
+            return updatedService;
+        };
+    };
+
     const deleteServiceBooking = (nombre) => {
         setExtraService(extraService.filter(a => a.nombre !== nombre))
 
     };
 
     const updateAmountService = (type, amount, service) => {
-        debugger
-        if (type === 'booking') {
+
+        if (type === 'perService') {
             setExtraService(prevServices =>
                 prevServices.map(s =>
                     s.id === service.id
@@ -440,7 +497,7 @@ const NewBooking = () => {
 
     const deleteServiceRoom = (nombre) => {
         setExtraServiceRoom(extraServiceRoom.filter(a => a.nombre !== nombre));
-    }
+    };
 
     const getTour = () => {
         const data = [];
@@ -543,15 +600,14 @@ const NewBooking = () => {
         if (packageBooking) {
             const exist = packageBookingList.find(e => e.id === packageBooking.value.id)
             if (exist) {
-                infoAlert('Oops', 'Ya existe esta comodidad en la habitación', 'warning', 3000, 'top-end')
+                infoAlert('Oops', 'Ya existe este paquete en la reserva', 'warning', 3000, 'top-end')
                 setPackageBooking(null)
                 return
             }
             const servicePackageUpdate = {
                 ...packageBooking.value,
                 servicios: packageBooking.value.servicios.map(servicio => ({
-                    ...servicio,
-                    cantidad: calAmountService(servicio)
+                    ...servicio
                 }))
             };
 
@@ -559,14 +615,46 @@ const NewBooking = () => {
             setPackageBooking(null);
 
         } else {
-            infoAlert('Oops', 'No ha seleccionado una comodida', 'error', 3000, 'top-end')
+            infoAlert('Oops', 'No ha seleccionado un paquete', 'error', 3000, 'top-end')
         }
 
     };
 
     const deletePackage = (nombre) => {
         setPackageBookingList(packageBookingList.filter(a => a.nombre !== nombre));
-    }
+    };
+
+    const updatePackageBooking = (pack) => {
+        const updataPackage = packageBookingList.map(p =>
+            p.nombre === pack.nombre ? { ...p, ...pack } : p
+
+        );
+        setPackageBookingList(updataPackage)
+    };
+
+    const updateServiceBooking = (service, type) => {
+        if (type === 'perService') {
+            const updataService = extraService.map(s =>
+                s.nombre === service.nombre ? { ...s, ...service } : s
+
+            );
+            setExtraService(updataService)
+        } else if (type === 'perRoom') {
+            const updateService = extraServiceRoom.map(s =>
+                s.nombre === service.nombre ? { ...s, ...service } : s
+
+            );
+            setExtraServiceRoom(updateService)
+        }
+    };
+
+    const updateTourBooking = (tour) => {
+
+        const updateTour = toursList.map(t =>
+            t.nombre === tour.nombre ? { ...t, ...tour } : t
+        );
+        setToursList(updateTour);
+    };
 
     const stepsFromWizard = useMemo(() => stepsWizardMenuBooking, []);
 
@@ -613,7 +701,6 @@ const NewBooking = () => {
     }, [wizardRef]);
 
     const handleSaveNote = (updatedNote) => {
-
         const update = notes.map(note => {
             if (note.area.id === updatedNote.area.id) {
                 return {
@@ -661,9 +748,9 @@ const NewBooking = () => {
                     ninos: amountChildren
                 },
                 total: null,
-                serviciosGrupal: extraService?.map(s => s.id),
-                paquetes: packageBookingList.map(p => p.id),
-                tours: toursList.map(t => t.id),
+                serviciosGrupal: extraService || [],
+                paquetes: packageBookingList || [],
+                tours: toursList || [],
                 notas: notes.filter(note => note.nota !== ""),
                 metodoPago: null,
                 politicas: null,
@@ -695,12 +782,32 @@ const NewBooking = () => {
         }
     };
 
+    if (loading_booking && id) {
+        return (
+            <React.Fragment>
+                <div className="page-content">
+                    <Container fluid={true}>
+                        <Breadcrumbs title={!id ? 'Nueva Reserva' : 'Editar Reserva'} breadcrumbItem="Reservas" breadcrumbItemUrl={!id ? '/reception/availability' : '/reception/availability/booking'} />
+                        <Row>
+                            <div className="col text-center pt-3 pb-3">
+                                <div className="spinner-border" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </Row>
+                    </Container>
+                </div>
+            </React.Fragment>
+        );
+
+    };
+
     return (
         <React.Fragment>
             <div className="page-content " ref={wizardRef}>
                 <Container fluid={true}>
-                    <Breadcrumbs title="Nueva Reserva" breadcrumbItem="Reservas" breadcrumbItemUrl='/reception/availability' />
-                    <Card className='col-md-12 p-2'>
+                    <Breadcrumbs title={!id ? 'Nueva Reserva' : 'Editar Reserva'} breadcrumbItem="Reservas" breadcrumbItemUrl={!id ? '/reception/availability' : '/reception/availability/booking'} />
+                    <Card className='p-4'>
                         <div className='d-flex col-md-12 justify-content-center '>
                             <nav className='d-flex col-md-12 justify-content-center shadow_wizard wizard_bar' {...stepperProps}>
                                 {stepsProps?.map((step, index) => (
@@ -743,7 +850,7 @@ const NewBooking = () => {
                         }
                         {steps[state.currentStep].label === 'Paquetes' &&
                             <div>
-                                <Packages props={{ handlePackage, getPackage, addPackage, deletePackage, setDisabledButton, packageBooking, packageBookingList }} />
+                                <Packages props={{ handlePackage, getPackage, addPackage, deletePackage, setDisabledButton, updatePackageBooking, packageBooking, packageBookingList }} />
                             </div>
                         }
                         {steps[state.currentStep].label === 'Habitaciones' &&
@@ -754,9 +861,8 @@ const NewBooking = () => {
                         {steps[state.currentStep].label === 'Servicios y Tours' &&
                             <div>
                                 <ToursService props={{
-                                    handleChangeServiceBooking,
-                                    handleChangeServiceRoom,
-                                    handleChangeTourRoom,
+                                    updateServiceBooking,
+                                    updateTourBooking,
                                     handleService,
                                     handleTour,
                                     deleteServiceBooking,
@@ -771,16 +877,17 @@ const NewBooking = () => {
                                     addExtraServicePerRoom,
                                     setDisabledButton,
                                     updateAmountService,
+                                    addDateServiceExtra,
+                                    deleteDateServiceExtra,
+                                    checkIn,
+                                    checkOut,
                                     ServicesRoom,
                                     roomsBooking,
                                     selectRoom,
-                                    serviceBookingCheck,
-                                    serviceRoomCheck,
                                     ServicesBooking,
                                     extraService,
                                     extraServiceRoom,
                                     options,
-                                    serviceTourCheck,
                                     tours,
                                     toursList,
                                     servicesPerRoom,

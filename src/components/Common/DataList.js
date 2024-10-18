@@ -34,6 +34,7 @@ import TableOperativeAreas from '../../Pages/GeneralSettings/Hotel/OperativeArea
 import TableNotes from '../../Pages/Reception/Availability/NewBooking/Notes/TableNotes';
 import TableTypeRoomSeason from '../../Pages/GeneralSettings/Hotel/Season/TableTypeRoomSeason';
 import TableDataTypeRoom from '../../Pages/Reception/Availability/NewBooking/TableDataTypeRoom';
+import TableDate from './TableDate';
 import TableOrders from '../../Pages/Restaurant/Orders/TableOrders';
 import TableFloors from '../../Pages/GeneralSettings/Floors/TableFloors';
 import TableTables from '../../Pages/GeneralSettings/Tables/TableTables';
@@ -213,6 +214,10 @@ const DataList = ({ ...props }) => {
                 {
                     type === 'invoicesParameters' &&
                     <TableInvoicesParameters {...props} data={datos} />
+                }
+                {
+                    type === 'tableDate' &&
+                    <TableDate {...props} data={datos} />
                 }
                 {
                     type === 'orders' &&
