@@ -10,6 +10,7 @@ export const OBTENER_TEMPORADAS = gql`
             tipo
             precio   
             descripcion
+            tiposHabitacion
         }
     }
 `;

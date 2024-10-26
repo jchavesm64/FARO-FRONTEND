@@ -50,8 +50,6 @@ const NewBooking = () => {
     const { loading: loading_booking, data: booking } = useQuery(OBTENER_RESERVA, { variables: { id: id }, skip: !id, pollInterval: 1000 });
     const { data: bookingRoom } = useQuery(OBTENER_RESERVAHABITACION, { variables: { id: booking?.obtenerReserva.id }, skip: !id, pollInterval: 1000 })
 
-    console.log(booking);
-
     const [insertar] = useMutation(SAVE_RESERVA);
 
     const [user, setUser] = useState([])
@@ -76,7 +74,8 @@ const NewBooking = () => {
     const [packageBookingList, setPackageBookingList] = useState([]);
 
     const [seasonlist, setSeasonlist] = useState([]);
-    const [currentSeason, setCurrentSeason] = useState(null);
+    const [currentSeason, setCurrentSeason] = useState([]);
+
 
     const [roomsAvailable, setRoomsAvailable] = useState(null);//Habitaciones disponibles
     const [typeRooms, setTypeRooms] = useState([]);//Tipo de habitaciones
@@ -98,8 +97,8 @@ const NewBooking = () => {
     const [filterNotes, setFilterNotes] = useState([]);
 
     const [componentSize, setComponentSize] = useState({ width: 0 });
+    const [total, setTotal] = useState(0);
     const wizardRef = useRef(null);
-
 
     //Load data for edit booking 
     useEffect(() => {
@@ -136,14 +135,6 @@ const NewBooking = () => {
             });
         };
 
-        const getCurrentSeason = () => (
-            seasonlist.find(sl => {
-                const dateStart = sl.fechaInicio;
-                const dateEnd = sl.fechaFin;
-                return currentDate >= convertDate(dateStart) && currentDate <= convertDate(dateEnd);
-            }) || null
-        );
-
         const getAreas = () => (operativeAreas?.obtenerAreas || []);
 
         const getRoomsAvailable = () => (dataRoomsAvailable?.obtenerHabitacionesDisponibles || []);
@@ -156,7 +147,6 @@ const NewBooking = () => {
         setTypeRooms(getTypeRooms());
         setAmountTypeRooms(getAmountTypeRooms());
         setSeasonlist(getSeasons());
-        setCurrentSeason(getCurrentSeason());
         setAreas(getAreas());
         setNotes(
             areas.map(area => (
@@ -192,6 +182,54 @@ const NewBooking = () => {
         setExtraService(updatedExtraService);
 
     }, [amountAdult, amountChildren, checkIn, checkOut])
+
+    useEffect(() => {
+
+        const getCurrentSeason = () => (
+            seasonlist.filter(sl => {
+                const dateStart = convertDate(sl.fechaInicio);
+                const dateEnd = convertDate(sl.fechaFin);
+                return (
+                    (checkIn <= dateEnd && checkOut >= dateStart) ||
+                    (checkIn >= dateStart && checkOut <= dateEnd)
+                );
+            }) || null
+        );
+
+        const differenceDays = (date1, date2) => {
+            const milSecontsPerDay = 1000 * 60 * 60 * 24;
+
+            return Math.ceil((date2 - date1) / milSecontsPerDay)
+        };
+
+        const calculateDates = () => {
+
+            return getCurrentSeason()?.map(s => {
+                const dateStart = new Date(convertDate(s.fechaInicio));
+                const dateEnd = new Date(convertDate(s.fechaFin));
+                const dateIn = new Date(checkIn);
+                const dateOut = new Date(checkOut);
+
+                const dateIniVal = dateStart < dateIn ? dateIn : dateStart;
+                const dateEndVal = dateEnd > dateOut ? dateOut : dateEnd;
+
+                if (dateIniVal <= dateEndVal) {
+                    const nights = differenceDays(dateIniVal, dateEndVal);
+                    return {
+                        ...s,
+                        nights: nights !== 0 ? nights : 1
+                    };
+                } else {
+                    return {
+                        ...s
+                    }
+                }
+
+            });
+
+        };
+        setCurrentSeason(calculateDates())
+    }, [checkIn, checkOut, seasonlist])
 
     const calculateNights = () => {
         const startDateObj = new Date(checkIn);
@@ -324,24 +362,22 @@ const NewBooking = () => {
     const totalPerRoom = (type) => {
         const total = (type.amountBooking * type.type.precioBase) + currentSeason.precio;
         return total
-    }
+    };
 
     const handleService = (a, type) => {
         if (type === 'general') setServicesBooking(a);
         if (type === 'room') setServicesRoom(a);
-    }
+    };
 
     const handlePackage = (a) => {
         setPackageBooking(a);
-    }
+    };
 
     const getServices = () => {
         const data = [];
         if (services?.obtenerServicios) {
             services.obtenerServicios.forEach((item) => {
                 const newItem = { ...item };
-
-                newItem.precio = item.precio + currentSeason.precio;
 
                 data.push({
                     value: newItem,
@@ -580,9 +616,10 @@ const NewBooking = () => {
 
     const getPackage = () => {
         const data = [];
+
         if (packages?.obtenerPaquetes) {
             packages.obtenerPaquetes.forEach((item) => {
-                const matchingSeason = item.temporadas?.nombre === currentSeason.nombre;
+                const matchingSeason = currentSeason.some(temporada => temporada.nombre === item.temporadas?.nombre);
                 if (matchingSeason) {
                     data.push({
                         value: item,
@@ -747,7 +784,7 @@ const NewBooking = () => {
                     adulto: amountAdult,
                     ninos: amountChildren
                 },
-                total: null,
+                total,
                 serviciosGrupal: extraService || [],
                 paquetes: packageBookingList || [],
                 tours: toursList || [],
@@ -802,42 +839,47 @@ const NewBooking = () => {
 
     };
 
+
     return (
         <React.Fragment>
             <div className="page-content " ref={wizardRef}>
                 <Container fluid={true}>
                     <Breadcrumbs title={!id ? 'Nueva Reserva' : 'Editar Reserva'} breadcrumbItem="Reservas" breadcrumbItemUrl={!id ? '/reception/availability' : '/reception/availability/booking'} />
                     <Card className='p-4'>
-                        <div className='d-flex col-md-12 justify-content-center '>
-                            <nav className='d-flex col-md-12 justify-content-center shadow_wizard wizard_bar' {...stepperProps}>
-                                {stepsProps?.map((step, index) => (
-                                    <div key={index}>
-                                        <ol
-                                            className={`
-                                                list-group wizard_button_size text-center step-hover-effect_wizard 
-                                                p-2 m-1 text-wrap fs-5 border-bottom border-top border-primary d-flex 
-                                                justify-content-center text-dark ${state.currentStep === index ? "border-3" : "border-1"}`}
-                                            key={index}
-                                            style={{
-                                                fontWeight: state.currentStep === index ? 'bold' : 'unset',
-                                                opacity: steps[index].disabled ? 0.6 : 1
-                                            }}
+                        {/* necesitamos separar el wizard para despejar la logia ce este archivo */}
+                        <div className=' d-flex flex-wrap flex-row justify-content-center'>
+                            <div className='d-flex col-md-12 justify-content-around '>
+                                <Button className='' id='Anterior' color="primary" onClick={prevStep} disabled={!state.hasPreviousStep}  ><i className={'mdi mdi-arrow-left-bold-circle-outline button_wizard_icon '}></i></Button>
+                                <nav className='d-flex col-md-10 justify-content-center shadow_wizard wizard_bar' {...stepperProps}>
+                                    {stepsProps?.map((step, index) => (
+                                        <div key={index}>
+                                            <ol
+                                                className={`
+                    list-group wizard_button_size text-center step-hover-effect_wizard 
+                    p-2 m-1 text-wrap fs-5 border-bottom border-top border-primary d-flex 
+                     text-dark ${state.currentStep === index ? "border-3" : "border-1"}`}
+                                                key={index}
+                                                style={{
+                                                    fontWeight: state.currentStep === index ? 'bold' : 'unset',
+                                                    opacity: steps[index].disabled ? 0.6 : 1
+                                                }}
 
-                                        >
-                                            <a {...step} onClick={() => handleStep(stepsProps[index].onClick)}  >
-                                                {componentSize.width <= 1151 ? (
-                                                    <i className={`${steps[index].icon} wizard_icon_size`}></i>
-                                                ) : steps[index].label}
-                                            </a>
-                                        </ol>
-                                    </div>
-                                ))}
-                            </nav>
+                                            >
+                                                <a {...step} onClick={() => handleStep(stepsProps[index].onClick)}  >
+                                                    {componentSize.width <= 1166 ? (
+                                                        <i className={`${steps[index].icon} wizard_icon_size`}></i>
+                                                    ) : steps[index].label}
+                                                </a>
+                                            </ol>
+                                        </div>
+                                    ))}
+
+                                </nav>
+                                <Button className='' id='Siguiente' color="primary" onClick={() => { nextStep(); handleChangeState(); }} disabled={!state.hasNextStep || disabledButton}><i className={'mdi mdi-arrow-right-bold-circle-outline button_wizard_icon'}></i></Button>
+                            </div>
                         </div>
-                        <div className='d-flex justify-content-between m-4 mt-3 mb-0'>
-                            <Button id='Anterior' color="primary" onClick={prevStep} disabled={!state.hasPreviousStep}><i className={'mdi mdi-arrow-left-bold-circle-outline button_wizard_icon'}></i></Button>
-                            <Button id='Siguiente' color="primary" onClick={() => { nextStep(); handleChangeState(); }} disabled={!state.hasNextStep || disabledButton}><i className={'mdi mdi-arrow-right-bold-circle-outline button_wizard_icon'}></i></Button>
-                        </div>
+                        {/* Esto es todo lo que se debe modulizar */}
+
                         {steps[state.currentStep].label === 'Buscar cliente' &&
                             <div>
                                 <SearchCustomer props={{ handleInputChange, selectClient, setCustomer, setFilter, setDisabledButton, filter, customers, customer, stateBooking, bookingDate }} />
@@ -902,7 +944,7 @@ const NewBooking = () => {
                         }
                         {steps[state.currentStep].label === 'Resumen' &&
                             <div>
-                                <Summary props={{ amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes, user }} />
+                                <Summary props={{ setTotal,amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes, user, amountTypeRooms, total}} />
                             </div>
                         }
                     </Card>

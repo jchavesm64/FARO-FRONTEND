@@ -19,6 +19,7 @@ const Rooms = ({ ...props }) => {
         setEnableRooms(valIndividualBooking)
     }, [typeBooking, roomsBooking])
 
+
     return (
         <React.Fragment>
             <div className="page-content p-4 border m-2">
@@ -34,17 +35,22 @@ const Rooms = ({ ...props }) => {
                                 <Row className="col-md-12 ms-0 flex-row justify-content-center room_card_wizard_details ">
                                     {amountTypeRooms.map((type, index) => (
                                         <Card key={`${type.type.nombre}-type`} className="m-2 p-1 bg-light shadow col-md-11">
-                                            <CardBody className="p-2 card_room_wizard">
+                                            <CardBody className="p-2 ">
                                                 <Row className="d-flex align-items-center" >
                                                     <div className="col-md-2 mb-3">
                                                         <span className="logo-lg">
-                                                            <img src="/static/media/faro-light.f23d16523144109283f2.png" alt="logo-light" height="24" />
+                                                            <img  src="/static/media/faro-light.f23d16523144109283f2.png" alt="logo-light" height="25" width="85" />
                                                         </span>
                                                     </div>
                                                     <div className="col-md-7 col-sm-12 ">
                                                         <p className="mb-1 mt-1">Tipo Habitación: <span>{type.type.nombre.slice(0, 20)}...</span></p>
-                                                        <p className="mb-1 mt-1">Precio por noche: $<span>{type.type.precioBase + currentSeason.precio}</span></p>
-                                                        <div className="d-flex flex-wrap description_room_wizard"> <p>Decripción: <span>{type.type.descripcion}</span></p></div>
+
+                                                        <div className="mb-1 mt-1 col-md-12 d-flex flex-column">Precio por noche:
+                                                            {currentSeason.map(c =>
+                                                                <spam className='ms-3'>{c.nombre}: <span>${c.tiposHabitacion[type.type.nombre].price}</span>
+                                                                </spam>
+                                                            )}
+                                                        </div>
                                                     </div>
 
                                                     <div className="col-md-3 col-sm-12 d-flex flex-column align-items-center justify-content-end"  >

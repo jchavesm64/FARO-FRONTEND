@@ -28,7 +28,6 @@ const ToursService = ({ ...props }) => {
         getTour,
         addTours,
         addExtraService,
-        getServicesPerRoom,
         addExtraServicePerRoom,
         setDisabledButton,
         updateAmountService,
@@ -109,6 +108,7 @@ const ToursService = ({ ...props }) => {
     const deleteDate = (index) => {
         setExtraDate(deleteDateServiceExtra(index, extraDate, type));
     };
+
 
     return (
         <React.Fragment>
@@ -292,7 +292,7 @@ const ToursService = ({ ...props }) => {
                                                                                             onChange={(e) => {
                                                                                                 handleService(e, 'room');
                                                                                             }}
-                                                                                            options={getServicesPerRoom()}
+                                                                                            options={getServices()}
                                                                                             placeholder={`Servicios para la habitación ${selectRoom.numeroHabitacion}`}
                                                                                             classNamePrefix="select2-selection"
                                                                                         />
