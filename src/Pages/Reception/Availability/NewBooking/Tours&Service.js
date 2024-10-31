@@ -28,7 +28,6 @@ const ToursService = ({ ...props }) => {
         getTour,
         addTours,
         addExtraService,
-        getServicesPerRoom,
         addExtraServicePerRoom,
         setDisabledButton,
         updateAmountService,
@@ -70,6 +69,7 @@ const ToursService = ({ ...props }) => {
     const toggle = () => { setModal(!modal); setType(''); setExtraDate(0); };
 
     const showModalEditService = (data, type) => {
+
         setType(type);
         setFilter(data);
         setModal(true);
@@ -109,6 +109,9 @@ const ToursService = ({ ...props }) => {
     const deleteDate = (index) => {
         setExtraDate(deleteDateServiceExtra(index, extraDate, type));
     };
+
+
+console.log(extraDate);
 
     return (
         <React.Fragment>
@@ -292,7 +295,7 @@ const ToursService = ({ ...props }) => {
                                                                                             onChange={(e) => {
                                                                                                 handleService(e, 'room');
                                                                                             }}
-                                                                                            options={getServicesPerRoom()}
+                                                                                            options={getServices()}
                                                                                             placeholder={`Servicios para la habitación ${selectRoom.numeroHabitacion}`}
                                                                                             classNamePrefix="select2-selection"
                                                                                         />
@@ -529,7 +532,7 @@ const ToursService = ({ ...props }) => {
 
                     </Row>
 
-                    <Modal key='modalCustomer' isOpen={modal} toggle={toggle} size={extraDate === 0 ? 'xl' : 'lg'}>
+                    <Modal key='modalCustomer' isOpen={modal} toggle={toggle} size={!extraDate ? 'xl' : 'lg'}>
                         <ModalHeader key='modalheader' toggle={toggle}>
                             {!extraDate ?
                                 <span className="fs-4 m-0 span_package_color">
@@ -540,7 +543,7 @@ const ToursService = ({ ...props }) => {
                                     </span>
                                 )}
                         </ModalHeader>
-                        {!extraDate === 0 ?
+                        {!extraDate  ?
                             <ModalBody key='modalbody'>
                                 {type !== '' ? <EditExtraService idBooking={filter?.id} updateServiceBooking={updateService} /> : (<EditTour idBooking={filter?.id} updateTourBooking={updateTour} />)}
                             </ModalBody> : (

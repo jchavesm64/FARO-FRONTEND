@@ -19,3 +19,11 @@
     color: white;
 }
 
+.shadow_booking {
+    box-shadow: 0 3px 4px rgba(rgba($dark, 0.8), 0.2);
+}
+
+.col-md-1-5 {
+    flex: 0 0 auto;
+    width: 9.666667%;
+}
