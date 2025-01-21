@@ -672,13 +672,13 @@ const NewBooking = () => {
     const updateServiceBooking = (service, type) => {
         if (type === 'perService') {
             const updataService = extraService.map(s =>
-                s.nombre === service.nombre ? { ...s, ...service } : s
+                s.nombre === service.nombre ? { ...s, ...service, consumido: 0 } : s
 
             );
             setExtraService(updataService)
         } else if (type === 'perRoom') {
             const updateService = extraServiceRoom.map(s =>
-                s.nombre === service.nombre ? { ...s, ...service } : s
+                s.nombre === service.nombre ? { ...s, ...service, comsumido: 0 } : s
 
             );
             setExtraServiceRoom(updateService)
@@ -793,14 +793,14 @@ const NewBooking = () => {
                 politicas: null,
                 usuario: user.id !== undefined ? user.id : null
             }
-
+            debugger
             const bookingRoom = {
                 habitacion: roomsBooking.length > 0 ? roomsBooking.map(room => room.id) : null,
                 fechaEntrada: checkIn,
                 fechaSalida: checkOut,
                 serviciosExtra: servicesPerRoom.length > 0 ? servicesPerRoom.map(roomData => ({
                     room: roomData.room.id,
-                    service: roomData.service.map(serviceData => serviceData.id)
+                    service: roomData.service
                 })) : null
             };
 
