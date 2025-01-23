@@ -15,7 +15,7 @@ const Customers = ({ ...props }) => {
     document.title = "Clientes | FARO";
 
     const [filter, setFilter] = useState('')
-    const { loading: load_clientes, error: error_clientes, data: data_clientes } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 })
+    const { loading: load_clientes, error: error_clientes, data: data_clientes, refetch } = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 })
     const [desactivar] = useMutation(DELETE_CLIENTE);
 
 
@@ -66,6 +66,7 @@ const Customers = ({ ...props }) => {
                 const { estado, message } = data.desactivarCliente;
                 if (estado) {
                     infoAlert('Cliente eliminado', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar Cliente', message, 'error', 3000, 'top-end')
                 }

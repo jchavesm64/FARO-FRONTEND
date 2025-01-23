@@ -18,7 +18,7 @@ const TaxManagement = ({ ...props }) => {
     const [displayLength, setDisplayLength] = useState(10);
 
 
-    const { loading: loading_tax, error: error_tax, data: data_tax } = useQuery(OBTENER_IMPUESTOS, { pollInterval: 1000 });
+    const { loading: loading_tax, error: error_tax, data: data_tax, refetch } = useQuery(OBTENER_IMPUESTOS, { pollInterval: 1000 });
     const [desactivar] = useMutation(DELETE_IMPUESTO);
 
     const getData = () => {
@@ -60,6 +60,7 @@ const TaxManagement = ({ ...props }) => {
                 const { estado, message } = data.desactivarImpuesto;
                 if (estado) {
                     infoAlert('Impuesto eliminado', message, 'success', 3000, 'top-end')
+                    refetch();
                 } else {
                     infoAlert('Eliminar Impuesto', message, 'error', 3000, 'top-end')
                 }

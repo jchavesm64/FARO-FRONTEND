@@ -149,6 +149,7 @@ $info:          $cyan;
 $warning:       $yellow;
 $danger:        $red;
 $light:         $gray-200;
+$gray:          $gray-400;
 $dark:          $gray-800;
 // scss-docs-end theme-color-variables
 
@@ -162,7 +163,11 @@ $theme-colors: (
   "danger":     $danger,
   "pink":       $pink,
   "light":      $light,
-  "dark":       $dark
+  "gray":       $gray,
+  "dark":       $dark,
+  "indigo":     $indigo,
+  "orange":     $orange,
+  "cyan-dark":  $cyan-600,
 );
 // scss-docs-end theme-colors-map
 

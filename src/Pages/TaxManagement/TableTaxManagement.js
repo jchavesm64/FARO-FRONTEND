@@ -20,6 +20,7 @@ const TableTaxManagement = ({ ...props }) => {
                     <tr>
                         <th>Nombre</th>
                         <th>Porcentaje de impuesto</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>

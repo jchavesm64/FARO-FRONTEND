@@ -82,11 +82,16 @@ export const restaurantRoutes = [
     //     icon: 'mdi mdi-cash-register',
     //     link: "/restaurant/pos" 
     // },
-    // { 
-    //     label: "Pedidos", 
-    //     icon: 'mdi mdi-text-box-multiple-outline',
-    //     link: "/restaurant/orders" 
-    // },
+    {
+        label: "Comandas",
+        icon: 'mdi mdi-text-box-multiple-outline',
+        link: "/restaurant/orders"
+    },
+    {
+        label: "Ordenes Pendientes",
+        icon: 'mdi mdi-clock-outline',
+        link: "/restaurant/pendingorders"
+    },
     // { 
     //     label: "Sesiones", 
     //     icon: 'mdi mdi-network-pos',
@@ -247,8 +252,10 @@ export const sidebarRoutes = [
             // { sublabel: "Pedidos", link: "/restaurant/orders" },
             // { sublabel: "Sesiones", link: "/restaurant/sessions" },
             { sublabel: "Gestión de menú", link: "/restaurant/menu" },
+            { sublabel: "Inventario", link: "/stock/Restaurante" },
+            { sublabel: "Comandas", link: "/restaurant/orders" },
+            { sublabel: "Ordenes Pendientes", link: "/restaurant/pendingorders" },
             // { sublabel: "Gestión de mesas", link: "/restaurant/tables" },
-            // { sublabel: "Inventario", link: "/stock/Restaurante" },
             // { sublabel: "Configuración", link: "/restaurant/settings" },
         ],
     },
@@ -325,8 +332,13 @@ export const sidebarRoutes = [
             { sublabel: "Roles", link: "/roles" },
             { sublabel: "Tipo de proveeduría", link: "/suppliertype" },
             { sublabel: "Ubicaciones", link: "/locations" },
+            { sublabel: "Pisos", link: "/floors" },
+            { sublabel: "Mesas", link: "/tables" },
             { sublabel: "Impuestos", link: "/taxmanagement" },
             { sublabel: "Hotel", link: "/hotelsettings" },
+            { sublabel: "Métodos de pago", link: "/paymentmethods" },
+            { sublabel: "Tipo de menú", link: "/menutype" },
+            { sublabel: "Tipo de platillo", link: "/dishtype" },
         ],
     },
 ]
@@ -353,9 +365,34 @@ export const menuRoutesGeneralSettings = [
         link: '/locations'
     },
     {
+        label: "Pisos",
+        icon: "mdi mdi-layers",
+        link: '/floors'
+    },
+    {
+        label: "Mesas",
+        icon: "mdi mdi-table-chair",
+        link: '/tables'
+    },
+    {
         label: "Impuestos",
         icon: "mdi mdi-currency-usd",
         link: '/taxmanagement'
+    },
+    {
+        label: "Métodos de pago",
+        icon: "mdi mdi-credit-card-outline",
+        link: '/paymentmethods'
+    },
+    {
+        label: "Tipo de menú",
+        icon: "mdi mdi-food",
+        link: '/menutype'
+    },
+    {
+        label: "Tipo de platillo",
+        icon: "mdi mdi-silverware-fork-knife",
+        link: '/dishtype'
     },
     {
         label: "Hotel",

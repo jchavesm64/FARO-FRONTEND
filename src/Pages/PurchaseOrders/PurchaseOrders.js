@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardBody, Container, Row } from "reactstrap";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import { Link } from "react-router-dom";
@@ -14,8 +14,20 @@ const PurchaseOrders = ({ ...props }) => {
     document.title = "Órdenes de compra | FARO";
 
     const [filter, setFilter] = useState('')
-    const { loading: load_ordenes_compra, error: error_ordenes_compra, data: data_ordenes_compra } = useQuery(OBTENER_ORDENES_COMPRA, { pollInterval: 1000 })
-    const [desactivar] = useMutation(DELETE_ORDEN_COMPRA);
+    const { loading: load_ordenes_compra, error: error_ordenes_compra, data: data_ordenes_compra, refetch } = useQuery(OBTENER_ORDENES_COMPRA, { pollInterval: 1000 })
+    const [desactivar] = useMutation(DELETE_ORDEN_COMPRA, {
+        update(cache, { data: { desactivarOrdenCompra } }) {
+            const { obtenerOrdenesCompra } = cache.readQuery({ query: OBTENER_ORDENES_COMPRA });
+            cache.writeQuery({
+                query: OBTENER_ORDENES_COMPRA,
+                data: { obtenerOrdenesCompra: obtenerOrdenesCompra.filter(orden => orden.id !== desactivarOrdenCompra.id) },
+            });
+        },
+    });
+
+    useEffect(() => {
+        refetch()
+    }, [refetch])
 
     function getFilteredByKey(key, value) {
         const val1 = key.proveedor.empresa.toLowerCase();

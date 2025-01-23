@@ -35,6 +35,12 @@ import TableNotes from '../../Pages/Reception/Availability/NewBooking/Notes/Tabl
 import TableTypeRoomSeason from '../../Pages/GeneralSettings/Hotel/Season/TableTypeRoomSeason';
 import TableDataTypeRoom from '../../Pages/Reception/Availability/NewBooking/TableDataTypeRoom';
 import TableDate from './TableDate';
+import TableOrders from '../../Pages/Restaurant/Orders/TableOrders';
+import TableFloors from '../../Pages/GeneralSettings/Floors/TableFloors';
+import TableTables from '../../Pages/GeneralSettings/Tables/TableTables';
+import TableMenuType from '../../Pages/GeneralSettings/MenuType/TableMenuType';
+import TableDishType from '../../Pages/GeneralSettings/DishType/TableDishType';
+import TablePaymentMethod from '../../Pages/GeneralSettings/PaymentMethod/TablePaymentMethod';
 
 const DataList = ({ ...props }) => {
     const { data, type, displayLength, onDelete } = props;
@@ -212,6 +218,30 @@ const DataList = ({ ...props }) => {
                 {
                     type === 'tableDate' &&
                     <TableDate {...props} data={datos} />
+                }
+                {
+                    type === 'orders' &&
+                    <TableOrders {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'floors' &&
+                    <TableFloors {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'tables' &&
+                    <TableTables {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'menuType' &&
+                    <TableMenuType {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'dishType' &&
+                    <TableDishType {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'paymentMethod' &&
+                    <TablePaymentMethod {...props} data={datos} onDelete={onDelete} />
                 }
             </div>
             {(data.length > displayLength) &&

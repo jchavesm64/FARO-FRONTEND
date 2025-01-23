@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import logolight from "../../assets/images/faro-light.png";
 import logodark from "../../assets/images/faro-dark.png";
 
@@ -28,6 +28,7 @@ const Login = props => {
   const [autenticarUsuario, { loading: load_login, error: error_login }] = useMutation(LOGIN);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showPassword, setShowPassword] = useState(false)
 
   const validation = useFormik({
     // enableReinitialize : use this flag when initial values needs to be changed
@@ -130,21 +131,26 @@ const Login = props => {
                           </div>
                           <div className="mb-4">
                             <Label className="form-label">Contraseña</Label>
-                            <Input
-                              autoComplete="current-password"
-                              name="password"
-                              value={validation.values.password || ""}
-                              type="password"
-                              placeholder="Ingrese su contraseña"
-                              onChange={validation.handleChange}
-                              onBlur={validation.handleBlur}
-                              invalid={
-                                validation.touched.password && validation.errors.password ? true : false
-                              }
-                            />
-                            {validation.touched.password && validation.errors.password ? (
-                              <FormFeedback type="invalid"><div> {validation.errors.password} </div></FormFeedback>
-                            ) : null}
+                            <div className="input-group">
+                              <Input
+                                autoComplete="current-password"
+                                name="password"
+                                value={validation.values.password || ""}
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="Ingrese su contraseña"
+                                onChange={validation.handleChange}
+                                onBlur={validation.handleBlur}
+                                invalid={
+                                  validation.touched.password && validation.errors.password ? true : false
+                                }
+                              />
+                              <span className="input-group-text" onClick={() => setShowPassword(!showPassword)}>
+                                {showPassword ? <i className="mdi mdi-eye"></i> : <i className="mdi mdi-eye-off"></i>}
+                              </span>
+                              {validation.touched.password && validation.errors.password ? (
+                                <FormFeedback type="invalid"><div> {validation.errors.password} </div></FormFeedback>
+                              ) : null}
+                            </div>
                           </div>
                           <Row>
                             <Col className="col">
