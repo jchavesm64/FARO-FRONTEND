@@ -265,34 +265,52 @@ const ReceptionHome = () => {
                             </div>
                         </Row>
                         <Row key='calendarmain' className='mt-3'>
-                            <div key='calendardiv' className="col-md-4 m-3 mt-0 shadow_calendar rounded">
-                                <Col key='calendarselect' className='d-flex justify-content-center '>
+                            <div key='calendardiv' className="col-md-5 m-2 mt-0 shadow_calendar rounded">
+                                <Col key='calendarselect' className='d-flex justify-content-center align-items-center'>
+                                    <button
+                                        className="btn btn-light m-1 "
+                                        onClick={() => {
+                                            const newMonth = month - 1 < 0 ? 11 : month - 1;
+                                            const newYear = month - 1 < 0 ? year - 1 : year;
+                                            handleMonthChange({ value: newMonth });
+                                            handleYearChange({ value: newYear });
+                                        }}
+                                    >
+                                        ‹
+                                    </button>
                                     <Select
                                         key='selectmonth'
                                         options={monthOptions}
                                         value={{ value: month, label: monthOptions[month].label }}
                                         onChange={handleMonthChange}
-                                        className="react-select-container col-md-6 m-1"
+                                        className="react-select-container col-md-5 m-1"
                                         classNamePrefix="react-select"
                                         placeholder="Select month"
-
                                     />
                                     <Select
                                         key='selectyear'
                                         options={yearOptions}
                                         value={{ value: year, label: year }}
                                         onChange={handleYearChange}
-                                        className="react-select-container col-md-6 m-1"
+                                        className="react-select-container col-md-5 m-1"
                                         classNamePrefix="react-select"
                                         placeholder="Select year"
-
                                     />
+                                    <button
+                                        className="btn btn-light m-1"
+                                        onClick={() => {
+                                            const newMonth = (month + 1) % 12;
+                                            const newYear = month + 1 > 11 ? year + 1 : year;
+                                            handleMonthChange({ value: newMonth });
+                                            handleYearChange({ value: newYear });
+                                        }}
+                                    >
+                                        ›
+                                    </button>
                                 </Col>
-                                <div key='hotcalendar' className="calendar mb-1 ">
+                                <div key='hotcalendar' className="calendar mb-1">
                                     <div key='listday' className="calendar-header p-1">
-                                        {
-                                            daysWeek.map(day => <div className="header-day" key={`header-day${day.label}`}>{day.label}</div>)
-                                        }
+                                        {daysWeek.map(day => <div className="header-day" key={`header-day${day.label}`}>{day.label}</div>)}
                                     </div>
                                     <div key='calendardays' className="calendar-body p-1">
                                         {weeks.map((week, weekIndex) => (
@@ -300,16 +318,15 @@ const ReceptionHome = () => {
                                                 {week.map((dia) => (
                                                     <Button
                                                         key={`dayweek${dia.dia}${week}`}
-                                                        className="calendar-day border border-secondary rounded "
+                                                        className="calendar-day border border-secondary rounded"
                                                         style={{
                                                             backgroundColor: getColorByPercentage(parseInt(dia.porcentajeDisponibilidad)),
                                                         }}
                                                         onClick={() => getData(dia, true)}
                                                     >
-                                                        <span key={`span${dia.dia}${week}`} className="fs-5 " style={{
+                                                        <span key={`span${dia.dia}${week}`} className="fs-5" style={{
                                                             color: parseInt(dia.porcentajeDisponibilidad) === 100 ? 'white' : 'black',
                                                         }}>{dia.dia}</span>
-
                                                     </Button>
                                                 ))}
                                             </div>
@@ -318,7 +335,7 @@ const ReceptionHome = () => {
                                 </div>
                             </div>
 
-                            <div key='listtyperoom' className="col-md-7">
+                            <div key='listtyperoom' className="col-md-6">
                                 <Card>
                                     <CardBody>
                                         <DataList data={roomAvailability !== undefined ? roomAvailability : []} type="typeroomdata" displayLength={3} />
@@ -326,6 +343,7 @@ const ReceptionHome = () => {
                                 </Card>
                             </div>
                         </Row>
+
                         <Modal key='modalavailability' isOpen={modal} toggle={toggle} >
                             <ModalHeader key='modalheader' toggle={toggle}><span className="fs-4 m-0 span_package_color">Información de reserva por día</span></ModalHeader>
                             <ModalBody key='modalbody'>

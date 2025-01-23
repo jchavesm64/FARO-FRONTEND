@@ -19,7 +19,8 @@ const Rooms = ({ ...props }) => {
         setEnableRooms(valIndividualBooking)
     }, [typeBooking, roomsBooking])
 
-
+console.log(roomsBooking)
+console.log(amountTypeRooms)
     return (
         <React.Fragment>
             <div className="page-content p-4 border m-2">

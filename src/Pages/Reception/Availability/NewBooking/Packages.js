@@ -15,6 +15,7 @@ const Packages = ({ ...props }) => {
     const toggle = () => setModal(!modal);
 
     const showModalEditPackage = (data) => {
+        
         setFilter(data)
         setModal(true);
     };

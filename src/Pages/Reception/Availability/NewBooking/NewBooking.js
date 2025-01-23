@@ -100,9 +100,29 @@ const NewBooking = () => {
     const [total, setTotal] = useState(0);
     const wizardRef = useRef(null);
 
+
     //Load data for edit booking 
     useEffect(() => {
         if (id !== undefined) {
+            //Da problemas a la hora de cargar las habitaciones que hay 
+            const updateAmountBooking = () => {
+                const updatedAmountTypeRooms = amountTypeRooms?.map(typeRoom => {
+
+                    if (roomsBooking?.length !== 0 && bookingRoom !== undefined && roomsBooking !== undefined) {
+                        debugger
+                        const amountBooking = roomsBooking?.filter(room => room.tipoHabitacion.id === typeRoom.type.id).length;
+                        return {
+                            ...typeRoom, // Conserva el resto de las propiedades
+                            amountBooking, // Actualiza la cantidad de reservas para este tipo
+                        };
+                    }
+
+                });
+
+                return updatedAmountTypeRooms; // Actualiza el estado con los nuevos valores
+            };
+
+
             setCustomer(booking?.obtenerReserva.cliente);
             setTypeBooking(booking?.obtenerReserva.tipo);
             setUser(booking?.obtenerReserva.usuario.nombre);
@@ -111,9 +131,13 @@ const NewBooking = () => {
             setCheckIn(timestampToDateLocal(Number(bookingRoom?.obtenerReservaHabitacion[0]?.fechaEntrada), 'date'));
             setCheckOut(timestampToDateLocal(Number(bookingRoom?.obtenerReservaHabitacion[0]?.fechaSalida), 'date'));
             setPackageBookingList(booking?.obtenerReserva?.paquetes);
+            setRoomsBooking(bookingRoom?.obtenerReservaHabitacion.map(room => room.habitacion));
+            setAmountTypeRooms(updateAmountBooking());
         }
     }, [booking, bookingRoom, id])
 
+    /* console.log('data reserva',booking)
+    console.log('data habitacion',roomsBooking) */
     // Data for new boooking
     useEffect(() => {
         setUser(data_user?.obtenerUsuarioByCodigo || [])
@@ -587,7 +611,7 @@ const NewBooking = () => {
 
     const options = typeRooms.map((type) => ({
         label: type.nombre,
-        options: roomsBooking.filter(roomB => roomB.tipoHabitacion.id === type.id).map((room) => ({
+        options: roomsBooking?.filter(roomB => roomB.tipoHabitacion.id === type.id).map((room) => ({
             label: room.numeroHabitacion,
             value: room,
         })),
@@ -846,7 +870,7 @@ const NewBooking = () => {
                 <Container fluid={true}>
                     <Breadcrumbs title={!id ? 'Nueva Reserva' : 'Editar Reserva'} breadcrumbItem="Reservas" breadcrumbItemUrl={!id ? '/reception/availability' : '/reception/availability/booking'} />
                     <Card className='p-4'>
-                        {/* necesitamos separar el wizard para despejar la logia ce este archivo */}
+                        {/* necesitamos separar el wizard para despejar la lógica de este archivo */}
                         <div className=' d-flex flex-wrap flex-row justify-content-center'>
                             <div className='d-flex col-md-12 justify-content-around '>
                                 <Button className='' id='Anterior' color="primary" onClick={prevStep} disabled={!state.hasPreviousStep}  ><i className={'mdi mdi-arrow-left-bold-circle-outline button_wizard_icon '}></i></Button>
@@ -944,7 +968,7 @@ const NewBooking = () => {
                         }
                         {steps[state.currentStep].label === 'Resumen' &&
                             <div>
-                                <Summary props={{ setTotal,amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes, user, amountTypeRooms, total}} />
+                                <Summary props={{ setTotal, amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes, user, amountTypeRooms, total }} />
                             </div>
                         }
                     </Card>

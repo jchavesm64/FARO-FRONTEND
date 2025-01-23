@@ -143,6 +143,7 @@ export const convertDate = (fechaStr) => {
 };
 
 export const timestampToDateLocal = (timestamp, format) => {
+    
     const date = new Date(timestamp);
 
     const day = String(date.getUTCDate()).padStart(2, '0');  // Obtener el día y agregar ceros a la izquierda si es necesario
