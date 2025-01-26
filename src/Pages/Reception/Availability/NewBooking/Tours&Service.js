@@ -66,7 +66,7 @@ const ToursService = ({ ...props }) => {
     const [filter, setFilter] = useState(null);
     const [extraDate, setExtraDate] = useState([]);
     const [type, setType] = useState('');
-    const toggle = () => { setModal(!modal); setType(''); setExtraDate(0); };
+    const toggle = () => { setModal(!modal); setType(''); setExtraDate([]); };
 
     const showModalEditService = (data, type) => {
         setType(type);
@@ -108,8 +108,6 @@ const ToursService = ({ ...props }) => {
     const deleteDate = (index) => {
         setExtraDate(deleteDateServiceExtra(index, extraDate, type));
     };
-
-
 
     return (
         <React.Fragment>
@@ -543,7 +541,7 @@ const ToursService = ({ ...props }) => {
                         </ModalHeader>
                         {extraDate.length === 0  ?
                             <ModalBody key='modalbody'>
-                                { type !== 'perRoom ' ? <EditExtraService idBooking={filter?.id} updateServiceBooking={updateService} /> : (<EditTour idBooking={filter?.id} updateTourBooking={updateTour} />)}
+                                { type !== 'perRoom ' && type!=='' ? <EditExtraService idBooking={filter?.id} updateServiceBooking={updateService} /> : (<EditTour idBooking={filter?.id} updateTourBooking={updateTour} />)}
                             </ModalBody> : (
                                 <ModalBody key='modalbody'>
                                     <Card className='p-4'>

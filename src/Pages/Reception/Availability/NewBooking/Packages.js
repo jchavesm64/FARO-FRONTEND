@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import Select from "react-select";
 import { Button, Card, CardBody, Col, Container, Modal, ModalBody, ModalHeader, Row } from "reactstrap";
 import ListInfo from "../../../../components/Common/ListInfo";
@@ -8,8 +8,9 @@ import EditPackage from "../../../GeneralSettings/Hotel/AdminPackage/EditPackage
 const Packages = ({ ...props }) => {
 
     const { handlePackage, getPackage, addPackage, deletePackage, setDisabledButton, updatePackageBooking, packageBooking, packageBookingList } = props.props;
-    setDisabledButton(false);
-
+    useEffect(() => {
+        setDisabledButton(false);
+    }, []);
     const [modal, setModal] = useState(false);
     const [filter, setFilter] = useState(null)
     const toggle = () => setModal(!modal);

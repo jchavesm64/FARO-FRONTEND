@@ -23,7 +23,7 @@ import { useStepper } from 'headless-stepper';
 import { OBTENER_AREAS } from '../../../../services/AreasOperativasService';
 import { OBTENER_TOURS } from '../../../../services/TourService';
 import { useMutation, useQuery } from '@apollo/client';
-import { OBTENER_RESERVA, SAVE_RESERVA } from '../../../../services/ReservaService';
+import { OBTENER_RESERVA, SAVE_RESERVA, UPDATE_RESERVA } from '../../../../services/ReservaService';
 import { OBTENER_USUARIO_CODIGO } from '../../../../services/UsuarioService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { OBTENER_RESERVAHABITACION } from '../../../../services/ReservaHabitacionService';
@@ -48,9 +48,12 @@ const NewBooking = () => {
     const { data: operativeAreas } = useQuery(OBTENER_AREAS, { pollInterval: 1000 });
 
     const { loading: loading_booking, data: booking } = useQuery(OBTENER_RESERVA, { variables: { id: id }, skip: !id, pollInterval: 1000 });
-    const { data: bookingRoom } = useQuery(OBTENER_RESERVAHABITACION, { variables: { id: booking?.obtenerReserva.id }, skip: !id, pollInterval: 1000 })
+    const { data: bookingRoom } = useQuery(OBTENER_RESERVAHABITACION, { variables: { id: booking?.obtenerReserva.id }, skip: !id, pollInterval: 1000 });
+
 
     const [insertar] = useMutation(SAVE_RESERVA);
+    const [actualizar] = useMutation(UPDATE_RESERVA);
+
 
     const [user, setUser] = useState([])
 
@@ -104,24 +107,21 @@ const NewBooking = () => {
     //Load data for edit booking 
     useEffect(() => {
         if (id !== undefined) {
-            //Da problemas a la hora de cargar las habitaciones que hay 
-            const updateAmountBooking = () => {
-                const updatedAmountTypeRooms = amountTypeRooms?.map(typeRoom => {
+            const getAmountTypeRooms = () => {
+                if (!roomsAvailable || !typeRooms) return [];
 
-                    if (roomsBooking?.length !== 0 && bookingRoom !== undefined && roomsBooking !== undefined) {
-                        debugger
-                        const amountBooking = roomsBooking?.filter(room => room.tipoHabitacion.id === typeRoom.type.id).length;
-                        return {
-                            ...typeRoom, // Conserva el resto de las propiedades
-                            amountBooking, // Actualiza la cantidad de reservas para este tipo
-                        };
-                    }
+                return typeRooms.map(type => {
+                    const RoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre);
+                    const totalRooms = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre).length;
 
+                    return {
+                        lengthAvailable: RoomAvailable.length,
+                        type,
+                        amountBooking: totalRooms,
+                        rooms: RoomAvailable
+                    };
                 });
-
-                return updatedAmountTypeRooms; // Actualiza el estado con los nuevos valores
             };
-
 
             setCustomer(booking?.obtenerReserva.cliente);
             setTypeBooking(booking?.obtenerReserva.tipo);
@@ -132,13 +132,39 @@ const NewBooking = () => {
             setCheckOut(timestampToDateLocal(Number(bookingRoom?.obtenerReservaHabitacion[0]?.fechaSalida), 'date'));
             setPackageBookingList(booking?.obtenerReserva?.paquetes);
             setRoomsBooking(bookingRoom?.obtenerReservaHabitacion.map(room => room.habitacion));
-            setAmountTypeRooms(updateAmountBooking());
+            setAmountTypeRooms(getAmountTypeRooms());
+            setExtraService(booking?.obtenerReserva?.serviciosGrupal);
+            setServicesPerRoom((prev) => {
+                const updatedServicesPerRoom = [...prev];
+                if (Array.isArray(bookingRoom?.obtenerReservaHabitacion)) {
+                    bookingRoom?.obtenerReservaHabitacion.forEach((roomData) => {
+                        const selectRoom = roomData.habitacion;
+                        const extraServiceRoom = roomData.serviciosExtra;
+
+                        if (!selectRoom || !extraServiceRoom) {
+                            console.warn("Datos incompletos en roomData:", roomData);
+                            return;
+                        }
+                        const index = updatedServicesPerRoom.findIndex(
+                            (item) => item.room.numeroHabitacion === selectRoom.numeroHabitacion
+                        );
+
+                        if (index !== -1) {
+                            updatedServicesPerRoom[index].service = extraServiceRoom;
+                        } else {
+                            updatedServicesPerRoom.push({ room: selectRoom, service: extraServiceRoom });
+                        }
+                    });
+                }
+                return updatedServicesPerRoom;
+            });
+            setToursList(booking?.obtenerReserva.tours);
+            setNotes(booking?.obtenerReserva.notas);
+
         }
     }, [booking, bookingRoom, id])
 
-    /* console.log('data reserva',booking)
-    console.log('data habitacion',roomsBooking) */
-    // Data for new boooking
+
     useEffect(() => {
         setUser(data_user?.obtenerUsuarioByCodigo || [])
     }, [data_user])
@@ -617,6 +643,8 @@ const NewBooking = () => {
         })),
     }));
 
+
+
     const addExtraServicePerRoom = () => {
         setServicesPerRoom((prev) => {
 
@@ -817,7 +845,7 @@ const NewBooking = () => {
                 politicas: null,
                 usuario: user.id !== undefined ? user.id : null
             }
-            debugger
+
             const bookingRoom = {
                 habitacion: roomsBooking.length > 0 ? roomsBooking.map(room => room.id) : null,
                 fechaEntrada: checkIn,
@@ -827,10 +855,15 @@ const NewBooking = () => {
                     service: roomData.service
                 })) : null
             };
+            let estado, message;
+            if (!id) {
 
-
-            const { data } = await insertar({ variables: { input, bookingRoom }, errorPolicy: 'all' });
-            const { estado, message } = data.insertarReserva;
+                const response = await insertar({ variables: { input, bookingRoom }, errorPolicy: 'all' });
+                ({ estado, message } = response.data.insertarReserva);
+            } else {
+                const response = await actualizar({ variables: { id, input, bookingRoom }, errorPolicy: 'all' });
+                ({ estado, message } = response.data.actualizarReserva);
+            }
 
             if (estado) {
                 infoAlert('Excelente', message, 'success', 3000, 'top-end')

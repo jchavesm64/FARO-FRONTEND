@@ -14,7 +14,7 @@ const EditTour = ({ idBooking, updateTourBooking }) => {
     const navigate = useNavigate();
 
     const { id } = useParams();
-    const { loading: loadingTour, error: errorTour, data: dataTour, startPolling, stopPolling } = useQuery(OBTENER_TOUR, { variables: { id: id ? id : idBooking }, pollInterval: 1000 });
+    const { loading: loadingTour, error: errorTour, data: dataTour, startPolling, stopPolling } = useQuery(OBTENER_TOUR, { variables: { id: idBooking ? idBooking : id }, pollInterval: 1000 });
     const [actualizar] = useMutation(UPDATE_TOUR);
 
     useEffect(() => {

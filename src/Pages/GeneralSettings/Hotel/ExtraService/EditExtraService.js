@@ -16,7 +16,7 @@ const EditExtraService = ({ idBooking, updateServiceBooking }) => {
     const { id } = useParams();
 
     const { data: typesService } = useQuery(OBTENER_TIPOSSERVICIOS, { pollInterval: 1000 });
-    const { loading: loading_extraservice, error: error_extraservice, data: data_extraservice, startPolling, stopPolling } = useQuery(OBTENER_SERVICIO_BY_ID, { variables: { id: id ? id : idBooking }, pollInterval: 1000 });
+    const { loading: loading_extraservice, error: error_extraservice, data: data_extraservice, startPolling, stopPolling } = useQuery(OBTENER_SERVICIO_BY_ID, { variables: { id: idBooking ? idBooking : id }, pollInterval: 1000 });
     const [actualizar] = useMutation(UPDATE_SERVICIO);
 
     useEffect(() => {

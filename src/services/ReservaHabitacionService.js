@@ -18,6 +18,7 @@ export const OBTENER_RESERVAHABITACION = gql`
     query obtenerReservaHabitacion($id:ID){
         obtenerReservaHabitacion(id:$id){
             id
+            serviciosExtra
             habitacion{
                 id
                 numeroHabitacion
