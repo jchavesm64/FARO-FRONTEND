@@ -128,12 +128,14 @@ import OperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/Operat
 import NewOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/NewOperativeAreas";
 import EditOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/EditOperativeAreas";
 import Booking from "../Pages/Reception/Availability/ViewBooking/View&EditBooking";
+import CheckIn from "../Pages/Reception/Check/CheckIn/CheckIn";
 
 import InvoiceMaintenance from "../Pages/Invoices/Maintenance";
 import InvoiceIssued from "../Pages/Invoices/Issued";
 import InvoiceParameters from "../Pages/Invoices/Parameters";
 import InvoiceCreditNote from "../Pages/Invoices/CreditNote";
 import InvoiceCompany from "../Pages/Invoices/Company";
+import BookingCheckIn from "../Pages/Reception/Check/CheckIn/BookingCheckIn";
 
 
 const authProtectedRoutes = [
@@ -194,6 +196,9 @@ const authProtectedRoutes = [
   { path: "/reception/availability/newbooking", component: <NewBooking /> },
   { path: "/reception/availability/editbooking/:id", component: <NewBooking /> },
   { path: "/reception/availability/booking", component: <Booking /> },
+
+  { path: "/reception/checkin", component: <CheckIn /> },
+  { path: "/reception/checkin/:id", component: <BookingCheckIn /> },
 
   { path: "/cleaningjobs", component: <CleaningJobs /> },
   { path: "/editcleaningjob/:id", component: <EditCleaningJobContainer /> },

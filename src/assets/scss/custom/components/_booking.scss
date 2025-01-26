@@ -32,3 +32,36 @@
     transform: scale(1.5);
     color: red;
 }
+
+.booking-details,
+.room-details {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.booking-title,
+.room-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.booking-info,
+.room-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.info-item {
+    flex: 1 1 45%;
+    font-size: 16px;
+    color: #555;
+}
+
+.info-item strong {
+    color: #333;
+}
