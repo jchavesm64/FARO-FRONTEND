@@ -129,6 +129,9 @@ import NewOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/New
 import EditOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/EditOperativeAreas";
 import Booking from "../Pages/Reception/Availability/ViewBooking/View&EditBooking";
 import CheckIn from "../Pages/Reception/Check/CheckIn/CheckIn";
+import CheckOut from "../Pages/Reception/Check/CheckOut/CheckOut";
+import InHouse from "../Pages/Reception/InHouse/InHouse";
+import BookService from "../Pages/Reception/BookService/BookService";
 
 import InvoiceMaintenance from "../Pages/Invoices/Maintenance";
 import InvoiceIssued from "../Pages/Invoices/Issued";
@@ -136,6 +139,9 @@ import InvoiceParameters from "../Pages/Invoices/Parameters";
 import InvoiceCreditNote from "../Pages/Invoices/CreditNote";
 import InvoiceCompany from "../Pages/Invoices/Company";
 import BookingCheckIn from "../Pages/Reception/Check/CheckIn/BookingCheckIn";
+import Reports from "../Pages/Reception/Reports/Reports";
+import ListBooking from "../Pages/Reception/ListBooking/ListBooking";
+
 
 
 const authProtectedRoutes = [
@@ -184,8 +190,8 @@ const authProtectedRoutes = [
   { path: "/editwarehouse/:id", component: <EditWarehouseContainer /> },
 
   { path: "/restaurant", component: <RestaurantHome /> },
-  { path: "/restaurant/menu", component: <Menu /> },
   { path: "/restaurant/newmenu", component: <NewMenu /> },
+  { path: "/restaurant/menu", component: <Menu /> },
   { path: "/restaurant/editmenu/:id", component: <EditMenuContainer /> },
   { path: "/restaurant/orders", component: <Orders /> },
   { path: "/restaurant/orders/new", component: <CreateOrder /> },
@@ -198,11 +204,19 @@ const authProtectedRoutes = [
   { path: "/reception/availability/booking", component: <Booking /> },
 
   { path: "/reception/checkin", component: <CheckIn /> },
+  { path: "/reception/checkout", component: <CheckOut /> },
   { path: "/reception/checkin/:id", component: <BookingCheckIn /> },
-
+  
+  { path: "/reception/inhouse", component: <InHouse /> },
+  { path: "/reception/bookservice", component: <BookService /> },
+  { path: "/reception/reports", component: <Reports /> },
+  { path: "/reception/listbooking", component: <ListBooking /> },
+  
   { path: "/cleaningjobs", component: <CleaningJobs /> },
   { path: "/editcleaningjob/:id", component: <EditCleaningJobContainer /> },
   { path: "/newcleaningjob", component: <NewCleaningJob /> },
+
+
 
   { path: "/cleaningjobs/checks", component: <CleanlinessChecks /> },
   { path: "/cleaningjobs/newcheck", component: <NewCleanlinessCheck /> },

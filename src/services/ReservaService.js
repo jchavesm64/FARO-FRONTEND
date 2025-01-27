@@ -121,9 +121,11 @@ export const DELETE_RESERVA = gql`
 `;
 
 
-export const CHECKIN_RESERVA = gql`mutation desactivarReserva($id:ID){
-        desactivarReserva(id:$id){
-            estado
+export const CHECKIN_RESERVA = gql`
+    mutation checkIn($id: ID!, $reserva: ID! $huespedes: [JSON!]!) {
+        checkIn(id: $id, reserva:$reserva huespedes: $huespedes) {
+            estado 
             message
         }
-    }`;
+    }
+`;

@@ -33,6 +33,27 @@
     color: red;
 }
 
+.pay_icon,
+.delete_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.pay_icon i,
+.delete_icon i {
+    font-size: 24px;
+}
+
+.pay_icon:hover {
+    transform: scale(1.5);
+    color: green !important;
+}
+
 .booking-details,
 .room-details {
     background: #fff;

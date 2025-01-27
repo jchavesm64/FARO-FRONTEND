@@ -13,7 +13,7 @@ import Breadcrumbs from '../../../../components/Common/Breadcrumb';
 import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
 import NewCustomer from '../../../Customers/NewCustomer'
 
-const BookingCheckIn = () => {
+const BookingChecOut = () => {
     document.title = "CheckIn | FARO";
 
     const navigate = useNavigate();
@@ -75,7 +75,7 @@ const BookingCheckIn = () => {
             confirmButtonText: "Sí, ¡realizar check-in!"
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const { data } = await checkIn({ variables: {id:selectedRoom.id, reserva: booking.id, huespedes } });
+                const { data } = await checkIn({ variables: { id: booking.id, huespedes } });
                 const { estado, message } = data.checkIn;
                 if (estado) {
                     infoAlert('Check-In realizado', message, 'success', 3000, 'top-end');
@@ -221,35 +221,6 @@ const BookingCheckIn = () => {
                     </Row>
                 )}
 
-                <Row className="mb-4">
-                    {/* <Col md={6}>
-                        <FormGroup>
-                        <label htmlFor="supplier" className="form-label">Tipo de habitación</label>
-                                        <Select
-                                            id="supplier"
-                                            value={typeRoom}
-                                            onChange={(e) => {
-                                                setTypeRoom(e);
-                                            }}
-                                            options={getTypeRooms()}
-                                            classNamePrefix="select2-selection"
-                                        />
-                        </FormGroup>
-                    </Col>
-                    <Col md={6}>
-                        <FormGroup>
-                            <Label for="cantidadPersonas">Cantidad de Personas</Label>
-                            <input
-                            className="form-control"
-                            type="number"
-                            id="checkOutDate"
-                            value={cantidadPersonas}
-                            onChange={ handleCantidadPersonasChange }
-                            min='0'
-                            />
-                            </FormGroup>
-                    </Col> */}
-                </Row>
 
                 {bookingRoom && bookingRoom.obtenerReservaHabitacion && bookingRoom.obtenerReservaHabitacion.length > 0 && (
                     <Row className="mb-4">
@@ -257,39 +228,31 @@ const BookingCheckIn = () => {
                             <div className="room-details">
                                 <h2 className="room-title">Detalles de la Habitación</h2>
                                 {bookingRoom.obtenerReservaHabitacion.map((habitacion, index) => (
-
-                                    habitacion.estado !== 'CheckIn' && (
-                                        <Card key={habitacion.id} className="room-info p-2 m-3 shadow_booking">
-                                            <div className="room-info">
-                                                <div className="info-item">
-                                                    <strong>Id :</strong> {habitacion.id}
-                                                </div>
-                                                <div className="info-item">
-                                                    <strong>Número de Habitación:</strong> {habitacion.habitacion.numeroHabitacion}
-                                                </div>
-                                                <div className="info-item">
-                                                    <strong>Tipo de Habitación:</strong> {habitacion.habitacion.tipoHabitacion.nombre}
-                                                </div>
-                                                <div className="info-item">
-                                                    <strong>Precio por Noche:</strong> ${habitacion.habitacion.precioPorNoche}
-                                                </div>
-                                                <div className="info-item">
-                                                    <strong>Fecha de Entrada:</strong> {new Date(Number(habitacion.fechaEntrada)).toLocaleDateString()}
-                                                </div>
-                                                <div className="info-item">
-                                                    <strong>Fecha de Salida:</strong> {new Date(Number(habitacion.fechaSalida)).toLocaleDateString()}
-                                                </div>
-                                                <div className="info-item">
-                                                    <strong>Comodidades:</strong> {habitacion.habitacion.comodidades.map(c => c.nombre).join(', ')}
-                                                </div>
-                                                <div className="info-item">
-                                                    <strong>Servicios Extra:</strong> {habitacion.serviciosExtra.map(s => s.nombre).join(', ')}
-                                                </div>
-                                                <Button color="success" onClick={() => toggleModal(habitacion)}>Check-In</Button>
-                                            </div>
-                                        </Card>
-                                    )
-
+                                    <div key={habitacion.id} className="room-info">
+                                        <h5>Habitación {index + 1}</h5>
+                                        <div className="info-item">
+                                            <strong>Número de Habitación:</strong> {habitacion.habitacion.numeroHabitacion}
+                                        </div>
+                                        <div className="info-item">
+                                            <strong>Tipo de Habitación:</strong> {habitacion.habitacion.tipoHabitacion.nombre}
+                                        </div>
+                                        <div className="info-item">
+                                            <strong>Precio por Noche:</strong> ${habitacion.habitacion.precioPorNoche}
+                                        </div>
+                                        <div className="info-item">
+                                            <strong>Fecha de Entrada:</strong> {new Date(Number(habitacion.fechaEntrada)).toLocaleDateString()}
+                                        </div>
+                                        <div className="info-item">
+                                            <strong>Fecha de Salida:</strong> {new Date(Number(habitacion.fechaSalida)).toLocaleDateString()}
+                                        </div>
+                                        <div className="info-item">
+                                            <strong>Comodidades:</strong> {habitacion.habitacion.comodidades.map(c => c.nombre).join(', ')}
+                                        </div>
+                                        <div className="info-item">
+                                            <strong>Servicios Extra:</strong> {habitacion.serviciosExtra.map(s => s.nombre).join(', ')}
+                                        </div>
+                                        <Button color="success" onClick={() => toggleModal(habitacion)}>Check-In</Button>
+                                    </div>
                                 ))}
                             </div>
                         </Col>
@@ -386,4 +349,4 @@ const BookingCheckIn = () => {
     );
 };
 
-export default BookingCheckIn;
+export default BookingChecOut;

@@ -39,6 +39,7 @@ export const OBTENER_RESERVAHABITACION = gql`
             }
             fechaEntrada
             fechaSalida
+            estado
         }
     }
 `;
