@@ -80,7 +80,7 @@ const CheckOut = () => {
                     <Breadcrumbs title="ChecOut" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
                 </Container>
                 {booking.length > 0 ? (
-                    <div className="page-content">
+                    <Row >
                         <Row className="mb-4">
                             <div className="col-md-12">
                                 <Card>
@@ -176,7 +176,7 @@ const CheckOut = () => {
                                 ))}
                             </Row>
                         </div>
-                    </div>
+                    </Row>
                 ) : (
                     <div className="d-flex justify-content-center align-items-center h-100">
                         <h5 className="text-muted">No hay reservas</h5>

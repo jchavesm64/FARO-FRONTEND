@@ -21,6 +21,8 @@ const Packages = ({ ...props }) => {
         setModal(true);
     };
 
+    
+    
     const updatePackage = (packageUpdate) => {
         updatePackageBooking(packageUpdate)
         setModal(false);

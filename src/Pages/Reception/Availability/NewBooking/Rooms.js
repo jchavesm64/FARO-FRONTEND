@@ -19,6 +19,8 @@ const Rooms = ({ ...props }) => {
         setEnableRooms(valIndividualBooking)
     }, [typeBooking, roomsBooking])
 
+console.log('roomsBooking', roomsBooking)
+
     return (
         <React.Fragment>
             <div className="page-content p-4 border m-2">
@@ -38,7 +40,7 @@ const Rooms = ({ ...props }) => {
                                                 <Row className="d-flex align-items-center" >
                                                     <div className="col-md-2 mb-3">
                                                         <span className="logo-lg">
-                                                            <img  src="/static/media/faro-light.f23d16523144109283f2.png" alt="logo-light" height="25" width="85" />
+                                                            <img src="/static/media/faro-light.f23d16523144109283f2.png" alt="logo-light" height="25" width="85" />
                                                         </span>
                                                     </div>
                                                     <div className="col-md-7 col-sm-12 ">
@@ -64,7 +66,7 @@ const Rooms = ({ ...props }) => {
                                                                 onBlur={(e) => handleBlur(e, index)}
                                                                 className="text-center"
                                                             />
-                                                            <Button color="primary" onClick={() => handleIncrease(index)} disabled={type.amountBooking === type.lengthAvailable || enableRooms}>
+                                                            <Button color="primary" onClick={() => handleIncrease(index)} disabled={type.amountBooking === type.lengthAvailable || enableRooms || type.amountBooking >= type.lengthAvailable} >
                                                                 +
                                                             </Button>
                                                         </InputGroup>
@@ -109,7 +111,7 @@ const Rooms = ({ ...props }) => {
                                                                         <ListSection
                                                                             key={`list2`}
                                                                             title="Comodidades por habitación"
-                                                                            items={roomsBooking.find(rooms => rooms.tipoHabitacion.nombre === type.type.nombre).comodidades}
+                                                                            items={roomsBooking.find(rooms => rooms.tipoHabitacion.nombre === type.type.nombre)?.comodidades}
                                                                             label="Comodidad"
                                                                             emptyMessage="Sin datos"
                                                                         />

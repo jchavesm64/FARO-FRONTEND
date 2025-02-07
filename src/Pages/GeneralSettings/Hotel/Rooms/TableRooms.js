@@ -28,7 +28,7 @@ const TableRooms = ({ ...props }) => {
                         data.map((room, i) => (
                             <tr key={`Room-${i}`}>
                                 <td>{room.numeroHabitacion}</td>
-                                <td>{room.tipoHabitacion.nombre}</td>
+                                <td>{room.tipoHabitacion?.nombre}</td>
                                 <td>{room.precioPorNoche}</td>
                                 <td>{room.descripcion}</td>
                                 <td>{room.estado}</td>

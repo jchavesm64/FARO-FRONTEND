@@ -41,6 +41,7 @@ import TableTables from '../../Pages/GeneralSettings/Tables/TableTables';
 import TableMenuType from '../../Pages/GeneralSettings/MenuType/TableMenuType';
 import TableDishType from '../../Pages/GeneralSettings/DishType/TableDishType';
 import TablePaymentMethod from '../../Pages/GeneralSettings/PaymentMethod/TablePaymentMethod';
+/* import TableListBooking from '../../Pages/Reception/ListBooking/TableListBooking';/*  */
 
 const DataList = ({ ...props }) => {
     const { data, type, displayLength, onDelete } = props;
@@ -243,6 +244,10 @@ const DataList = ({ ...props }) => {
                     type === 'paymentMethod' &&
                     <TablePaymentMethod {...props} data={datos} onDelete={onDelete} />
                 }
+               {/*  {
+                    type === 'listbook' &&
+                    <TableListBooking {...props} data={datos} onDelete={onDelete} />
+                } */}
             </div>
             {(data.length > displayLength) &&
                 <DataListPagination type={type} length={data.length} displayLength={displayLength} activePage={parseInt(page)} setPage={setPage} />

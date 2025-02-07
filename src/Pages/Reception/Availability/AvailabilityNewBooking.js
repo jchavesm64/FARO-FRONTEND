@@ -180,7 +180,7 @@ const ReceptionHome = () => {
             };
 
             rooms?.forEach(habitacion => {
-                const tipoNombre = habitacion.tipoHabitacion.nombre;
+                const tipoNombre = habitacion.tipoHabitacion?.nombre;
 
                 const roomType = availability.find(room => room.nombre === tipoNombre);
 
