@@ -94,7 +94,7 @@ const Orders = ({ ...props }) => {
         }));
 
         const updatedTables = [...tables];
-        const maxWidth = 875;
+        const maxWidth = 600;
         const maxHeight = 555;
         const sillaWidth = 40;
         const sillaHeight = 40;
@@ -106,6 +106,8 @@ const Orders = ({ ...props }) => {
         let sillaLeft = 20;
         let mesaTop = 0;
         let mesaLeft = 20;
+        let sillaCount = 0;
+        let mesaCount = 0;
 
         // Position chairs
         updatedTables.forEach(obj => {
@@ -316,17 +318,14 @@ const Orders = ({ ...props }) => {
 
                         infoAlert('Transferencia completa', messageComanda, 'success', 3000, 'top-end')
 
-                        // Reset states
                         setSelectedTable(null);
                         setComandaId(null);
                         setComandaCreatedAt(null);
                         setComandaData([]);
 
-                        // Refetch data
                         await refetchMesas();
                         await refetchComanda({ id: destinationTable.id });
 
-                        // Update the selected table to the destination table
                         setSelectedTable(destinationTable);
                     } else {
                         infoAlert('Error de transferencia', messageComanda, 'error', 3000, 'top-end')

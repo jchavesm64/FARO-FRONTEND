@@ -21,6 +21,7 @@ export const OBTENER_SUBCUENTAS = gql`
             }
             fecha
             platillos{
+                _id
                 id
                 precio
                 descuento
@@ -61,6 +62,7 @@ export const OBTENER_SUBCUENTA_BY_ID = gql`
             }
             fecha
             platillos{
+                _id
                 id
                 precio
                 descuento
@@ -101,6 +103,7 @@ export const OBTENER_SUBCUENTAS_POR_COMANDA = gql`
             }
             fecha
             platillos{
+                _id
                 id
                 precio
                 descuento

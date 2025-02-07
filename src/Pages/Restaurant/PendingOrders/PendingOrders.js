@@ -52,7 +52,6 @@ const PendingOrders = ({ ...props }) => {
     }
 
     const getPendingOrders = () => {
-        console.log("COMANDAS: ", data_comandas);
 
         if (!comandas.length) {
             return <div className="text-center"><h5>No hay órdenes pendientes.</h5></div>;
@@ -123,7 +122,6 @@ const PendingOrders = ({ ...props }) => {
     }
 
     const getTemporaryServedSubcuentas = () => {
-        console.log("TEMPORARY SERVED ARRAY: ", temporaryServedArray);
         return temporaryServedArray.map((item, index) => {
             return (
                 <Card key={"table-" + item.id} className="mb-3 card-pending-orders">
@@ -200,24 +198,6 @@ const PendingOrders = ({ ...props }) => {
         }
     };
 
-    const handleServeSubcuentas = async () => {
-        try {
-            await Promise.all(
-                temporaryServedArray.map(async subcuentaId => {
-                    await actualizarEntregados({
-                        variables: {
-                            input: { subcuenta: subcuentaId }
-                        }
-                    });
-                })
-            );
-            infoAlert('Excelente', 'Subcuentas entregadas con éxito.', 'success', 1000, 'top-end');
-            setTemporaryServedArray([]);
-        } catch (error) {
-            infoAlert('Oops', 'Error al entregar subcuentas.', 'error', 3000, 'top-end');
-        }
-    };
-
     const getLastServed = () => {
         return lastServedArray.map((item, index) => {
             return (
@@ -282,13 +262,6 @@ const PendingOrders = ({ ...props }) => {
                                         <SpanSubtitleForm subtitle={"En Preparación"} />
                                     </div>
                                     {getTemporaryServedSubcuentas()}
-                                    {temporaryServedArray.length > 0 && (
-                                        <div className="text-center">
-                                            <Button color="success" onClick={handleServeSubcuentas}>
-                                                Entregar Ordenes
-                                            </Button>
-                                        </div>
-                                    )}
                                 </CardBody>
                             </Card>
                         </div>

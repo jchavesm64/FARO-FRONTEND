@@ -92,7 +92,7 @@ const CreateOrder = ({ ...props }) => {
     useEffect(() => {
         if (table) {
             const initialObservations = {};
-            const items = table.orders.filter(order => order.estado !== 'Cancelado').map(order => {
+            const items = table.orders.filter(order => order.estado !== 'Cancelado' && order.estado !== 'Entregado').map(order => {
                 const count = itemCountRef.current++; 
             
                 initialObservations[count] = order.observaciones || ""; 
@@ -197,6 +197,7 @@ const CreateOrder = ({ ...props }) => {
     }
 
     const getSelectedItems = () => {
+        
         const items = selectedItems.map((item, i) => (
             <Row key={`selected-item-${item.count}-${i}`} className="m-0">
                 <div className="col-md-12 h5 d-flex justify-content-between align-items-center">
@@ -211,7 +212,7 @@ const CreateOrder = ({ ...props }) => {
                 </div>
                 <div className="col-md-12 d-flex justify-content-between align-items-center mb-3">
                     <p className="mb-0 h5">{formatPrices(item.price)}</p>
-                    <button className="btn btn-danger btn-add-remove" onClick={() => { removeItem(data_order.obtenerComandaPorMesa.subcuentas[0].id, item._id, item.name,item) }}>
+                    <button className="btn btn-danger btn-add-remove" onClick={() => { removeItem(data_order?.obtenerComandaPorMesa?.subcuentas[0]?.id, item._id, item.name,item) }}>
                             -
                     </button>
                 </div>
@@ -224,6 +225,7 @@ const CreateOrder = ({ ...props }) => {
     const addItem = (menuItem) => {
         const newCount = itemCountRef.current++;
         const newItem = {
+            _id: null,
             id: menuItem.id,
             count: newCount,
             name: menuItem.nombre,
@@ -339,6 +341,7 @@ const CreateOrder = ({ ...props }) => {
                 cliente: null, //TODO: Add client
                 fecha: new Date(),
                 platillos: [...selectedItems.map(item => ({
+                    _id: item._id || null,
                     id: item.id,
                     nombre: item.name,
                     precio: item.price,
