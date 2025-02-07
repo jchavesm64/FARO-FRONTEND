@@ -4,55 +4,46 @@ import { Card, CardBody, Button, Container, Row, Col } from "reactstrap";
 import Breadcrumbs from "../../../components/Common/Breadcrumb";
 import SpanSubtitleForm from "../../../components/Forms/SpanSubtitleForm";
 import { useMutation, useQuery } from "@apollo/client";
-import { OBTENER_COMANDAS } from "../../../services/ComandaService";
+import { OBTENER_COMANDAS_PENDIENTES } from "../../../services/ComandaService";
 import { getFechaTZ } from "../../../helpers/helpers";
 import { infoAlert } from "../../../helpers/alert";
 import { UPDATE_SERVED } from "../../../services/SubcuentaService";
+import { set } from "lodash";
 
 const PendingOrders = ({ ...props }) => {
     document.title = "Ordenes Pendientes | FARO";
 
     const navigate = useNavigate();
-    const { data: data_comandas, loading: loading_comandas, error: error_comandas } = useQuery(OBTENER_COMANDAS, { pollInterval: 1000 });
+    const { data: data_comandas, loading: loading_comandas, error: error_comandas } = useQuery(OBTENER_COMANDAS_PENDIENTES, { pollInterval: 1000 });
     const [actualizarEntregados] = useMutation(UPDATE_SERVED);
 
+    const [comandas, setComandas] = useState([]);
     const [temporaryServedArray, setTemporaryServedArray] = useState([]);
     const [lastServedArray, setLastServedArray] = useState([]);
 
-    const handleServePlatillo = (mesa, platillo, subcuentaId) => {
-        const servedQuantity = getServedQuantity(mesa.id, platillo.id, subcuentaId);
+    useEffect(() => {
+        if (data_comandas?.obtenerComandasPendientes) {
+            const filteredComandas = data_comandas.obtenerComandasPendientes.filter(comanda => comanda.subcuentas[0].platillos && comanda.subcuentas[0].platillos.length > 0);
+            setComandas(filteredComandas);
+        }
+    }, [data_comandas]);
 
-        if (servedQuantity < platillo.cantidad) {
-            setTemporaryServedArray(prevArray => {
-                const existingEntry = prevArray.find(item => item.mesa.id === mesa.id && item.platillo.id === platillo.id && item.subcuentaId === subcuentaId);
-
-                if (existingEntry) {
-                    return prevArray.map(item =>
-                        item.mesa.id === mesa.id && item.platillo.id === platillo.id && item.subcuentaId === subcuentaId
-                            ? { ...item, quantity: item.quantity + 1 }
-                            : item
-                    );
-                } else {
-                    return [...prevArray, { mesa: mesa, platillo, quantity: 1, subcuentaId }];
-                }
-            });
-        } else {
-            infoAlert('Oops', `No puedes servir más de ${platillo.cantidad} ${platillo.nombre}.`, 'error', 3000, 'top-end');
+    
+    const handlePrepareSubcuenta = (comanda) => {
+        if (!temporaryServedArray.some(item => item.id === comanda.id)) {
+            setTemporaryServedArray(prevArray => [...prevArray, comanda]);
+            setComandas(prevComandas => prevComandas.filter(item => item.id !== comanda.id));
         }
     };
 
-    const getServedQuantity = (mesaId, platilloId, subcuentaId) => {
-        const entry = temporaryServedArray.find(item => item.mesa.id === mesaId && item.platillo.id === platilloId && item.subcuentaId === subcuentaId);
-        return entry ? entry.quantity : 0;
-    };
-
     function formatObservationsText(input) {
+        if(!input) return '';
         const lines = input.split('\n');
 
         const formattedLines = lines.map(line => {
             const trimmedLine = line.trim();
             if (trimmedLine && !trimmedLine.endsWith('.')) {
-                return '- ' + trimmedLine + '.';
+                return ' ' + trimmedLine + '.';
             }
             return trimmedLine;
         });
@@ -61,185 +52,201 @@ const PendingOrders = ({ ...props }) => {
     }
 
     const getPendingOrders = () => {
-        const hasAnyPendingOrders = data_comandas?.obtenerComandas?.some(comanda =>
-            comanda.subcuentas.some(subcuenta =>
-                subcuenta.platillos.some(platillo =>
-                    (platillo.cantidad - platillo.entregados) > 0
-                )
-            )
-        );
+        console.log("COMANDAS: ", data_comandas);
 
-        if (!hasAnyPendingOrders) {
+        if (!comandas.length) {
             return <div className="text-center"><h5>No hay órdenes pendientes.</h5></div>;
         }
+
         return (
             <div>
-                {data_comandas?.obtenerComandas?.map(comanda => {
-                    const hasPendingPlatillos = comanda.subcuentas.some(subcuenta =>
-                        subcuenta.platillos.some(platillo =>
-                            (platillo.cantidad - platillo.entregados) > 0
-                        )
-                    );
-
-                    if (!hasPendingPlatillos) return null;
-
-                    return (
-                        <Card key={"table-" + comanda.id} className="mb-3 card-pending-orders">
-                            <CardBody>
-                                <Row>
-                                    <div className="text-center">
-                                        <h4>{comanda.mesa.tipo + " " + comanda.mesa.numero}</h4>
-                                    </div>
-                                    <h6><strong>Piso:</strong> {comanda.mesa.piso.nombre}</h6>
-                                    <h6><strong>Fecha:</strong> {getFechaTZ("fechaHora", comanda.fecha)}</h6>
-                                    {comanda.observaciones && <h6><strong>Observaciones:</strong> {formatObservationsText(comanda.observaciones)}</h6>}
-                                </Row>
-                                <Card key={"orders-" + comanda.id} className="card-pending-orders mb-0">
-                                    <CardBody >
-                                        {comanda.subcuentas.map(subcuenta => (
-                                            <React.Fragment key={"subcuenta-" + subcuenta.id}>
-                                                {subcuenta.platillos.map(platillo => {
-                                                    const pendingQuantity = platillo.cantidad - platillo.entregados;
-                                                    const servedQuantity = getServedQuantity(comanda.mesa.id, platillo.id, subcuenta.id);
-                                                    return (pendingQuantity > 0 &&
-                                                        <div key={`${comanda.mesa.id}-${platillo.id}`} className="mb-2">
-                                                            <Row>
-                                                                <div className="text-center mb-2">
-                                                                    <h5>{platillo.nombre} </h5>
-                                                                </div>
-                                                            </Row>
-                                                            <Row className="align-items-center">
-                                                                <div className="col-md-6">
-                                                                    <h6 className="mb-0">Entregar <strong>{servedQuantity}</strong> de <strong>{pendingQuantity}</strong></h6>
-                                                                </div>
-                                                                <div className="col-md-6 text-end">
-                                                                    <Button
-                                                                        color="info"
-                                                                        onClick={() => handleServePlatillo(comanda.mesa, platillo, subcuenta.id)}
-                                                                        disabled={servedQuantity >= pendingQuantity}
-                                                                    >
-                                                                        Entregar
-                                                                    </Button>
-                                                                </div>
-                                                            </Row>
-                                                            <hr />
-                                                        </div>
-                                                    );
-                                                })}
-                                            </React.Fragment>
+                {comandas?.map(comanda => (
+                    <Card key={"table-" + comanda.id} className="mb-3 card-pending-orders">
+                        <CardBody>
+                            <Row>
+                                <div className="text-center">
+                                    <h4>{comanda.mesa.tipo + " " + comanda.mesa.numero}</h4>
+                                </div>
+                                <h6><strong>Piso:</strong> {comanda.mesa.piso.nombre}</h6>
+                                <h6><strong>Fecha:</strong> {getFechaTZ("fechaHora", comanda.fecha)}</h6>
+                            </Row>
+                            <div className="text-center mb-2">
+                                <h5>Subcuenta</h5>
+                            </div>
+                            {comanda.subcuentas.map(subcuenta => (
+                                <Card key={"subcuenta-" + subcuenta.id} className="card-pending-orders mb-0">
+                                    <CardBody>
+                                        {subcuenta.platillos.map(platillo => (
+                                            <div key={`${comanda.mesa.id}-${platillo._id}`} className="mb-2">
+                                                <Row>
+                                                    <div className="text-center mb-2">
+                                                        <h5>{platillo.nombre}</h5>
+                                                    </div>
+                                                </Row>
+                                                <Row className="align-items-center">
+                                                    <div className="col-md-12">
+                                                        <h6 className="mb-0">Observaciones: {formatObservationsText(platillo.observaciones)}</h6>
+                                                    </div>
+                                                </Row>
+                                                <hr />
+                                            </div>
                                         ))}
+                                        <div className="text-center">
+                                            <Button
+                                                color="info"
+                                                onClick={() => handlePrepareSubcuenta(comanda)}
+                                            >
+                                                Preparar  
+                                            </Button>
+                                        </div>
                                     </CardBody>
                                 </Card>
-                            </CardBody>
-                        </Card>
-                    )
-                })}
+                            ))}
+                        </CardBody>
+                    </Card>
+                ))}
             </div>
         );
     };
 
-    const handleRemoveServedPlatillo = (platillo) => {
+    const handleRemovePrepareSubcuenta = (comanda) => {
         setTemporaryServedArray(prevArray => {
-            return prevArray.map(item =>
-                item.platillo.id === platillo.id
-                    ? { ...item, quantity: item.quantity - 1 }
-                    : item
-            ).filter(item => item.quantity > 0);
+            const updatedArray = prevArray.filter(item => item.id !== comanda.id);
+            if (updatedArray.length !== prevArray.length) {
+                setComandas(prevComandas => {
+                    const updatedComandas = [...prevComandas, comanda];
+                    return updatedComandas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                });
+            }
+            return updatedArray;
         });
     }
 
-    const getTemporaryServedPlatillos = () => {
+    const getTemporaryServedSubcuentas = () => {
+        console.log("TEMPORARY SERVED ARRAY: ", temporaryServedArray);
         return temporaryServedArray.map((item, index) => {
+            return (
+                <Card key={"table-" + item.id} className="mb-3 card-pending-orders">
+                    <CardBody>
+                        <Row>
+                            <div className="text-center">
+                                <h4>{item.mesa.tipo + " " + item.mesa.numero}</h4>
+                            </div>
+                            <h6><strong>Piso:</strong> {item.mesa.piso.nombre}</h6>
+                            <h6><strong>Fecha:</strong> {getFechaTZ("fechaHora", item.fecha)}</h6>
+                        </Row>
+                        <div className="text-center mb-2">
+                            <h5>Subcuenta</h5>
+                        </div>
+                        {item.subcuentas.map(subcuenta => (
+                            <Card key={"subcuenta-" + subcuenta.id} className="card-pending-orders mb-0">
+                                <CardBody>
+                                    {subcuenta.platillos.map(platillo => (
+                                        <div key={`${item.mesa.id}-${platillo._id}`} className="mb-2">
+                                            <Row>
+                                                <div className="text-center mb-2">
+                                                    <h5>{platillo.nombre}</h5>
+                                                </div>
+                                            </Row>
+                                            <Row className="align-items-center">
+                                                <div className="col-md-12">
+                                                    <h6 className="mb-0">Observaciones: {formatObservationsText(platillo.observaciones)}</h6>
+                                                </div>
+                                            </Row>
+                                            <hr />
+                                        </div>
+                                    ))}
+                                    <div className="text-center">
+                                        <Button
+                                            color="danger"
+                                            className="me-2"
+                                            onClick={() => handleRemovePrepareSubcuenta(item)}
+                                        >
+                                            Eliminar
+                                        </Button>
+                                        <Button
+                                            color="info"
+                                            onClick={() => handleDeliverSubcuenta(item)}
+                                        >
+                                            Entregar
+                                        </Button>
+                                    </div>
+                                </CardBody>
+                            </Card>
+                        ))}
+                    </CardBody>
+                </Card>
+            );
+        });
+    };
+    
+
+    const handleDeliverSubcuenta = async (comanda) => {
+        console.log("COMANDA: ", comanda.subcuentas[0].id);
+        try {
+            const {data} = await actualizarEntregados({variables: {id: comanda.subcuentas[0].id }});
+
+            const { estado, message } = data.actualizarEntregados;
+            if (!estado) {
+                infoAlert("Error actualizar Subcuenta", message, "error", 3000, "top-end");
+                return;
+            }
+            infoAlert('Excelente', 'Subcuenta entregada con éxito.', 'success', 1000, 'top-end');
+
+            setLastServedArray(prev => [...prev, comanda].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
+            setTemporaryServedArray(prevArray => prevArray.filter(item => item.id !== comanda.id));
+        } catch (error) {
+            infoAlert('Oops', 'Error al entregar subcuenta.', 'error', 3000, 'top-end');
+        }
+    };
+
+    const handleServeSubcuentas = async () => {
+        try {
+            await Promise.all(
+                temporaryServedArray.map(async subcuentaId => {
+                    await actualizarEntregados({
+                        variables: {
+                            input: { subcuenta: subcuentaId }
+                        }
+                    });
+                })
+            );
+            infoAlert('Excelente', 'Subcuentas entregadas con éxito.', 'success', 1000, 'top-end');
+            setTemporaryServedArray([]);
+        } catch (error) {
+            infoAlert('Oops', 'Error al entregar subcuentas.', 'error', 3000, 'top-end');
+        }
+    };
+
+    const getLastServed = () => {
+        return lastServedArray.map((item, index) => {
             return (
                 <Card key={index} className="mb-2 card-pending-orders">
                     <CardBody>
                         <Row className="text-center">
-                            <h4>{item.platillo.nombre}</h4>
+                            <h4 className="mb-0">{`${item.mesa.tipo} ${item.mesa.numero}`}</h4>
                         </Row>
-                        <Row className="align-items-center">
-                            <div className="col-md-8">
-                                <Row className="align-items-center">
-                                    <div className="col-md-2">
-                                        <Button
-                                            color="danger"
-                                            onClick={() => handleRemoveServedPlatillo(item.platillo)}
-                                        >
-                                            -
-                                        </Button>
-                                    </div>
-                                    <div className="col-md-10">
-                                        <h5 className="mb-0">{`Entrega en ${item.mesa.tipo} ${item.mesa.numero}`}</h5>
-                                    </div>
-                                </Row>
+                        <Row>
+                            <div className="col-md-12">
+                                <h6>Subcuenta</h6>
                             </div>
-
-                            <div className="col-md-4 text-end">
-                                <h5 className="mb-0">Cantidad: <strong>{item.quantity}</strong></h5>
+                        </Row>
+                        <hr />
+                        <Row>
+                            <div className="col-md-12">
+                                <h5 className="mb-2">Platillos:</h5>
+                                <ul>
+                                    {item.subcuentas[0].platillos.map((platillo) => (
+                                        <li key={platillo._id}>{platillo.nombre}</li>
+                                    ))}
+                                </ul>
                             </div>
                         </Row>
                     </CardBody>
                 </Card>
-            )
+            );
         })
     }
-
-    const handleServePlatillos = () => {
-        const servedWithTimestamp = temporaryServedArray.map(item => ({
-            ...item,
-            timestamp: new Date().toISOString()
-        }));
-
-        servedWithTimestamp.forEach(async item => {
-            try {
-                const { data } = await actualizarEntregados({
-                    variables: {
-                        input: {
-                            subcuenta: item.subcuentaId,
-                            platillo: item.platillo.id,
-                            entregados: item.quantity
-                        }
-                    },
-                    errorPolicy: 'all'
-                });
-                const { estado } = data.actualizarEntregados;
-                if (!estado) {
-                    throw new Error();
-                }
-            } catch (error) {
-                infoAlert('Oops', 'Ocurrió un error al entregar los platillos. Por favor intenta de nuevo.', 'error', 3000, 'top-end');
-                return;
-            }
-        });
-
-        infoAlert('Excelente', 'Platillos Entregados de manera exitosa.', 'success', 1000, 'top-end');
-
-        setLastServedArray(prev =>
-            [...prev, ...servedWithTimestamp].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        );
-
-        setTemporaryServedArray([]);
-    };
-
-    /*const getLastServed = () => {
-        return lastServedArray.map((item, index) => {
-            return (
-                <Card key={index} className="mb-2 card-pending-orders">
-                    <CardBody className="p-0">
-                        <div className="green-bar text-center">
-                            {getFechaTZ("fechaHoraSegundos", item.timestamp)}
-                        </div>
-                        <div className="card-content p-3">
-                            <h4 className="text-center">{item.platillo.nombre}</h4>
-                            <div className="d-flex justify-content-between align-items-center">
-                                <h5 className="mb-0">{`${item.mesa.tipo} ${item.mesa.numero}`}</h5>
-                                <h5 className="mb-0">Cantidad: <strong>{item.quantity}</strong></h5>
-                            </div>
-                        </div>
-                    </CardBody>
-                </Card>
-            )
-        })
-    }*/
 
     return (
         <React.Fragment>
@@ -247,7 +254,7 @@ const PendingOrders = ({ ...props }) => {
                 <Container fluid={true}>
                     <Breadcrumbs title='Ordenes Pendientes' breadcrumbItem='Restaurante' breadcrumbItemUrl='/restaurant' />
                     <Row>
-                        <div className="col-md-6 mb-3">
+                        <div className="col-md-4 mb-3">
                             <Card className="h-100">
                                 <CardBody>
                                     <Row className="text-center mb-3">
@@ -268,16 +275,16 @@ const PendingOrders = ({ ...props }) => {
                                 </CardBody>
                             </Card>
                         </div>
-                        <div className="col-md-6 mb-3">
+                        <div className="col-md-4 mb-3">
                             <Card className="h-100">
                                 <CardBody>
                                     <div className="text-center mb-3">
-                                        <SpanSubtitleForm subtitle={"Entrega Actual"} />
+                                        <SpanSubtitleForm subtitle={"En Preparación"} />
                                     </div>
-                                    {getTemporaryServedPlatillos()}
+                                    {getTemporaryServedSubcuentas()}
                                     {temporaryServedArray.length > 0 && (
                                         <div className="text-center">
-                                            <Button color="success" onClick={handleServePlatillos}>
+                                            <Button color="success" onClick={handleServeSubcuentas}>
                                                 Entregar Ordenes
                                             </Button>
                                         </div>
@@ -285,7 +292,7 @@ const PendingOrders = ({ ...props }) => {
                                 </CardBody>
                             </Card>
                         </div>
-                        {/*<div className="col-md-4 mb-3">
+                        <div className="col-md-4 mb-3">
                             <Card className="h-100">
                                 <CardBody className="d-flex flex-column m-0">
                                     <div className="text-center">
@@ -294,7 +301,7 @@ const PendingOrders = ({ ...props }) => {
                                     {getLastServed()}
                                 </CardBody>
                             </Card>
-                        </div>*/}
+                        </div>
                     </Row>
                 </Container>
             </div>

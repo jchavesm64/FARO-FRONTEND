@@ -1,4 +1,4 @@
-import React, { useEffect, useState, } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Card, CardBody, Container, Row, Modal, ModalHeader, ModalBody } from "reactstrap";
 import Breadcrumbs from "../../../components/Common/Breadcrumb";
@@ -8,9 +8,11 @@ import { OBTENER_MENUS } from "../../../services/MenuService";
 import { useMutation, useQuery } from "@apollo/client";
 import Select from "react-select";
 import { infoAlert } from "../../../helpers/alert";
-import { OBTENER_COMANDA_POR_MESA, SAVE_COMANDA, UPDATE_COMANDA } from "../../../services/ComandaService";
+import { OBTENER_COMANDA_POR_MESA, SAVE_COMANDA, UPDATE_COMANDA, DELETE_COMANDA} from "../../../services/ComandaService";
+import { DELETE_SUBCUENTA, DELETE_PLATILLO } from "../../../services/SubcuentaService";
 import { SAVE_SUBCUENTA } from "../../../services/SubcuentaService";
 import { UPDATE_MESA } from "../../../services/MesaService";
+import Swal from "sweetalert2";
 
 const CreateOrder = ({ ...props }) => {
     document.title = "Crear Comanda | FARO";
@@ -30,15 +32,19 @@ const CreateOrder = ({ ...props }) => {
     const [insertarSubcuenta] = useMutation(SAVE_SUBCUENTA);
     const [actualizarMesa] = useMutation(UPDATE_MESA);
     const [actualizarComanda] = useMutation(UPDATE_COMANDA);
+    const [deletePlatillo] = useMutation(DELETE_PLATILLO);
+    
 
     const [category, setCategory] = useState(null);
     const [selectedItems, setSelectedItems] = useState([]);
     const [filter, setFilter] = useState('');
-    const [observations, setObservations] = useState('');
+    const [observations, setObservations] = useState({});
     const [modal, setModal] = useState(false);
+    const [currentItem, setCurrentItem] = useState(null);
     const [orderId, setOrderId] = useState(null);
     const [disableSave, setDisableSave] = useState(true);
     const toggle = () => setModal(!modal);
+    const itemCountRef = useRef(0);
 
     const getData = () => {
         if (data_menu) {
@@ -84,11 +90,36 @@ const CreateOrder = ({ ...props }) => {
     }, [data_menu]);
 
     useEffect(() => {
+        if (table) {
+            const initialObservations = {};
+            const items = table.orders.filter(order => order.estado !== 'Cancelado').map(order => {
+                const count = itemCountRef.current++; 
+            
+                initialObservations[count] = order.observaciones || ""; 
+    
+                return {
+                    _id: order._id,
+                    id: order.id,
+                    count: count, 
+                    name: order.nombre,
+                    price: order.precio,
+                    quantity: order.cantidad,
+                    observations: order.observaciones || "",
+                    subBill: 1
+                };
+            });
+
+            setObservations(initialObservations);
+            setSelectedItems(items);
+        }
+    }, [table]);
+
+    useEffect(() => {
         if (data_order?.obtenerComandaPorMesa) {
             setOrderId(data_order.obtenerComandaPorMesa.id);
-            setObservations(data_order.obtenerComandaPorMesa.observaciones);
+            //setObservations(data_order.obtenerComandaPorMesa.observaciones);
         }
-    }, [data_order]);
+    }, [data_order]);  
 
     const getFilteredMenuData = () => {
         if (!menuType) return [];
@@ -143,19 +174,11 @@ const CreateOrder = ({ ...props }) => {
         });
         return items;
     }
-
-    useEffect(() => {
-        if (table) {
-            setSelectedItems(table.orders.map(order => ({
-                id: order.id,
-                name: order.nombre,
-                price: order.precio,
-                quantity: order.cantidad,
-                subBill: 1
-            }))
-            );
-        }
-    }, [table]);
+    const handleOpenModal = (item) => {
+        if (!item) return;
+        setCurrentItem(item);
+        setModal(true);
+    };    
 
     useEffect(() => {
         setDisableSave(selectedItems.length <= 0 || selectedItems.every(item => item.quantity <= 0));
@@ -175,32 +198,22 @@ const CreateOrder = ({ ...props }) => {
 
     const getSelectedItems = () => {
         const items = selectedItems.map((item, i) => (
-            <Row key={`selected-item-${item.id}-${i}`} className="m-0">
-                <div className="col-md-12 h5">
+            <Row key={`selected-item-${item.count}-${i}`} className="m-0">
+                <div className="col-md-12 h5 d-flex justify-content-between align-items-center">
                     {item.name}
+                    <button
+                        type="button"
+                        className="btn btn-info btn-sm"
+                        onClick={() => handleOpenModal(item)}
+                    >
+                        <i className="mdi mdi-eye align-middle"></i>
+                    </button>
                 </div>
                 <div className="col-md-12 d-flex justify-content-between align-items-center mb-3">
-                    <div className="d-flex align-items-center justify-content-between col-md-5">
-                        <button className="btn btn-danger btn-add-remove" onClick={() => { removeItem(item.id) }}>
+                    <p className="mb-0 h5">{formatPrices(item.price)}</p>
+                    <button className="btn btn-danger btn-add-remove" onClick={() => { removeItem(data_order.obtenerComandaPorMesa.subcuentas[0].id, item._id, item.name,item) }}>
                             -
-                        </button>
-                        <input
-                            className="form-control w-30 min-w-45-px"
-                            type="text"
-                            value={item.quantity}
-                            onChange={(e) => {
-                                setSelectedItems(selectedItems.map(thisItem =>
-                                    thisItem.id === item.id ?
-                                        { ...thisItem, quantity: Number(e.target.value) } :
-                                        thisItem
-                                ))
-                            }}
-                        />
-                        <button className="btn btn-success btn-add-remove" onClick={() => { addItem(item) }}>
-                            +
-                        </button>
-                    </div>
-                    <p className="mb-0 h5">{formatPrices(item.price * item.quantity)}</p>
+                    </button>
                 </div>
                 <hr />
             </Row>
@@ -209,41 +222,87 @@ const CreateOrder = ({ ...props }) => {
     }
 
     const addItem = (menuItem) => {
-        const existingItem = selectedItems.find(item => item.id === menuItem.id);
-
-        if (existingItem) {
-            setSelectedItems(selectedItems.map(item =>
-                item.id === menuItem.id
-                    ? { ...item, quantity: item.quantity + 1 }
-                    : item
-            ));
-        } else {
-            const newItem = {
-                id: menuItem.id,
-                name: menuItem.nombre,
-                price: menuItem.precioCosto + (menuItem.precioCosto * (menuItem.porcentajeGanancia / 100)),
-                quantity: 1,
-                subBill: 1
-            };
-            setSelectedItems([...selectedItems, newItem]);
-        }
+        const newCount = itemCountRef.current++;
+        const newItem = {
+            id: menuItem.id,
+            count: newCount,
+            name: menuItem.nombre,
+            price: menuItem.precioCosto + (menuItem.precioCosto * (menuItem.porcentajeGanancia / 100)),
+            state: "Pendiente",
+            observations: "",
+        };
+        setSelectedItems([...selectedItems, newItem]);
+        setObservations({ ...observations, [newCount]: "" });
     }
 
-    const removeItem = (id) => {
-        const existingItem = selectedItems.find(item => item.id === id);
+    const removeItem = async (subcuentaId, platilloId, name, item) => {
+    
+        Swal.fire({
+            title: "Eliminar platillo de la comanda",
+            text: `¿Está seguro de eliminar ${name || ''}?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#0BB197",
+            cancelButtonColor: "#FF3D60",
+            cancelButtonText: "Cancelar",
+            confirmButtonText: "Sí, ¡eliminar!"
+        }).then(async (result) => {
+            if (!result.isConfirmed) return;
+    
+            try {
+                if (item._id) {
+                    const { data } = await deletePlatillo({ variables: { subcuentaId, platilloId } });
+                    const { estado, message } = data.desactivarPlatillo;
+    
+                    if (!estado) {
+                        infoAlert("Eliminar Platillo", message, "error", 3000, "top-end");
+                        return;
+                    }
+    
+                    infoAlert("Platillo eliminado", message, "success", 3000, "top-end");
 
-        if (existingItem) {
-            if (existingItem.quantity > 1) {
-                setSelectedItems(selectedItems.map(item =>
-                    item.id === id
-                        ? { ...item, quantity: item.quantity - 1 }
-                        : item
-                ));
-            } else {
-                setSelectedItems(selectedItems.filter(item => item.id !== id));
+                    await refetchOrder();
+    
+                } else {
+                    // Eliminar localmente
+                    updateLocalState(item);
+                }
+                // Actualizar la lista de platillos seleccionados
+                setSelectedItems(prevItems => prevItems.filter(selectedItem => selectedItem.count !== item.count));
+            } catch (error) {
+                infoAlert("Eliminar Platillo", error.message, "error", 3000, "top-end");
             }
+        });
+    };
+    const updateLocalState = (item) => {
+        setSelectedItems(prevItems => prevItems.filter(selectedItem => selectedItem.count !== item.count));
+    
+        setObservations(prevObservations => {
+            const newObservations = { ...prevObservations };
+            delete newObservations[item.count];
+            return newObservations;
+        });
+    };
+    
+    /*const updateComandaState = async () => {
+        try {
+            const { data: dataComanda } = await refetchComanda({ id: selectedTable.id });
+            //const subcuentas = dataComanda.obtenerComandaPorMesa?.subcuentas || [];
+    
+    
+            await refetchMesas();
+        } catch (error) {
+            infoAlert("Actualizar Comanda", error.message, "error", 3000, "top-end");
         }
-    }
+    };
+    
+    const removeItem = (count) => {
+        setSelectedItems(selectedItems.filter(item => item.count !== count));
+        const newObservations = { ...observations };
+        delete newObservations[count];
+        setObservations(newObservations);
+    };*/
+    
 
     const onClickSendOrder = async () => {
         try {
@@ -251,7 +310,6 @@ const CreateOrder = ({ ...props }) => {
             let newOrderId = orderId;
             const order = {
                 mesa: table.id,
-                observaciones: observations,
                 preFactura: false,
                 estado: "GENERADA",
             }
@@ -267,7 +325,6 @@ const CreateOrder = ({ ...props }) => {
                 setOrderId(comandaData.id);
                 newOrderId = comandaData.id;
             }
-            console.log("Order", order)
             await actualizarComanda({ variables: { id: newOrderId, input: order }, errorPolicy: 'all' });
             const { data } = await actualizarMesa({ variables: { id: table.id, input: { disponibilidad: "OCUPADA" } }, errorPolicy: 'all' });
             const { estado, message } = data.actualizarMesa;
@@ -284,12 +341,13 @@ const CreateOrder = ({ ...props }) => {
                 platillos: [...selectedItems.map(item => ({
                     id: item.id,
                     nombre: item.name,
-                    cantidad: item.quantity,
                     precio: item.price,
-                    descuento: 0
+                    descuento: 0,
+                    estado: "Pendiente",
+                    observaciones: item.observations
                 }))],
                 descuento: 0,
-                total: selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                total: selectedItems.reduce((sum, item) => sum + item.price, 0),
                 moneda: "COLONES",
                 formaPago: null,
                 estado: "Pendiente"
@@ -317,6 +375,25 @@ const CreateOrder = ({ ...props }) => {
         integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
         return `₡${integerPart},${decimalPart}`;
+    };
+
+    const handleObservationChange = (e) => {
+        setObservations({
+            ...observations,
+            [currentItem.count]: e.target.value
+        });
+    };
+
+    const saveObservation = () => {
+        setSelectedItems(selectedItems.map(item =>
+            item.count === currentItem.count
+                ? { ...item, observations: observations[item.count] }
+                : item
+        ));
+        toggle();
+    };
+    const updateObservation = (count, value) => {
+        setObservations({ ...observations, [count]: value });
     };
 
     if (load_menu) {
@@ -347,15 +424,6 @@ const CreateOrder = ({ ...props }) => {
                             <SpanSubtitleForm subtitle={table ? "Para la " + (table.isChair ? `Silla ${table.name}` : table.name) : `\u00A0`} />
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
-                            <button
-                                type="button"
-                                className="btn btn-info waves-effect waves-light"
-                                style={{ width: '100%' }}
-                                onClick={() => { toggle() }}
-                            >
-                                Observaciones{" "}
-                                <i className="mdi mdi-eye align-middle ms-2"></i>
-                            </button>
                         </div>
                         <div className="col-md-2 col-sm-12 mb-3">
                             <button
@@ -445,7 +513,7 @@ const CreateOrder = ({ ...props }) => {
                                         {getSelectedItems()}
                                     </div>
                                     <div className="align-self-end mt-auto">
-                                        <p className="mb-0 h5">Total: {formatPrices(selectedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0))} </p>
+                                        <p className="mb-0 h5">Total: {formatPrices(selectedItems.reduce((acc, item) => acc + item.price, 0))} </p>
                                     </div>
                                 </CardBody>
                             </Card>
@@ -453,7 +521,7 @@ const CreateOrder = ({ ...props }) => {
                     </Row>
                     <Modal isOpen={modal} toggle={toggle} size="md">
                         <ModalHeader toggle={toggle}>
-                            {table.name}
+                            {currentItem?.name}
                         </ModalHeader>
                         <ModalBody>
                             <Row>
@@ -462,11 +530,20 @@ const CreateOrder = ({ ...props }) => {
                                     <textarea
                                         className="form-control"
                                         id="observations"
-                                        value={observations}
+                                        value={currentItem?.count in observations ? observations[currentItem.count] : ""}
                                         placeholder="Sin cebolla, con mayonesa extra..."
-                                        onChange={(e) => { setObservations(e.target.value) }}
+                                        onChange={(e) => handleObservationChange(e, currentItem?.count)}
                                         rows="4"
                                     />
+                                </div>
+                                <div className="col-md-12 text-end">
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={() => saveObservation(currentItem?.count)}
+                                    >
+                                        Guardar
+                                    </button>
                                 </div>
                             </Row>
                         </ModalBody>

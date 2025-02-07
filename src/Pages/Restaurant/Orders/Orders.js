@@ -9,6 +9,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { OBTENER_PISOS, OBTENER_MESAS_POR_PISO } from "../../../services/PisoService";
 import { OBTENER_COMANDA_POR_MESA, UPDATE_COMANDA, DELETE_COMANDA } from "../../../services/ComandaService";
 import { UPDATE_MESA } from "../../../services/MesaService";
+import { DELETE_SUBCUENTA, DELETE_PLATILLO } from "../../../services/SubcuentaService";
 import { isEqual, set } from "lodash";
 import Swal from "sweetalert2";
 import { infoAlert } from "../../../helpers/alert";
@@ -45,6 +46,8 @@ const Orders = ({ ...props }) => {
     const [updateComanda] = useMutation(UPDATE_COMANDA);
     const [updateMesa] = useMutation(UPDATE_MESA);
     const [deleteComanda] = useMutation(DELETE_COMANDA);
+    const [deleteSubcuenta] = useMutation(DELETE_SUBCUENTA);
+    const [deletePlatillo] = useMutation(DELETE_PLATILLO);
 
     useEffect(() => {
         const fetchMesas = async () => {
@@ -86,6 +89,7 @@ const Orders = ({ ...props }) => {
             isSelected: false,
             hasOrder: table.disponibilidad === "OCUPADA",
             isReserved: table.disponibilidad === "RESERVADA",
+            subcuenta: null,
             orders: []
         }));
 
@@ -156,12 +160,14 @@ const Orders = ({ ...props }) => {
             dataComandas.obtenerComandaPorMesa?.subcuentas?.forEach(subcuenta => {
                 subcuenta.platillos.forEach(platillo => {
                     newOrders.push({
+                        _id:platillo._id,
                         id: platillo.id,
                         nombre: platillo.nombre,
-                        cantidad: platillo.cantidad,
                         precio: platillo.precio,
                         descuento: platillo.descuento,
-                        entregados: platillo.entregados
+                        estado: platillo.estado,
+                        observaciones: platillo.observaciones,
+                        subcuenta: dataComandas.obtenerComandaPorMesa?.subcuentas[0]?.id
                     });
                 }
                 )
@@ -178,11 +184,10 @@ const Orders = ({ ...props }) => {
                             : table
                     )
                 );
-
                 setSelectedTable(prevTable => ({
                     ...prevTable,
                     hasOrder: newOrders.length > 0,
-                    orders: newOrders
+                    orders: newOrders,
                 }));
             }
         }
@@ -207,31 +212,49 @@ const Orders = ({ ...props }) => {
         setSelectedTable(table);
     };
 
-    const onDeleteItem = (id, name) => {
-        //TODO: terminar de implementar
+    const onDeleteItem = (subcuentaId, platilloId, name) => {
+        console.log("Deleting item...", subcuentaId, platilloId);
         Swal.fire({
-            title: "Eliminar elemento de la comanda",
+            title: "Eliminar platillo de la comanda",
             text: `¿Está seguro de eliminar ${name || ''}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#0BB197",
             cancelButtonColor: "#FF3D60",
-            cancelButtonText: 'Cancelar',
+            cancelButtonText: "Cancelar",
             confirmButtonText: "Sí, ¡eliminar!"
         }).then(async (result) => {
             if (result.isConfirmed) {
-                /*const { data } = await desactivar({ variables: { id } });
-                const { estado, message } = data.desactivarMenu;
+                const { data } = await deletePlatillo({ variables: { subcuentaId, platilloId } });
+                const { estado, message } = data.desactivarPlatillo;
+    
                 if (estado) {
-                    infoAlert('Elemento eliminado', message, 'success', 3000, 'top-end')
-                    refetch();
+                    infoAlert("Platillo eliminado", message, "success", 3000, "top-end");
+    
+                    // Refetch comanda para actualizar la vista
+                    const { data: dataComanda } = await refetchComanda({ id: selectedTable.id });
+                    const subcuentas = dataComanda.obtenerComandaPorMesa?.subcuentas || [];
+    
+                    if (subcuentas.every(subcuenta => subcuenta.platillos.every(platillo => platillo.estado === "Cancelado"))) {
+                        // Si todos los platillos están cancelados, eliminar la comanda y liberar la mesa
+                        await deleteComanda({ variables: { id: comandaId } });
+                        await updateMesa({ variables: { id: selectedTable.id, input: { disponibilidad: "LIBRE" } } });
+    
+                        infoAlert("Comanda eliminada", "La comanda ha sido eliminada porque todos los platillos fueron cancelados.", "success", 3000, "top-end");
+    
+                        setComandaId(null);
+                        setComandaData([]);
+                        setComandaCreatedAt(null);
+                    }
+    
+                    await refetchMesas();
                 } else {
-                    infoAlert('Eliminar elemento de menú', message, 'error', 3000, 'top-end')
-                }*/
-                console.log(`Deleting ${name} with id ${id}`);
+                    infoAlert("Eliminar Platillo", message, "error", 3000, "top-end");
+                }
             }
         });
     };
+    
 
     const onDeleteOrder = () => {
         //TODO: terminar de implementar
