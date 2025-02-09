@@ -199,3 +199,24 @@ body {
     width: 100%;
   }
 }
+
+.charges-container {
+  max-height: var(--max-main-container-height);
+  .table {
+    margin: 0;
+  }
+}
+.button-actions-container {
+  display: flex;
+  justify-content: end;
+  gap: 15px;
+}
+
+.btn,
+.btn:hover {
+  transition: all 50ms ease-in-out;
+}
+
+.room-change-actions {
+  justify-content: space-between;
+}

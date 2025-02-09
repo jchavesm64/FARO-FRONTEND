@@ -64,6 +64,7 @@ export const OBTENER_FULL_RESERVAHABITACION = gql`
         }
         fechaReserva
       }
+      cargosHabitacion
       estado
       fechaEntrada
       fechaSalida

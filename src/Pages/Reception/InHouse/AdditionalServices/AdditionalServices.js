@@ -11,7 +11,6 @@ import { OBTENER_SERVICIO } from "../../../../services/ServiciosExtraService";
 import PlusMinusInput from "../../../../components/Common/PlusMinusInput";
 import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
 import { Tab, Tabs } from "react-bootstrap";
-import { keys } from "lodash";
 
 const AdditionalServices = () => {
   const client = useApolloClient();
@@ -315,7 +314,7 @@ const AdditionalServices = () => {
                     [selectedRoom?.id]: newListValue,
                   });
                 }}
-                maxAvailable={5}
+                maxAvailable={100}
               />
             )}
           </div>
@@ -340,6 +339,8 @@ const AdditionalServices = () => {
       />
     );
   };
+
+  console.log(extraServices);
 
   return (
     <div className="page-content">

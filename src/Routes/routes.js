@@ -142,6 +142,8 @@ import BookingCheckIn from "../Pages/Reception/Check/CheckIn/BookingCheckIn";
 import Reports from "../Pages/Reception/Reports/Reports";
 import ListBooking from "../Pages/Reception/ListBooking/ListBooking";
 import AdditionalServices from "../Pages/Reception/InHouse/AdditionalServices/AdditionalServices";
+import RoomCharges from "../Pages/Reception/InHouse/RoomCharges/RoomCharges";
+import RoomChange from "../Pages/Reception/InHouse/RoomChange/RoomChange";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -227,7 +229,7 @@ const authProtectedRoutes = [
   { path: "/reception/inhouse", component: <InHouse /> },
   {
     path: "/reception/inhouse/roomChanges",
-    component: <div>cambio a la Habitacion</div>,
+    component: <RoomChange />,
   },
   {
     path: "/reception/inhouse/additionalServices",
@@ -235,7 +237,7 @@ const authProtectedRoutes = [
   },
   {
     path: "/reception/inhouse/roomCharge",
-    component: <div>Cargos a la habitacion</div>,
+    component: <RoomCharges />,
   },
   { path: "/reception/inhouse/tours", component: <div>tours</div> },
   {
