@@ -220,3 +220,31 @@ body {
 .room-change-actions {
   justify-content: space-between;
 }
+
+.plus-minus-input-container {
+  .btn {
+    z-index: 10;
+  }
+}
+
+.precio-td {
+}
+
+.actions-td {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.select2-selection__menu {
+  z-index: 999 !important;
+}
+
+.add-save-services-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.additional-services-container {
+  padding: 15px 24px;
+}

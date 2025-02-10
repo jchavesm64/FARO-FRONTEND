@@ -1,5 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Card, CardBody, Container, Input, Row } from "reactstrap";
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardBody,
+  Col,
+  Container,
+  FormGroup,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  Row,
+} from "reactstrap";
 import { useApolloClient, useMutation } from "@apollo/client";
 import Select from "react-select";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
@@ -11,6 +21,11 @@ import { OBTENER_SERVICIO } from "../../../../services/ServiciosExtraService";
 import PlusMinusInput from "../../../../components/Common/PlusMinusInput";
 import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
 import { Tab, Tabs } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import { getFecha, timestampToDateLocal } from "../../../../helpers/helpers";
+import DataList from "../../../../components/Common/DataList";
+import { infoAlert, requestConfirmationAlert } from "../../../../helpers/alert";
+import { keys } from "lodash";
 
 const AdditionalServices = () => {
   const client = useApolloClient();
@@ -23,11 +38,12 @@ const AdditionalServices = () => {
   const [selectedService, setSelectedService] = useState(null);
   const [isSelectingType, setIsSelectingType] = useState(false);
 
-  const [key, setKey] = useState("room");
-  const [filterKey, setFilterKey] = useState("");
-  const searchRef = useRef(null);
+  const [calendarModal, setCalendarModal] = useState(false);
+  const [extraDate, setExtraDate] = useState({});
 
-  //services
+  const [key, setKey] = useState("room");
+
+  // Services
   const [update] = useMutation(UPDATE_RESERVA_HABITACION);
 
   useEffect(() => {
@@ -35,7 +51,7 @@ const AdditionalServices = () => {
       try {
         const { data } = await client.query({
           query: OBTENER_FULL_RESERVAHABITACION,
-          fetchPolicy: "network-only", // Always fetch fresh data
+          fetchPolicy: "network-only",
         });
         setRoomsReservation(data.obtenerReservaHabitaciones);
       } catch (error) {
@@ -46,7 +62,7 @@ const AdditionalServices = () => {
       try {
         const { data } = await client.query({
           query: OBTENER_SERVICIO,
-          fetchPolicy: "network-only", // Always fetch fresh data
+          fetchPolicy: "network-only",
         });
         setServices(data.obtenerServicios);
       } catch (error) {
@@ -56,10 +72,110 @@ const AdditionalServices = () => {
 
     fetchReservas();
     fetchServicios();
-    // const interval = setInterval(fetchReservas, 1000); // Poll every second
-
-    // return () => clearInterval(interval); // Cleanup on unmount
   }, [client]);
+
+  const toggleCalendarModal = () => setCalendarModal(!calendarModal);
+
+  const getServices = () => {
+    const datos = [];
+    if (services) {
+      const alreadySelectedServices = extraServices[selectedRoom?.id]?.map(
+        (service) => service?.id
+      );
+      services
+        .filter((item) => !alreadySelectedServices?.includes(item.id))
+        .forEach((item) => {
+          datos.push({
+            value: item,
+            label: item?.nombre || "",
+          });
+        });
+    }
+    return datos;
+  };
+
+  const AdditionalServicesTable = () => {
+    return (
+      <table className="table table-hover table-striped mb-0">
+        <thead>
+          <tr>
+            <th key="service" className="text-center">
+              Servicio
+            </th>
+            <th key="price" className="text-center">
+              Precio
+            </th>
+            <th style={{ width: "20%" }} key="extra" className="text-center">
+              Extra
+            </th>
+            <th style={{ width: "28%" }} key="actions" className="text-center">
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {extraServices[selectedRoom?.id]?.map((line, index) => {
+            const isQuantifiable = line.tipo?.cuantificable === "true";
+            return (
+              <tr key={index}>
+                <td>{line.nombre}</td>
+                <td className="precio-td">{line.precio}</td>
+                <td>
+                  {isQuantifiable && (
+                    <PlusMinusInput
+                      value={line?.extra ?? 1}
+                      handleChange={(newNum) => {
+                        const newListValue = extraServices[
+                          selectedRoom?.id
+                        ]?.map((s, i) => {
+                          if (index === i) return { ...s, extra: newNum };
+                          return s;
+                        });
+                        setExtraServices({
+                          ...extraServices,
+                          [selectedRoom?.id]: newListValue,
+                        });
+                      }}
+                      maxAvailable={100}
+                    />
+                  )}
+                </td>
+                <td className="actions-td">
+                  {isQuantifiable && (
+                    <ButtonIconTable
+                      icon="mdi mdi-calendar-range"
+                      color="info"
+                      onClick={() => {
+                        setExtraDate(line);
+                        toggleCalendarModal();
+                      }}
+                    />
+                  )}
+                  {
+                    <ButtonIconTable
+                      icon="mdi mdi-delete"
+                      color="danger"
+                      onClick={() => {
+                        const newListValue = extraServices[
+                          selectedRoom?.id
+                        ]?.filter((s, i) => {
+                          return index !== i;
+                        });
+                        setExtraServices({
+                          ...extraServices,
+                          [selectedRoom?.id]: newListValue,
+                        });
+                      }}
+                    />
+                  }
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
+  };
 
   const ReservationSelection = () => {
     const uniqueArray = roomsReservation.reduce((acc, value) => {
@@ -81,14 +197,15 @@ const AdditionalServices = () => {
         </div>
         <div className="reservations p-6 pt-0 overflow-auto">
           <div className="reservations-container">
-            {reservations.map((reservation) => {
+            {reservations.map((reservation, index) => {
               const date = new Date(+reservation?.fechaReserva);
               return (
                 <ReservationCard
+                  key={index}
                   title={reservation?.cliente?.nombreFacturacion}
                   rangeDates={date.toLocaleDateString("es-ES")}
                   onClick={() => setSelectedReservation(reservation)}
-                  isSelected={selectedReservation?.id === reservation.id}
+                  isSelected={selectedReservation?.id === reservation?.id}
                 />
               );
             })}
@@ -128,20 +245,25 @@ const AdditionalServices = () => {
 
     return (
       <div>
-        <div className="p-6 flex flex-col align-items-left">
-          {/* <SearchInput /> */}
-        </div>
+        <div className="p-6 flex flex-col align-items-left"></div>
         <div className="rooms p-6 pt-0 overflow-auto">
           <div className="rooms-container">
-            {roomsReservation.map((room) => {
+            {roomsReservation.map((room, index) => {
               return (
                 <RoomCard
+                  key={index}
                   roomName={room.habitacion.numeroHabitacion}
                   personQuantity={buildPersonQuantity(
                     room.reserva?.numeroPersonas?.adulto,
                     room.reserva?.numeroPersonas?.nino
                   )}
-                  onClick={() => setSelectedRoom(room)}
+                  onClick={() => {
+                    setSelectedRoom(room);
+                    setExtraServices({
+                      ...extraServices,
+                      [room?.id]: room?.serviciosExtra ?? [],
+                    });
+                  }}
                   isSelected={selectedRoom?.id === room.id}
                 />
               );
@@ -174,78 +296,31 @@ const AdditionalServices = () => {
     });
   };
 
-  const TypeSelector = () => {
-    const buildOptions = () => {
-      const datos = [];
-      if (services) {
-        const alreadySelectedServices = extraServices[selectedRoom?.id]?.map(
-          (service) => service?.id
-        );
-        services
-          .filter((item) => !alreadySelectedServices?.includes(item.id))
-          .map((item) => {
-            datos.push({
-              value: item,
-              label: item?.nombre || "",
-            });
-          });
-      }
-      return datos;
-    };
-
-    const saveService = async (service) => {
+  const saveServices = async () => {
+    const savedServicesPromises = [];
+    keys(extraServices).forEach((key) => {
       const input = {
-        serviciosExtra: [{ _id: service.id, estado: "ACTIVO" }],
+        serviciosExtra: extraServices[key],
       };
-      const { data } = await update({
-        variables: { id: selectedRoom.id, input },
-        errorPolicy: "all",
-      });
-    };
+      savedServicesPromises.push(
+        update({
+          variables: { id: key, input },
+          errorPolicy: "all",
+        })
+      );
+    });
 
-    return (
-      <Card color={"secondary"}>
-        <CardBody>
-          <div className="draft-card-container">
-            <div className="select-container">
-              <Select
-                id="servicios"
-                menuPosition="fixed"
-                size="md"
-                placeholder="Seleccione el servicio a agregar"
-                value={selectedService}
-                options={buildOptions()}
-                searchable={true}
-                onChange={(e) => {
-                  if (e?.value) {
-                    setSelectedService(e);
-                  }
-                }}
-              />
-            </div>
-            <ButtonIconTable
-              icon="mdi mdi-check"
-              color="success"
-              disabled={!selectedService}
-              onClick={() => {
-                addExtraService(selectedService.value);
-                setSelectedService(null);
-                setIsSelectingType(false);
-                saveService(selectedService.value);
-              }}
-            />
-            <ButtonIconTable
-              icon="bx bx-x"
-              color="danger"
-              onClick={() => {
-                setIsSelectingType(false);
-                setSelectedService(null);
-              }}
-            />
-          </div>
-        </CardBody>
-      </Card>
-    );
+    await Promise.all(savedServicesPromises);
+
+    debugger;
+
+    // const input = {
+    //   serviciosExtra: [{ _id: service.id, estado: "ACTIVO" }],
+    // };
+    // const { data } = await update({
+    //   variables: { id: selectedRoom.id, input },
+    //   errorPolicy: "all",
+    // });
   };
 
   const AdditionalServices = () => {
@@ -253,8 +328,74 @@ const AdditionalServices = () => {
       <Card className="w-50">
         <CardBody>
           <div>
-            <div className="flex flex-col p-6">
+            <div className="flex flex-col p-6 additional-services-container">
               <h3>Servicios Adicionales</h3>
+              {selectedRoom != null && isSelectingType ? (
+                <div className="row row-cols-lg-auto g-3 align-items-center justify-content-between">
+                  <div className="col-xl-8 col-md-12">
+                    <Select
+                      id="service"
+                      value={selectedService}
+                      onChange={(e) => {
+                        if (e?.value) setSelectedService(e);
+                      }}
+                      options={getServices()}
+                      placeholder="Servicios"
+                      classNamePrefix="select2-selection"
+                    />
+                  </div>
+                  <div style={{ gap: "14px" }} className="col-12 d-flex">
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => {
+                        addExtraService(selectedService.value);
+                        setSelectedService(null);
+                        setIsSelectingType(false);
+                      }}
+                      disabled={selectedService === null}
+                    >
+                      Aceptar
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => {
+                        setSelectedService(null);
+                        setIsSelectingType(false);
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="add-save-services-container">
+                  <button
+                    className="btn btn-outline-primary"
+                    onClick={() => {
+                      setIsSelectingType(true);
+                    }}
+                    disabled={!selectedRoom}
+                  >
+                    Agregar Servicio
+                  </button>
+                  <button
+                    className="btn btn-outline-secondary"
+                    onClick={() => {
+                      requestConfirmationAlert({
+                        title: "¿Estás seguro?",
+                        bodyText: "¿Deseas guardar los servicios adicionales?",
+                        confirmButtonText: "Sí, guardar cambios",
+                        confirmationEvent: () => {
+                          saveServices();
+                        },
+                      });
+                    }}
+                    disabled={!selectedRoom}
+                  >
+                    Guardar Servicios
+                  </button>
+                </div>
+              )}
             </div>
             <div className="p-6 pt-0 overflow-auto">
               <div>
@@ -265,21 +406,14 @@ const AdditionalServices = () => {
                       tiene que seleccionar un cuarto.
                     </p>
                   )}
-                  {extraServices[selectedRoom?.id]?.map((service, index) => {
+                  {selectedRoom && <AdditionalServicesTable />}
+
+                  {/* {extraServices[selectedRoom?.id]?.map((service, index) => {
                     return (
                       <AdditionalServiceCard service={service} index={index} />
                     );
-                  })}
-                  {isSelectingType && <TypeSelector />}
-
-                  {!(selectedRoom === null || isSelectingType) && (
-                    <a
-                      onClick={() => setIsSelectingType(true)}
-                      className="add-link"
-                    >
-                      Agregar servicio
-                    </a>
-                  )}
+                  })} */}
+                  {/* {isSelectingType && <TypeSelector />} */}
                 </div>
               </div>
             </div>
@@ -289,58 +423,13 @@ const AdditionalServices = () => {
     );
   };
 
-  const AdditionalServiceCard = (props) => {
-    const { service, index } = props;
-    return (
-      <Card color={"secondary"}>
-        <CardBody>
-          <div className="text-left additional-service-container">
-            <div className="additional-service-info">
-              <div className="font-bold">Servicio: {service.nombre}</div>
-              <div>Precio: {service.precio}</div>
-            </div>
-            {service?.tipo?.cuantificable === "true" && (
-              <PlusMinusInput
-                value={extraServices[selectedRoom?.id][index]?.numExtra ?? 0}
-                handleChange={(newNum) => {
-                  const newListValue = extraServices[selectedRoom?.id]?.map(
-                    (s, i) => {
-                      if (index === i) return { ...s, numExtra: newNum };
-                      return s;
-                    }
-                  );
-                  setExtraServices({
-                    ...extraServices,
-                    [selectedRoom?.id]: newListValue,
-                  });
-                }}
-                maxAvailable={100}
-              />
-            )}
-          </div>
-        </CardBody>
-      </Card>
+  const getFechaFromReservaHabitacion = (fechaField) => {
+    const date = timestampToDateLocal(
+      Number(selectedRoom?.[fechaField]),
+      "date"
     );
+    return getFecha(date);
   };
-
-  const SearchInput = () => {
-    return (
-      <input
-        className="form-control"
-        type="search"
-        placeholder="Escriba el término a buscar"
-        value={filterKey}
-        ref={searchRef}
-        onChange={(e) => {
-          setFilterKey(e.target.value);
-          searchRef.current.focus();
-          // setFilterKey(e.target.value);
-        }}
-      />
-    );
-  };
-
-  console.log(extraServices);
 
   return (
     <div className="page-content">
@@ -373,6 +462,126 @@ const AdditionalServices = () => {
           </Card>
           <AdditionalServices />
         </div>
+        <Modal
+          key="modalCustomer"
+          isOpen={calendarModal}
+          toggle={toggleCalendarModal}
+          onClosed={() => {
+            const currentServiceEdited = extraServices[selectedRoom?.id].find(
+              (es) => es.id === extraDate.id
+            );
+            if (!currentServiceEdited.useExtra?.length) {
+              const newListValue = extraServices[selectedRoom?.id]?.map((s) => {
+                if (s.id === extraDate.id) {
+                  return { ...s, useExtra: extraDate.useExtra };
+                }
+                return s;
+              });
+              setExtraServices({
+                ...extraServices,
+                [selectedRoom?.id]: newListValue,
+              });
+            } else {
+              const newListValue = extraServices[selectedRoom?.id]?.map(
+                (se) => {
+                  if (se.id === extraDate.id) {
+                    return { ...se, useExtra: extraDate.useExtra };
+                  }
+                  return se;
+                }
+              );
+              setExtraServices({
+                ...extraServices,
+                [selectedRoom?.id]: newListValue,
+              });
+            }
+          }}
+          size={!extraDate ? "xl" : "lg"}
+        >
+          <ModalHeader key="modalheader" toggle={toggleCalendarModal}>
+            {extraDate.length === 0 ? (
+              <span className="fs-4 m-0 span_package_color">
+                Editar sevicio
+              </span>
+            ) : (
+              <span className="fs-4 m-0 span_package_color">
+                Fechas para el uso de cada servicio extra
+              </span>
+            )}
+          </ModalHeader>
+
+          <ModalBody key="modalbody">
+            <Card className="p-4">
+              <Row>
+                <div className="d-flex flex-column">
+                  <label className="fs-5 m-0 ms-1 mb-2 span_package_color">
+                    <strong>Servicio: </strong>
+                    <span className="fs-5 label_package_color">
+                      {extraDate?.nombre}
+                    </span>
+                  </label>
+                  <label className="fs-5 m-0 ms-1 mb-2 span_package_color">
+                    <strong>Extra: </strong>
+                    <span className="fs-5 label_package_color">
+                      {extraDate?.extra}
+                    </span>
+                  </label>
+                </div>
+              </Row>
+              <Row className="d-flex justify-content-between shadow_service rounded-5 p-3">
+                <Col className="col-md-6 d-flex  flex-wrap justify-content-center align-items-center p-0">
+                  <FormGroup className=" m-0" disabled={true}>
+                    <DatePicker
+                      startDate={new Date()}
+                      onChange={(e) => {
+                        if (
+                          (extraDate?.useExtra?.length ?? 0) < extraDate?.extra
+                        ) {
+                          const newUseExtra = [
+                            ...(extraDate?.useExtra || []),
+                            e,
+                          ];
+                          setExtraDate({
+                            ...extraDate,
+                            useExtra: newUseExtra,
+                          });
+                        } else {
+                          infoAlert(
+                            "Oops",
+                            "Ya completó las fechas para los servicios extra",
+                            "warning",
+                            3000,
+                            "top-end"
+                          );
+                        }
+                      }}
+                      inline
+                      className="form-control"
+                      minDate={getFechaFromReservaHabitacion("fechaEntrada")}
+                      maxDate={getFechaFromReservaHabitacion("fechaSalida")}
+                    />
+                  </FormGroup>
+                </Col>
+                <Col className="col-md-6  d-flex justify-content-center flex-wrap">
+                  <DataList
+                    data={extraDate?.useExtra ? extraDate.useExtra : []}
+                    type="tableDate"
+                    displayLength={3}
+                    enableDelete={true}
+                    deleteAction={(index) => {
+                      setExtraDate({
+                        ...extraDate,
+                        useExtra: extraDate.useExtra.filter(
+                          (_, i) => index !== i
+                        ),
+                      });
+                    }}
+                  />
+                </Col>
+              </Row>
+            </Card>
+          </ModalBody>
+        </Modal>
       </Container>
     </div>
   );

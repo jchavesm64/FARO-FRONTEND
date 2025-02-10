@@ -3,10 +3,12 @@ import { Button, Input, InputGroup } from "reactstrap";
 
 const PlusMinusInput = ({ value, handleChange, maxAvailable }) => {
   return (
-    <InputGroup style={{ maxWidth: "7rem" }}>
+    <InputGroup
+      style={{ maxWidth: "7rem" }}
+      className="plus-minus-input-container"
+    >
       <Button
         color="primary"
-        className="z-0"
         onClick={() => {
           if (value > 0) {
             handleChange(value - 1);
@@ -27,7 +29,6 @@ const PlusMinusInput = ({ value, handleChange, maxAvailable }) => {
       />
       <Button
         color="primary"
-        className="z-0"
         onClick={() => {
           if (value < maxAvailable) {
             handleChange(value + 1);
