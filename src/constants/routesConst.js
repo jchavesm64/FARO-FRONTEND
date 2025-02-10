@@ -160,27 +160,27 @@ export const receptionRoutes = [
 export const InHouseRoutes = [
   {
     label: "Cambio de habitaciones",
-    icon: "mdi mdi-calendar-plus",
+    icon: "bx bxs-directions",
     link: "/reception/inhouse/roomChanges",
   },
   {
     label: "Servicios Adicionales",
-    icon: "mdi mdi-briefcase-download",
+    icon: "bx bxs-bookmark-alt-plus",
     link: "/reception/inhouse/additionalServices",
   },
   {
     label: "Cargos a la habitacion",
-    icon: "mdi mdi-briefcase-upload",
+    icon: "bx bxs-bed",
     link: "/reception/inhouse/roomCharge",
   },
   {
     label: "Tours",
-    icon: "mdi mdi-home-outline",
+    icon: "bx bxs-binoculars",
     link: "/reception/inhouse/tours",
   },
   {
     label: "Servicios por Reserva",
-    icon: "mdi mdi-clipboard-plus-outline",
+    icon: "mdi mdi-clipboard-plus",
     link: "/reception/inhouse/reservationServices",
   },
 ];
