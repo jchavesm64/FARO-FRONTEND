@@ -54,6 +54,7 @@ export const OBTENER_FULL_RESERVAHABITACION = gql`
       }
       serviciosExtra
       reserva {
+        id
         numeroPersonas {
           adulto
           ninos
@@ -62,6 +63,7 @@ export const OBTENER_FULL_RESERVAHABITACION = gql`
           id
           nombreFacturacion
         }
+        serviciosGrupal
         fechaReserva
       }
       cargosHabitacion

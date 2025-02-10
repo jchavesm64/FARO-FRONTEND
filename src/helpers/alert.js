@@ -19,6 +19,7 @@ export const requestConfirmationAlert = (params) => {
     confirmationEvent,
     CancelEvent,
     showCancelEvent,
+    blockConfirmAlert,
   } = params;
   Swal.fire({
     title: title,
@@ -30,7 +31,8 @@ export const requestConfirmationAlert = (params) => {
   }).then(async (result) => {
     if (result.isConfirmed) {
       confirmationEvent?.();
-      Swal.fire("Guardado!", "Los cambios han sido guardados.", "success");
+      if (blockConfirmAlert)
+        Swal.fire("Guardado!", "Los cambios han sido guardados.", "success");
     } else {
       if (showCancelEvent) {
         CancelEvent?.();

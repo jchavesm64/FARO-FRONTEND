@@ -178,11 +178,6 @@ export const InHouseRoutes = [
     icon: "bx bxs-binoculars",
     link: "/reception/inhouse/tours",
   },
-  {
-    label: "Servicios por Reserva",
-    icon: "mdi mdi-clipboard-plus",
-    link: "/reception/inhouse/reservationServices",
-  },
 ];
 
 export const hotelsettings = [

@@ -26,6 +26,7 @@ import { getFecha, timestampToDateLocal } from "../../../../helpers/helpers";
 import DataList from "../../../../components/Common/DataList";
 import { infoAlert, requestConfirmationAlert } from "../../../../helpers/alert";
 import { keys } from "lodash";
+import { UPDATE_RESERVA_INFO } from "../../../../services/ReservaService";
 
 const AdditionalServices = () => {
   const client = useApolloClient();
@@ -37,14 +38,19 @@ const AdditionalServices = () => {
   const [extraServices, setExtraServices] = useState({});
   const [selectedService, setSelectedService] = useState(null);
   const [isSelectingType, setIsSelectingType] = useState(false);
+  const [isInfoModified, setIsInfoModified] = useState(false);
 
   const [calendarModal, setCalendarModal] = useState(false);
   const [extraDate, setExtraDate] = useState({});
 
   const [key, setKey] = useState("room");
 
+  const isRoomTabSelected = key === "room";
+  const isReservationTabSelected = key === "reservation";
+
   // Services
-  const [update] = useMutation(UPDATE_RESERVA_HABITACION);
+  const [updateReservaHabitacion] = useMutation(UPDATE_RESERVA_HABITACION);
+  const [updateReserva] = useMutation(UPDATE_RESERVA_INFO);
 
   useEffect(() => {
     const fetchReservas = async () => {
@@ -72,14 +78,17 @@ const AdditionalServices = () => {
 
     fetchReservas();
     fetchServicios();
-  }, [client]);
+  }, [client, key]);
 
   const toggleCalendarModal = () => setCalendarModal(!calendarModal);
 
   const getServices = () => {
     const datos = [];
     if (services) {
-      const alreadySelectedServices = extraServices[selectedRoom?.id]?.map(
+      const currentIdSelected = isRoomTabSelected
+        ? selectedRoom?.id
+        : selectedReservation?.id;
+      const alreadySelectedServices = extraServices[currentIdSelected]?.map(
         (service) => service?.id
       );
       services
@@ -95,6 +104,9 @@ const AdditionalServices = () => {
   };
 
   const AdditionalServicesTable = () => {
+    const currentIdSelected = isRoomTabSelected
+      ? selectedRoom?.id
+      : selectedReservation?.id;
     return (
       <table className="table table-hover table-striped mb-0">
         <thead>
@@ -114,7 +126,7 @@ const AdditionalServices = () => {
           </tr>
         </thead>
         <tbody>
-          {extraServices[selectedRoom?.id]?.map((line, index) => {
+          {extraServices[currentIdSelected]?.map((line, index) => {
             const isQuantifiable = line.tipo?.cuantificable === "true";
             return (
               <tr key={index}>
@@ -126,15 +138,16 @@ const AdditionalServices = () => {
                       value={line?.extra ?? 1}
                       handleChange={(newNum) => {
                         const newListValue = extraServices[
-                          selectedRoom?.id
+                          currentIdSelected
                         ]?.map((s, i) => {
                           if (index === i) return { ...s, extra: newNum };
                           return s;
                         });
                         setExtraServices({
                           ...extraServices,
-                          [selectedRoom?.id]: newListValue,
+                          [currentIdSelected]: newListValue,
                         });
+                        if (!isInfoModified) setIsInfoModified(true);
                       }}
                       maxAvailable={100}
                     />
@@ -156,15 +169,19 @@ const AdditionalServices = () => {
                       icon="mdi mdi-delete"
                       color="danger"
                       onClick={() => {
+                        const currentIdSelected = isRoomTabSelected
+                          ? selectedRoom?.id
+                          : selectedReservation?.id;
                         const newListValue = extraServices[
-                          selectedRoom?.id
+                          currentIdSelected
                         ]?.filter((s, i) => {
                           return index !== i;
                         });
                         setExtraServices({
                           ...extraServices,
-                          [selectedRoom?.id]: newListValue,
+                          [currentIdSelected]: newListValue,
                         });
+                        if (!isInfoModified) setIsInfoModified(true);
                       }}
                     />
                   }
@@ -192,9 +209,7 @@ const AdditionalServices = () => {
 
     return (
       <div className="">
-        <div className="p-6 flex flex-col align-items-left">
-          <h3>Reservaciones</h3>
-        </div>
+        <div className="p-6 flex flex-col align-items-left"></div>
         <div className="reservations p-6 pt-0 overflow-auto">
           <div className="reservations-container">
             {reservations.map((reservation, index) => {
@@ -204,7 +219,16 @@ const AdditionalServices = () => {
                   key={index}
                   title={reservation?.cliente?.nombreFacturacion}
                   rangeDates={date.toLocaleDateString("es-ES")}
-                  onClick={() => setSelectedReservation(reservation)}
+                  onClick={() => {
+                    setSelectedReservation(reservation);
+                    const extraServicesKeys = keys(extraServices);
+                    if (!extraServicesKeys.includes(reservation?.id)) {
+                      setExtraServices({
+                        ...extraServices,
+                        [reservation?.id]: reservation?.serviciosGrupal ?? [],
+                      });
+                    }
+                  }}
                   isSelected={selectedReservation?.id === reservation?.id}
                 />
               );
@@ -259,10 +283,13 @@ const AdditionalServices = () => {
                   )}
                   onClick={() => {
                     setSelectedRoom(room);
-                    setExtraServices({
-                      ...extraServices,
-                      [room?.id]: room?.serviciosExtra ?? [],
-                    });
+                    const extraServicesKeys = keys(extraServices);
+                    if (!extraServicesKeys.includes(room?.id)) {
+                      setExtraServices({
+                        ...extraServices,
+                        [room?.id]: room?.serviciosExtra ?? [],
+                      });
+                    }
                   }}
                   isSelected={selectedRoom?.id === room.id}
                 />
@@ -289,21 +316,29 @@ const AdditionalServices = () => {
   };
 
   const addExtraService = (service) => {
-    const list = extraServices[selectedRoom?.id] ?? [];
-    setExtraServices({
-      ...extraServices,
-      [selectedRoom?.id]: [...list, service],
-    });
+    if (isRoomTabSelected) {
+      const list = extraServices[selectedRoom?.id] ?? [];
+      setExtraServices({
+        ...extraServices,
+        [selectedRoom?.id]: [...list, service],
+      });
+    } else if (isReservationTabSelected) {
+      const list = extraServices[selectedReservation?.id] ?? [];
+      setExtraServices({
+        ...extraServices,
+        [selectedReservation?.id]: [...list, service],
+      });
+    }
   };
 
-  const saveServices = async () => {
+  const saveServicesForReservaHabitacion = async () => {
     const savedServicesPromises = [];
     keys(extraServices).forEach((key) => {
       const input = {
         serviciosExtra: extraServices[key],
       };
       savedServicesPromises.push(
-        update({
+        updateReservaHabitacion({
           variables: { id: key, input },
           errorPolicy: "all",
         })
@@ -311,16 +346,23 @@ const AdditionalServices = () => {
     });
 
     await Promise.all(savedServicesPromises);
+  };
 
-    debugger;
+  const saveServicesForReserva = async () => {
+    const savedServicesPromises = [];
+    keys(extraServices).forEach((key) => {
+      const input = {
+        serviciosGrupal: extraServices[key],
+      };
+      savedServicesPromises.push(
+        updateReserva({
+          variables: { id: key, input },
+          errorPolicy: "all",
+        })
+      );
+    });
 
-    // const input = {
-    //   serviciosExtra: [{ _id: service.id, estado: "ACTIVO" }],
-    // };
-    // const { data } = await update({
-    //   variables: { id: selectedRoom.id, input },
-    //   errorPolicy: "all",
-    // });
+    await Promise.all(savedServicesPromises);
   };
 
   const AdditionalServices = () => {
@@ -330,7 +372,8 @@ const AdditionalServices = () => {
           <div>
             <div className="flex flex-col p-6 additional-services-container">
               <h3>Servicios Adicionales</h3>
-              {selectedRoom != null && isSelectingType ? (
+              {(selectedRoom != null || selectedReservation != null) &&
+              isSelectingType ? (
                 <div className="row row-cols-lg-auto g-3 align-items-center justify-content-between">
                   <div className="col-xl-8 col-md-12">
                     <Select
@@ -348,9 +391,13 @@ const AdditionalServices = () => {
                     <button
                       className="btn btn-primary"
                       onClick={() => {
-                        addExtraService(selectedService.value);
+                        addExtraService({
+                          ...selectedService.value,
+                          extra: 1,
+                        });
                         setSelectedService(null);
                         setIsSelectingType(false);
+                        if (!isInfoModified) setIsInfoModified(true);
                       }}
                       disabled={selectedService === null}
                     >
@@ -374,7 +421,10 @@ const AdditionalServices = () => {
                     onClick={() => {
                       setIsSelectingType(true);
                     }}
-                    disabled={!selectedRoom}
+                    disabled={
+                      (isRoomTabSelected && !selectedRoom) ||
+                      (isReservationTabSelected && !selectedReservation)
+                    }
                   >
                     Agregar Servicio
                   </button>
@@ -386,11 +436,18 @@ const AdditionalServices = () => {
                         bodyText: "¿Deseas guardar los servicios adicionales?",
                         confirmButtonText: "Sí, guardar cambios",
                         confirmationEvent: () => {
-                          saveServices();
+                          if (isRoomTabSelected)
+                            saveServicesForReservaHabitacion();
+                          if (isReservationTabSelected)
+                            saveServicesForReserva();
+                          setIsInfoModified(false);
                         },
                       });
                     }}
-                    disabled={!selectedRoom}
+                    disabled={
+                      (isRoomTabSelected && !selectedRoom) ||
+                      (isReservationTabSelected && !selectedReservation)
+                    }
                   >
                     Guardar Servicios
                   </button>
@@ -400,20 +457,18 @@ const AdditionalServices = () => {
             <div className="p-6 pt-0 overflow-auto">
               <div>
                 <div className="flex items-center flex-direction-column services-container">
-                  {selectedRoom === null && (
+                  {((isRoomTabSelected && selectedRoom === null) ||
+                    (isReservationTabSelected &&
+                      selectedReservation === null)) && (
                     <p>
                       Para actualizar o agregar servicios adicionales, primero
                       tiene que seleccionar un cuarto.
                     </p>
                   )}
-                  {selectedRoom && <AdditionalServicesTable />}
-
-                  {/* {extraServices[selectedRoom?.id]?.map((service, index) => {
-                    return (
-                      <AdditionalServiceCard service={service} index={index} />
-                    );
-                  })} */}
-                  {/* {isSelectingType && <TypeSelector />} */}
+                  {((isRoomTabSelected && selectedRoom) ||
+                    (isReservationTabSelected && selectedReservation)) && (
+                    <AdditionalServicesTable />
+                  )}
                 </div>
               </div>
             </div>
@@ -446,7 +501,25 @@ const AdditionalServices = () => {
                 id="controlled-tab-example"
                 activeKey={key}
                 onSelect={(k) => {
-                  setKey(k);
+                  const handleChangeTab = () => {
+                    setExtraServices({});
+                    setSelectedRoom(null);
+                    setSelectedReservation(null);
+                    setIsSelectingType(false);
+                    setIsInfoModified(false);
+                    setKey(k);
+                  };
+                  if (isInfoModified) {
+                    requestConfirmationAlert({
+                      title: "¿Estás seguro?",
+                      bodyText:
+                        "Tienes cambios sin guardar. ¿Deseas continuar sin guardar los servicios adicionales?",
+                      confirmButtonText: "Sí, Continuar",
+                      confirmationEvent: handleChangeTab,
+                    });
+                  } else {
+                    handleChangeTab();
+                  }
                 }}
                 className="mb-3"
               >
@@ -454,7 +527,6 @@ const AdditionalServices = () => {
                   <RoomsSelection />
                 </Tab>
                 <Tab eventKey="reservation" title="Reservación">
-                  Tab content for reservation
                   <ReservationSelection />
                 </Tab>
               </Tabs>
@@ -467,22 +539,27 @@ const AdditionalServices = () => {
           isOpen={calendarModal}
           toggle={toggleCalendarModal}
           onClosed={() => {
-            const currentServiceEdited = extraServices[selectedRoom?.id].find(
+            const currentIdSelected = isRoomTabSelected
+              ? selectedRoom?.id
+              : selectedReservation?.id;
+            const currentServiceEdited = extraServices[currentIdSelected].find(
               (es) => es.id === extraDate.id
             );
             if (!currentServiceEdited.useExtra?.length) {
-              const newListValue = extraServices[selectedRoom?.id]?.map((s) => {
-                if (s.id === extraDate.id) {
-                  return { ...s, useExtra: extraDate.useExtra };
+              const newListValue = extraServices[currentIdSelected]?.map(
+                (s) => {
+                  if (s.id === extraDate.id) {
+                    return { ...s, useExtra: extraDate.useExtra };
+                  }
+                  return s;
                 }
-                return s;
-              });
+              );
               setExtraServices({
                 ...extraServices,
-                [selectedRoom?.id]: newListValue,
+                [currentIdSelected]: newListValue,
               });
             } else {
-              const newListValue = extraServices[selectedRoom?.id]?.map(
+              const newListValue = extraServices[currentIdSelected]?.map(
                 (se) => {
                   if (se.id === extraDate.id) {
                     return { ...se, useExtra: extraDate.useExtra };
@@ -492,7 +569,7 @@ const AdditionalServices = () => {
               );
               setExtraServices({
                 ...extraServices,
-                [selectedRoom?.id]: newListValue,
+                [currentIdSelected]: newListValue,
               });
             }
           }}
@@ -545,6 +622,7 @@ const AdditionalServices = () => {
                             ...extraDate,
                             useExtra: newUseExtra,
                           });
+                          if (!isInfoModified) setIsInfoModified(true);
                         } else {
                           infoAlert(
                             "Oops",
@@ -575,6 +653,7 @@ const AdditionalServices = () => {
                           (_, i) => index !== i
                         ),
                       });
+                      if (!isInfoModified) setIsInfoModified(true);
                     }}
                   />
                 </Col>
