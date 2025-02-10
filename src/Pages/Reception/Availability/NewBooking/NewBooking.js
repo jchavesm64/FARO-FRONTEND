@@ -23,7 +23,7 @@ import { useStepper } from 'headless-stepper';
 import { OBTENER_AREAS } from '../../../../services/AreasOperativasService';
 import { OBTENER_TOURS } from '../../../../services/TourService';
 import { useMutation, useQuery } from '@apollo/client';
-import { OBTENER_RESERVA, SAVE_RESERVA } from '../../../../services/ReservaService';
+import { OBTENER_RESERVA, SAVE_RESERVA, UPDATE_RESERVA } from '../../../../services/ReservaService';
 import { OBTENER_USUARIO_CODIGO } from '../../../../services/UsuarioService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { OBTENER_RESERVAHABITACION } from '../../../../services/ReservaHabitacionService';
@@ -48,9 +48,12 @@ const NewBooking = () => {
     const { data: operativeAreas } = useQuery(OBTENER_AREAS, { pollInterval: 1000 });
 
     const { loading: loading_booking, data: booking } = useQuery(OBTENER_RESERVA, { variables: { id: id }, skip: !id, pollInterval: 1000 });
-    const { data: bookingRoom } = useQuery(OBTENER_RESERVAHABITACION, { variables: { id: booking?.obtenerReserva.id }, skip: !id, pollInterval: 1000 })
+    const { data: bookingRoom } = useQuery(OBTENER_RESERVAHABITACION, { variables: { id: booking?.obtenerReserva.id }, skip: !id, pollInterval: 1000 });
+
 
     const [insertar] = useMutation(SAVE_RESERVA);
+    const [actualizar] = useMutation(UPDATE_RESERVA);
+
 
     const [user, setUser] = useState([])
 
@@ -103,6 +106,23 @@ const NewBooking = () => {
     //Load data for edit booking 
     useEffect(() => {
         if (id !== undefined) {
+            const getAmountTypeRooms = () => {
+                if (!amountTypeRooms || !bookingRoom?.obtenerReservaHabitacion || amountTypeRooms.length === 0 || bookingRoom?.obtenerReservaHabitacion.length === 0) return amountTypeRooms;
+                
+                return amountTypeRooms?.map(typeRoom => {
+                    
+                    if (typeRoom.amountBooking > 0) {
+                        return typeRoom; 
+                    }
+                    const reservasPorTipo = bookingRoom?.obtenerReservaHabitacion.filter(reserva => reserva.habitacion.tipoHabitacion.nombre === typeRoom.type.nombre);
+                    const amountBooking = reservasPorTipo.length;
+                    return {
+                        ...typeRoom,
+                        amountBooking 
+                    };
+                });
+            };
+
             setCustomer(booking?.obtenerReserva.cliente);
             setTypeBooking(booking?.obtenerReserva.tipo);
             setUser(booking?.obtenerReserva.usuario.nombre);
@@ -111,10 +131,40 @@ const NewBooking = () => {
             setCheckIn(timestampToDateLocal(Number(bookingRoom?.obtenerReservaHabitacion[0]?.fechaEntrada), 'date'));
             setCheckOut(timestampToDateLocal(Number(bookingRoom?.obtenerReservaHabitacion[0]?.fechaSalida), 'date'));
             setPackageBookingList(booking?.obtenerReserva?.paquetes);
+            setRoomsBooking(bookingRoom?.obtenerReservaHabitacion.map(room => room.habitacion));
+            setAmountTypeRooms(getAmountTypeRooms());
+            setExtraService(booking?.obtenerReserva?.serviciosGrupal);
+            setServicesPerRoom((prev) => {
+                const updatedServicesPerRoom = [...prev];
+                if (Array.isArray(bookingRoom?.obtenerReservaHabitacion)) {
+                    bookingRoom?.obtenerReservaHabitacion.forEach((roomData) => {
+                        const selectRoom = roomData.habitacion;
+                        const extraServiceRoom = roomData.serviciosExtra;
+
+                        if (!selectRoom || !extraServiceRoom) {
+                            console.warn("Datos incompletos en roomData:", roomData);
+                            return;
+                        }
+                        const index = updatedServicesPerRoom.findIndex(
+                            (item) => item.room.numeroHabitacion === selectRoom.numeroHabitacion
+                        );
+
+                        if (index !== -1) {
+                            updatedServicesPerRoom[index].service = extraServiceRoom;
+                        } else {
+                            updatedServicesPerRoom.push({ room: selectRoom, service: extraServiceRoom });
+                        }
+                    });
+                }
+                return updatedServicesPerRoom;
+            });
+            setToursList(booking?.obtenerReserva.tours);
+            setNotes(booking?.obtenerReserva.notas);
+
         }
     }, [booking, bookingRoom, id])
 
-    // Data for new boooking
+
     useEffect(() => {
         setUser(data_user?.obtenerUsuarioByCodigo || [])
     }, [data_user])
@@ -316,6 +366,8 @@ const NewBooking = () => {
     };
 
     const handleDecrease = (index) => {
+        
+        //solucionar cuando se disminuye la cantidad de habitaciones
         const currentRoomType = amountTypeRooms[index];
         if (currentRoomType.amountBooking === 0) return;
         const updatedRooms = [...amountTypeRooms];
@@ -587,11 +639,13 @@ const NewBooking = () => {
 
     const options = typeRooms.map((type) => ({
         label: type.nombre,
-        options: roomsBooking.filter(roomB => roomB.tipoHabitacion.id === type.id).map((room) => ({
+        options: roomsBooking?.filter(roomB => roomB.tipoHabitacion.id === type.id).map((room) => ({
             label: room.numeroHabitacion,
             value: room,
         })),
     }));
+
+
 
     const addExtraServicePerRoom = () => {
         setServicesPerRoom((prev) => {
@@ -672,13 +726,13 @@ const NewBooking = () => {
     const updateServiceBooking = (service, type) => {
         if (type === 'perService') {
             const updataService = extraService.map(s =>
-                s.nombre === service.nombre ? { ...s, ...service } : s
+                s.nombre === service.nombre ? { ...s, ...service, consumido: 0 } : s
 
             );
             setExtraService(updataService)
         } else if (type === 'perRoom') {
             const updateService = extraServiceRoom.map(s =>
-                s.nombre === service.nombre ? { ...s, ...service } : s
+                s.nombre === service.nombre ? { ...s, ...service, comsumido: 0 } : s
 
             );
             setExtraServiceRoom(updateService)
@@ -800,13 +854,18 @@ const NewBooking = () => {
                 fechaSalida: checkOut,
                 serviciosExtra: servicesPerRoom.length > 0 ? servicesPerRoom.map(roomData => ({
                     room: roomData.room.id,
-                    service: roomData.service.map(serviceData => serviceData.id)
+                    service: roomData.service
                 })) : null
             };
+            let estado, message;
+            if (!id) {
 
-
-            const { data } = await insertar({ variables: { input, bookingRoom }, errorPolicy: 'all' });
-            const { estado, message } = data.insertarReserva;
+                const response = await insertar({ variables: { input, bookingRoom }, errorPolicy: 'all' });
+                ({ estado, message } = response.data.insertarReserva);
+            } else {
+                const response = await actualizar({ variables: { id, input, bookingRoom }, errorPolicy: 'all' });
+                ({ estado, message } = response.data.actualizarReserva);
+            }
 
             if (estado) {
                 infoAlert('Excelente', message, 'success', 3000, 'top-end')
@@ -846,7 +905,7 @@ const NewBooking = () => {
                 <Container fluid={true}>
                     <Breadcrumbs title={!id ? 'Nueva Reserva' : 'Editar Reserva'} breadcrumbItem="Reservas" breadcrumbItemUrl={!id ? '/reception/availability' : '/reception/availability/booking'} />
                     <Card className='p-4'>
-                        {/* necesitamos separar el wizard para despejar la logia ce este archivo */}
+                        {/* necesitamos separar el wizard para despejar la lógica de este archivo */}
                         <div className=' d-flex flex-wrap flex-row justify-content-center'>
                             <div className='d-flex col-md-12 justify-content-around '>
                                 <Button className='' id='Anterior' color="primary" onClick={prevStep} disabled={!state.hasPreviousStep}  ><i className={'mdi mdi-arrow-left-bold-circle-outline button_wizard_icon '}></i></Button>
@@ -944,7 +1003,7 @@ const NewBooking = () => {
                         }
                         {steps[state.currentStep].label === 'Resumen' &&
                             <div>
-                                <Summary props={{ setTotal,amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes, user, amountTypeRooms, total}} />
+                                <Summary props={{ setTotal, amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes, user, amountTypeRooms, total }} />
                             </div>
                         }
                     </Card>

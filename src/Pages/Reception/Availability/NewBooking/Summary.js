@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Badge, Button, Card, Col, Container, Row } from "reactstrap";
+import { useParams } from "react-router-dom";
 import ListSection from "../../../../components/Common/ListSelection";
 import { typesBooking } from "../../../../constants/routesConst";
 
 const Summary = ({ ...props }) => {
 
-    const { setTotal,amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes, user, amountTypeRooms,total } = props.props
+    const { setTotal, amountPeople, calculateNights, onClickSave, customer, currentDate, currentSeason, checkIn, checkOut, amountAdult, amountChildren, typeBooking, packageBookingList, roomsBooking, servicesPerRoom, extraService, toursList, notes, user, amountTypeRooms, total } = props.props
 
     const [isOpenRoom, setIsOpenRoom] = useState(false);
     const [isOpenPackage, setIsOpenPackage] = useState(false);
     const [isOpenService, setIsOpenService] = useState(false);
     const [isOpenTours, setIsOpenTours] = useState(false);
     const [isOpenNotes, setIsOpenNote] = useState(false);
-    
+
+    const { id } = useParams();
 
     const toggleAccordion = (currentStateSetter, currentState) => {
         currentStateSetter(!currentState);
@@ -34,11 +36,12 @@ const Summary = ({ ...props }) => {
         }, 0);
         const totalTours = toursList.reduce((total, t) => total + t.precio, 0);
         setTotal(totalPackage + totalRoomPrice + totalServicePerRoom + totalService + totalTours)
-    }, [amountAdult,amountChildren,currentSeason,extraService,packageBookingList,roomsBooking,servicesPerRoom,toursList])
+    }, [amountAdult, amountChildren, currentSeason, extraService, packageBookingList, roomsBooking, servicesPerRoom, toursList])
 
 
 
     console.log('Tour', toursList);
+    console.log('servicios', servicesPerRoom);
 
 
     return (
@@ -447,7 +450,7 @@ const Summary = ({ ...props }) => {
                                             className="position-fixed send_booking_wizard"
                                             onClick={() => onClickSave()}
                                         >
-                                            Realizar Reserva
+                                            {!id ? 'Realizar Reserva' : 'Guardar Reserva'}
                                         </Button>
                                     </Col>
                                 </Row>

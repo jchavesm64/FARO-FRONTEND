@@ -21,7 +21,7 @@ const EditPackage = ({ props, idBooking, updatePackage }) => {
     const { data: Tours } = useQuery(OBTENER_TOURS, { pollInterval: 1000 });
     const { data: services } = useQuery(OBTENER_SERVICIO, { pollInterval: 1000 });
     const { data: seasons } = useQuery(OBTENER_TEMPORADAS, { pollInterval: 1000 });
-    const { loading: loading_paquete, error: error_paquete, data: data_paquete, startPolling, stopPolling } = useQuery(OBTENER_PAQUETE, { variables: { id: id ? id : idBooking }, pollInterval: 1000 });
+    const { loading: loading_paquete, error: error_paquete, data: data_paquete, startPolling, stopPolling } = useQuery(OBTENER_PAQUETE, { variables: { id: idBooking ? idBooking : id }, pollInterval: 1000 });
     const [actualizar] = useMutation(UPDATE_PAQUETE);
 
     useEffect(() => {
@@ -79,7 +79,8 @@ const EditPackage = ({ props, idBooking, updatePackage }) => {
     ];
 
     useEffect(() => {
-        if (data_paquete) {
+        
+        if (data_paquete!=null) {
             setName(data_paquete.obtenerPaquete.nombre);
             setDescription(data_paquete.obtenerPaquete.descripcion);
             setToursList(data_paquete.obtenerPaquete.tours);

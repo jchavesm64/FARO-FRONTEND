@@ -143,7 +143,7 @@ export const receptionRoutes = [
     {
         label: "Reserva de Servicios Externos",
         icon: 'mdi mdi-clipboard-plus-outline',
-        link: "/reception/externalservice"
+        link: "/reception/bookservice"
     },
     {
         label: "Reportes",
@@ -153,7 +153,7 @@ export const receptionRoutes = [
     {
         label: "Listado de Reservas",
         icon: 'mdi mdi-format-list-bulleted',
-        link: "/reception/listreservatios"
+        link: "/reception/listbooking"
     },
 ]
 

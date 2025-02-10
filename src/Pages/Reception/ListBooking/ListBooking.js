@@ -1,17 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
-import Swal from 'sweetalert2';
-import { infoAlert } from '../../../../helpers/alert';
-import { OBTENER_RESERVAS, DELETE_RESERVA } from "../../../../services/ReservaService";
-import { Container, Row, Card, CardHeader, FormGroup, Label, CardTitle, CardBody, Badge, Input, Button, Col, } from 'reactstrap';
-import { Link } from 'react-router-dom';
-import Breadcrumbs from '../../../../components/Common/Breadcrumb';
+/* import React, { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client';
+import { Container, Row, Card, CardHeader, FormGroup, Label, CardTitle, CardBody, Badge, Input, Button, Col } from 'reactstrap';
+import { OBTENER_RESERVAS } from "../../../../services/ReservaService";
+import Breadcrumbs from '../../../components/Common/Breadcrumb';
+import DataList from '../../../components/Common/DataList';
 
-const Booking = () => {
-    document.title = "Disponibilidad | FARO";
+const ListBooking = ({ ...props }) => {
 
-    const { data: data_booking } = useQuery(OBTENER_RESERVAS, { pollInterval: 1000 });
-    const [desactivar] = useMutation(DELETE_RESERVA);
+    document.title = "Listado de reservas | FARO";
+    const { data: data_booking, loading: loading_booking, error: error_booking } = useQuery(OBTENER_RESERVAS, { pollInterval: 1000 });
 
     const [booking, setBooking] = useState([]);
     const [filteredBooking, setFilteredBooking] = useState([]);
@@ -27,28 +24,7 @@ const Booking = () => {
         setFilteredBooking(data_booking?.obtenerReservas || []);
     }, [data_booking]);
 
-    const onDelete = async (reserva) => {
-        Swal.fire({
-            title: "Cancelar reserva",
-            text: `¿Está seguro de eliminar la reserva ${reserva.id}?`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#0BB197",
-            cancelButtonColor: "#FF3D60",
-            cancelButtonText: 'Cancelar',
-            confirmButtonText: "Sí, ¡eliminar!"
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                const { data } = await desactivar({ variables: { id: reserva.id } });
-                const { estado, message } = data.desactivarReserva;
-                if (estado) {
-                    infoAlert('Reserva eliminada', message, 'success', 3000, 'top-end')
-                } else {
-                    infoAlert('Eliminar reserva', message, 'error', 3000, 'top-end')
-                }
-            }
-        });
-    }
+
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -89,20 +65,17 @@ const Booking = () => {
         setFilteredBooking(filtered);
     };
 
-    const onPayment = async (reserva) => {
-        //TODO: Implementar pago de reservas
-    };
 
     useEffect(() => {
         filterBookings();
     }, [filterCriteria, booking]);
-    console.log(JSON.stringify(booking));
+
 
     return (
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Reservas" breadcrumbItem="Nueva Reserva" breadcrumbItemUrl="/reception/availability" />
+                    <Breadcrumbs title="Listado de reservas" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
                 </Container>
 
                 {booking.length > 0 ? (
@@ -163,58 +136,11 @@ const Booking = () => {
                             </div>
                         </Row>
                         <div className="scroll-container">
-                            <Row className='row-cols-2 m-0 mt-3 row-cols-sm-3 row-cols-md-5 d-flex justify-content-center flex-wrap'>
-                                {filteredBooking.map(b => (
-                                    <Link to={b.estado === 'Pendiente' || b.estado === 'Incompleto' || b.estado === 'Conflicto'  ? `/reception/availability/editbooking/${b.id}` : '#'} style={{ textDecoration: 'none' }} className="card_home_link p-0 m-0" key={b.id}>
-                                        <Card className="card_booking p-0 mb-2 overflow-hidden">
-                                            <CardHeader className={`d-flex justify-content-between text-primary-foreground ${b.estado === 'Cancelada' ? 'bg-danger' : 'bg-primary'}`}>
-                                                <CardTitle className="text-lg">
-                                                    <span className="fs-5 m-0 ms-1 mb-2 span_color">Reservación:</span> {b.id.slice(0, 10)}...
-                                                </CardTitle>
-                                                {(b.estado === 'Conflicto' || b.estado === 'Incompleto' || b.estado === 'Activa' || b.estado === 'CheckIn' || b.estado === 'Pendiente') && (
-                                                    <div className="pay_icon" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onPayment(b); }}>
-                                                        <i className='mdi mdi-cash w-50'></i>
-                                                    </div>
-                                                )}
-                                                {!(b.estado === 'Cancelada' || b.estado === 'Pagada' || b.estado === 'CheckOut' || b.estado === 'Finalizada' || b.estado === 'Activa') && (
-                                                    <div className="delete_icon" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(b); }}>
-                                                        <i className='mdi mdi-delete'></i>
-                                                    </div>
-                                                )}
-
-                                            </CardHeader>
-                                            <CardBody className="pt-2">
-                                                <div className="d-flex flex-column mb-2">
-                                                    <span className="font-semibold">{b.cliente.nombre.slice(0, 15)}...</span>
-                                                    <span className="text-sm text-gray-600">
-                                                        {b.cliente.ciudad}, {b.cliente.pais}
-                                                    </span>
-                                                </div>
-                                                <div className="d-flex justify-content-around">
-                                                    <Badge color={`${b.estado === 'Cancelada' ? 'danger' : 'primary'}`} className="mr-2 fs-6" variant={b.estado === 'Pendiente' ? 'outline' : 'default'}>
-                                                        {b.estado}
-                                                    </Badge>
-                                                    <Badge color={`${b.estado === 'Cancelada' ? 'danger' : 'primary'}`} className="fs-6 p-1 text-center">{b.tipo}</Badge>
-                                                </div>
-
-                                                <div className="m-0 mt-1 text-sm">
-                                                    <span>Adults: {b.numeroPersonas.adulto}</span>
-                                                    <strong> &nbsp; </strong>
-                                                    <span>Children: {b.numeroPersonas.ninos}</span>
-                                                </div>
-                                                <div className="m-0 text-sm">
-                                                    <span>Servicios: {b.serviciosGrupal.length}</span>
-                                                    <strong> &nbsp; </strong>
-                                                    <span>Paquetes: {b.paquetes.length}</span>
-                                                </div>
-                                                <p className="mt-1 mb-3 text-sm">
-                                                    Fecha reserva: {new Date(Number(b.fechaReserva)).toLocaleDateString()}
-                                                </p>
-                                            </CardBody>
-                                        </Card>
-                                    </Link>
-                                ))}
-                            </Row>
+                            <Card>
+                                <CardBody>
+                                    <DataList data={booking} type="listbook" displayLength={9} {...props} />
+                                </CardBody>
+                            </Card>
                         </div>
                     </div>
                 ) : (
@@ -223,10 +149,13 @@ const Booking = () => {
                     </div>
                 )
                 }
-
             </div>
-        </React.Fragment >
-    )
-}
 
-export default Booking;
+
+        </React.Fragment>
+
+
+    );
+};
+
+export default ListBooking; */

@@ -58,6 +58,7 @@ export const OBTENER_RESERVA = gql`
             tipo
             tours
             paquetes
+            notas
             cliente {
                 id
                 tipo
@@ -96,6 +97,34 @@ export const SAVE_RESERVA = gql`
     mutation insertarReserva($input: ReservaInput,$bookingRoom: ReservaHabitacionInput){
         insertarReserva(input: $input, bookingRoom: $bookingRoom){
             estado
+            message
+        }
+    }
+`;
+
+export const UPDATE_RESERVA = gql`
+    mutation actualizarReserva($id:ID, $input: ReservaInput,$bookingRoom: ReservaHabitacionInput){
+        actualizarReserva(id:$id, input: $input, bookingRoom: $bookingRoom){
+            estado
+            message
+        }
+    }
+`;
+
+export const DELETE_RESERVA = gql`
+    mutation desactivarReserva($id:ID){
+        desactivarReserva(id:$id){
+            estado
+            message
+        }
+    }
+`;
+
+
+export const CHECKIN_RESERVA = gql`
+    mutation checkIn($id: ID!, $reserva: ID! $huespedes: [JSON!]!) {
+        checkIn(id: $id, reserva:$reserva huespedes: $huespedes) {
+            estado 
             message
         }
     }
