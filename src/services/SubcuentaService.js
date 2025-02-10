@@ -21,10 +21,12 @@ export const OBTENER_SUBCUENTAS = gql`
             }
             fecha
             platillos{
+                _id
                 id
-                cantidad
                 precio
                 descuento
+                estado
+                observaciones
             }
             descuento
             total
@@ -60,10 +62,12 @@ export const OBTENER_SUBCUENTA_BY_ID = gql`
             }
             fecha
             platillos{
+                _id
                 id
-                cantidad
                 precio
                 descuento
+                estado
+                observaciones
             }
             descuento
             total
@@ -99,10 +103,12 @@ export const OBTENER_SUBCUENTAS_POR_COMANDA = gql`
             }
             fecha
             platillos{
+                _id
                 id
-                cantidad
                 precio
                 descuento
+                estado
+                observaciones
             }
             descuento
             total
@@ -136,8 +142,8 @@ export const UPDATE_SUBCUENTA = gql`
 `;
 
 export const UPDATE_SERVED = gql`
-    mutation actualizarEntregados($input:actualizarEntregadosInput){
-        actualizarEntregados(input:$input){
+    mutation actualizarEntregados($id:ID, $input:actualizarEntregadosInput){
+        actualizarEntregados(id:$id,input:$input){
             estado
             message
         }
@@ -147,6 +153,15 @@ export const UPDATE_SERVED = gql`
 export const DELETE_SUBCUENTA = gql`
     mutation desactivarSubcuenta($id:ID){
         desactivarSubcuenta(id:$id){
+            estado
+            message
+        }
+    }
+`;
+
+export const DELETE_PLATILLO = gql`
+    mutation desactivarPlatillo($subcuentaId: ID, $platilloId: ID){
+        desactivarPlatillo(subcuentaId: $subcuentaId, platilloId:$platilloId){
             estado
             message
         }

@@ -100,15 +100,15 @@ const EditProduct = ({ stockType, product }) => {
                     <Row>
                         <div className="col-md-6 col-sm-12">
                             <Row>
-                                <div className="col-6 mb-3">
+                                <div className="col-md-5 col-sm-12 mb-3">
                                     <label htmlFor="nombre" className="form-label">* Nombre</label>
                                     <input className="form-control" type="text" id="nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
                                 </div>
-                                <div className="col-3 mb-3">
+                                <div className="col-md-3 col-sm-12 mb-3">
                                     <label htmlFor="existencias" className="form-label">Existencias</label>
                                     <input disabled className="form-control" type="number" id="existencias" value={existencias} onChange={(e) => setExistencias(e.target.value)} />
                                 </div>
-                                <div className="col-3 mb-3">
+                                <div className="col-md-4 col-sm-12 mb-3">
                                     <label htmlFor="unidad" className="form-label">* Unidad de medida</label>
                                     <Select
                                         menuPosition="fixed"

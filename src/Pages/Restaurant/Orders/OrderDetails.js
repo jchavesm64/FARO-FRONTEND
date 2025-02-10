@@ -16,13 +16,12 @@ const OrderDetails = ({ table, onDelete, onDeleteOrder, onTransfer, transferMode
     const formatTotal = (orders) => {
         if (!orders) return '₡0,00';
         let total = 0;
-        orders.forEach((order) => {
-            total += order.precio * order.cantidad;
+        orders.filter(order => order.estado !== 'Cancelado').forEach((order) => {
+            total += order.precio;
         });
         let totalStr = total.toFixed(2);
         let [integerPart, decimalPart] = totalStr.split('.');
         integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-
         return `₡${integerPart},${decimalPart}`;
     };
 

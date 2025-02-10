@@ -54,7 +54,6 @@ export const OBTENER_COMANDAS = gql`
         obtenerComandas {
             id
             fecha
-            observaciones
             mesa {
                 id
                 numero
@@ -67,16 +66,44 @@ export const OBTENER_COMANDAS = gql`
             subcuentas {
                 id
                 platillos {
+                    _id
                     id
-                    cantidad
                     nombre
-                    entregados
+                    estado
+                    observaciones
                 }
             }
         }
     }
 `;
 
+export const OBTENER_COMANDAS_PENDIENTES = gql`
+    query {
+        obtenerComandasPendientes {
+            id
+            fecha
+            mesa {
+                id
+                numero
+                piso {
+                    id
+                    nombre
+                }
+                tipo
+            }
+            subcuentas {
+                id
+                platillos {
+                    _id
+                    id
+                    nombre
+                    estado
+                    observaciones
+                }
+            }
+        }
+    }
+`;
 export const OBTENER_COMANDA_BY_ID = gql`
     query obtenerComandaById($id:ID){
         obtenerComandaById(id:$id){
@@ -85,7 +112,6 @@ export const OBTENER_COMANDA_BY_ID = gql`
                 id
             }
             fecha
-            observaciones
             preFactura
             estado
             subcuentas{
@@ -103,11 +129,13 @@ export const OBTENER_COMANDA_BY_ID = gql`
                 }
                 fecha
                 platillos{
+                    _id
                     id
-                    cantidad
                     nombre
                     precio
                     descuento
+                    estado
+                    observaciones
                 }
                 descuento
                 total
@@ -134,7 +162,6 @@ export const OBTENER_COMANDA_POR_MESA = gql`
                 id
             }
             fecha
-            observaciones
             preFactura
             estado
             subcuentas{
@@ -152,12 +179,13 @@ export const OBTENER_COMANDA_POR_MESA = gql`
                 }
                 fecha
                 platillos{
+                    _id
                     id
-                    cantidad
                     nombre
                     precio
                     descuento
-                    entregados
+                    estado
+                    observaciones
                 }
                 descuento
                 total

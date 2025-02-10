@@ -37,7 +37,7 @@ const Floor = ({ data, selectTable }) => {
     }, [selectTable]);
 
     return (
-        <div className="card-floor floor-container floor-full-height" onClick={deselectTable}>
+        <div className="card-floor floor-container floor-full-height d-flex flex-column align-items-center gap-2" onClick={deselectTable}>
             {tables.map((table) => (
                 <Table
                     key={table.id}
