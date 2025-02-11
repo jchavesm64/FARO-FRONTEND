@@ -144,6 +144,7 @@ import ListBooking from "../Pages/Reception/ListBooking/ListBooking";
 import AdditionalServices from "../Pages/Reception/InHouse/AdditionalServices/AdditionalServices";
 import RoomCharges from "../Pages/Reception/InHouse/RoomCharges/RoomCharges";
 import RoomChange from "../Pages/Reception/InHouse/RoomChange/RoomChange";
+import Tours from "../Pages/Reception/InHouse/Tours/Tours";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -239,7 +240,7 @@ const authProtectedRoutes = [
     path: "/reception/inhouse/roomCharge",
     component: <RoomCharges />,
   },
-  { path: "/reception/inhouse/tours", component: <div>tours</div> },
+  { path: "/reception/inhouse/tours", component: <Tours /> },
   {
     path: "/reception/inhouse/reservationServices",
     component: <div>Servicios de Reserva</div>,
