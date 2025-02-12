@@ -23,7 +23,7 @@ import {
 } from "../../../../services/ReservaHabitacionService";
 import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
 import { v4 as uuidv4 } from "uuid";
-import { infoAlert, requestConfirmationAlert } from "../../../../helpers/alert";
+import { requestConfirmationAlert } from "../../../../helpers/alert";
 
 const chargeInitialValue = { id: null, cargo: "", monto: "" };
 
@@ -104,7 +104,7 @@ const RoomCharges = () => {
       cargosHabitacion,
     };
 
-    const { data } = await update({
+    await update({
       variables: { id: selectedRoom.id, input },
       errorPolicy: "all",
     });
@@ -162,6 +162,7 @@ const RoomCharges = () => {
       <div>
         <div className="p-6 flex flex-col align-items-left">
           {/* <SearchInput /> */}
+          <p>Seleccione la habitación a la cual desea agregar cargos</p>
         </div>
         <div className="rooms p-6 pt-0 overflow-auto">
           <div className="rooms-container">

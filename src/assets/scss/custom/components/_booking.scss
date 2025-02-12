@@ -248,3 +248,13 @@ body {
 .additional-services-container {
   padding: 15px 24px;
 }
+
+.reservas-list-container {
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.search-container {
+  display: flex;
+  gap: 14px;
+}
