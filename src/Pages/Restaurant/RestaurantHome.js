@@ -12,7 +12,7 @@ const RestaurantHome = () => {
       <div className="page-content">
         <Container fluid={true}>
           <Breadcrumbs title="Restaurante"  />
-          <Row className="flex justify-content-center gap-3">
+          <Row className="flex justify-content-center gap-3 mb-4">
                 {
                     restaurantRoutes.map((route, index) => (
                         <ButtomCardHome key={index} route={route}/> 

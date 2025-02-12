@@ -214,7 +214,12 @@ const Orders = ({ ...props }) => {
         setSelectedTable(table);
     };
 
-    const onDeleteItem = (subcuentaId, platilloId, name) => {
+    const onDeleteItem = (subcuentaId, platilloId, name, state) => {
+        if (state === "Entregado") {
+            infoAlert("Eliminar Platillo", "No se puede eliminar un producto que ya ha sido entregado.", "error", 3000, "top-end");
+            return;
+        }
+
         console.log("Deleting item...", subcuentaId, platilloId);
         Swal.fire({
             title: "Eliminar platillo de la comanda",
@@ -343,7 +348,10 @@ const Orders = ({ ...props }) => {
     };
 
     const onBill = () => {
-        console.log("Billing...");
+        const selectedComanda = dataComandas?.obtenerComandaPorMesa;
+        if (selectedComanda) {
+            navigate('/restaurant/orders/invoice', { state: { data: selectedComanda, table: selectedTable, floor:selectedFloor } });
+        }
     };
 
     if (loadingPisos) {

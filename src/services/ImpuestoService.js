@@ -22,6 +22,17 @@ export const OBTENER_IMPUESTO_BY_ID = gql`
     }
 `;
 
+export const OBTENER_IMPUESTO_BY_NOMBRE = gql`
+    query obtenerImpuestoByNombre($nombre:String){
+        obtenerImpuestoByNombre(nombre:$nombre){
+            id
+            nombre
+            valor
+            estado
+        }
+    }
+`;
+
 export const SAVE_IMPUESTO = gql`
     mutation insertarImpuesto($input:ImpuestoInput){
         insertarImpuesto(input:$input){

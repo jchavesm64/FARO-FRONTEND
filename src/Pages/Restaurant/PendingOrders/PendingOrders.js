@@ -227,12 +227,23 @@ const PendingOrders = ({ ...props }) => {
             );
         })
     }
+    const refreshPage = () => {
+        setLastServedArray([]);
+        //window.location.reload();
+    };
 
     return (
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title='Ordenes Pendientes' breadcrumbItem='Restaurante' breadcrumbItemUrl='/restaurant' />
+                    <Row className="mb-4">
+                        <Col className="d-flex justify-content-end">
+                            <Button color="primary" onClick={refreshPage}>
+                                <i className="mdi mdi-reload"></i> Refrescar Entregas
+                            </Button>
+                        </Col>
+                    </Row>
                     <Row>
                         <div className="col-md-4 mb-3">
                             <Card className="h-100">

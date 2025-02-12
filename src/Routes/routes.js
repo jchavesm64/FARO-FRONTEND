@@ -47,6 +47,8 @@ import RestaurantHome from "../Pages/Restaurant/RestaurantHome";
 import Orders from "../Pages/Restaurant/Orders/Orders";
 import CreateOrder from "../Pages/Restaurant/Orders/CreateOrder";
 import PendingOrders from "../Pages/Restaurant/PendingOrders/PendingOrders";
+import Invoice from "../Pages/Restaurant/Orders/Invoice";
+
 
 import CleaningJobs from "../Pages/CleaningJobs/CleaningJobs";
 
@@ -188,6 +190,7 @@ const authProtectedRoutes = [
   { path: "/restaurant/orders", component: <Orders /> },
   { path: "/restaurant/orders/new", component: <CreateOrder /> },
   { path: "/restaurant/pendingorders", component: <PendingOrders /> },
+  { path: "/restaurant/orders/invoice", component: <Invoice /> },
 
   { path: "/reception", component: <ReceptionHome /> },
   { path: "/reception/availability", component: <AvailabilityNewBooking /> },

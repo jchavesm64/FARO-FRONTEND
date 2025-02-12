@@ -119,6 +119,7 @@ export const restaurantRoutes = [
     // },
 ]
 
+
 export const receptionRoutes = [
     {
         label: "Disponibilidad y Nueva reserva",

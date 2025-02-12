@@ -60,7 +60,7 @@ const TableOrders = ({ data, onDelete }) => {
                                 <ButtonIconTable
                                     icon="mdi mdi-delete"
                                     color="danger"
-                                    onClick={() => onDelete(order.subcuenta, order._id, order.nombre)}
+                                    onClick={() => onDelete(order.subcuenta, order._id, order.nombre, order.estado)}
                                 />
                             </td>
                         </tr>
