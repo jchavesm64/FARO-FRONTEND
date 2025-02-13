@@ -53,6 +53,7 @@ export const OBTENER_FULL_RESERVAHABITACION = gql`
         numeroHabitacion
       }
       serviciosExtra
+      serviciosExternos
       toursExtra
       reserva {
         id

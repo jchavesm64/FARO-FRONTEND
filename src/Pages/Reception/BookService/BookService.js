@@ -19,14 +19,13 @@ import { Tab, Tabs } from "react-bootstrap";
 import { getFecha, timestampToDateLocal } from "../../../helpers/helpers";
 import { keys } from "lodash";
 import ButtonIconTable from "../../../components/Common/ButtonIconTable";
-import PlusMinusInput from "../../../components/Common/PlusMinusInput";
 import {
   OBTENER_FULL_RESERVAHABITACION,
   UPDATE_RESERVA_HABITACION,
 } from "../../../services/ReservaHabitacionService";
 import { UPDATE_RESERVA_INFO } from "../../../services/ReservaService";
 import { useApolloClient, useMutation } from "@apollo/client";
-import { OBTENER_SERVICIO } from "../../../services/ServiciosExtraService";
+import { OBTENER_SERVICIO_EXTERNOS } from "../../../services/ServiciosExternalService";
 
 const BookService = () => {
   document.title = "Servicios Externos | FARO";
@@ -66,20 +65,20 @@ const BookService = () => {
         console.error("Error fetching reservas:", error);
       }
     };
-    const fetchServicios = async () => {
+    const fetchServiciosExternos = async () => {
       try {
         const { data } = await client.query({
-          query: OBTENER_SERVICIO,
+          query: OBTENER_SERVICIO_EXTERNOS,
           fetchPolicy: "network-only",
         });
-        setServices(data.obtenerServicios);
+        setServices(data.obtenerServiciosExternos);
       } catch (error) {
-        console.error("Error fetching servicios:", error);
+        console.error("Error fetching servicios externos:", error);
       }
     };
 
     fetchReservas();
-    fetchServicios();
+    fetchServiciosExternos();
   }, [client, key]);
 
   const toggleCalendarModal = () => setCalendarModal(!calendarModal);
@@ -114,14 +113,12 @@ const BookService = () => {
         <thead>
           <tr>
             <th key="service" className="text-center">
-              Servicio
+              Servicio Externo
             </th>
             <th key="price" className="text-center">
               Precio
             </th>
-            <th style={{ width: "20%" }} key="extra" className="text-center">
-              Extra
-            </th>
+
             <th style={{ width: "28%" }} key="actions" className="text-center">
               Acciones
             </th>
@@ -134,27 +131,6 @@ const BookService = () => {
               <tr key={index}>
                 <td>{line.nombre}</td>
                 <td className="precio-td">{line.precio}</td>
-                <td>
-                  {isQuantifiable && (
-                    <PlusMinusInput
-                      value={line?.extra ?? 1}
-                      handleChange={(newNum) => {
-                        const newListValue = extraServices[
-                          currentIdSelected
-                        ]?.map((s, i) => {
-                          if (index === i) return { ...s, extra: newNum };
-                          return s;
-                        });
-                        setExtraServices({
-                          ...extraServices,
-                          [currentIdSelected]: newListValue,
-                        });
-                        if (!isInfoModified) setIsInfoModified(true);
-                      }}
-                      maxAvailable={100}
-                    />
-                  )}
-                </td>
                 <td className="actions-td">
                   {isQuantifiable && (
                     <ButtonIconTable
@@ -227,7 +203,7 @@ const BookService = () => {
                     if (!extraServicesKeys.includes(reservation?.id)) {
                       setExtraServices({
                         ...extraServices,
-                        [reservation?.id]: reservation?.serviciosGrupal ?? [],
+                        [reservation?.id]: reservation?.serviciosExternos ?? [],
                       });
                     }
                   }}
@@ -289,7 +265,7 @@ const BookService = () => {
                     if (!extraServicesKeys.includes(room?.id)) {
                       setExtraServices({
                         ...extraServices,
-                        [room?.id]: room?.serviciosExtra ?? [],
+                        [room?.id]: room?.serviciosExternos ?? [],
                       });
                     }
                   }}
@@ -337,7 +313,7 @@ const BookService = () => {
     const savedServicesPromises = [];
     keys(extraServices).forEach((key) => {
       const input = {
-        serviciosExtra: extraServices[key],
+        serviciosExternos: extraServices[key],
       };
       savedServicesPromises.push(
         updateReservaHabitacion({
@@ -354,7 +330,7 @@ const BookService = () => {
     const savedServicesPromises = [];
     keys(extraServices).forEach((key) => {
       const input = {
-        serviciosGrupal: extraServices[key],
+        serviciosExternos: extraServices[key],
       };
       savedServicesPromises.push(
         updateReserva({
@@ -395,7 +371,6 @@ const BookService = () => {
                       onClick={() => {
                         addExtraService({
                           ...selectedService.value,
-                          extra: 1,
                         });
                         setSelectedService(null);
                         setIsSelectingType(false);
@@ -428,7 +403,7 @@ const BookService = () => {
                       (isReservationTabSelected && !selectedReservation)
                     }
                   >
-                    Agregar Servicio
+                    Agregar Servicio Externo
                   </button>
                   <button
                     className="btn btn-outline-secondary"
