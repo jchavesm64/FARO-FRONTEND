@@ -29,7 +29,7 @@ import { useApolloClient, useMutation } from "@apollo/client";
 import { OBTENER_SERVICIO } from "../../../services/ServiciosExtraService";
 
 const BookService = () => {
-  document.title = "Reservas de servicios | FARO";
+  document.title = "Servicios Externos | FARO";
 
   const client = useApolloClient();
 
@@ -373,7 +373,7 @@ const BookService = () => {
         <CardBody>
           <div>
             <div className="flex flex-col p-6 additional-services-container">
-              <h3>Servicios Adicionales</h3>
+              <h3>Servicios Externos</h3>
               {(selectedRoom != null || selectedReservation != null) &&
               isSelectingType ? (
                 <div className="row row-cols-lg-auto g-3 align-items-center justify-content-between">
@@ -435,7 +435,7 @@ const BookService = () => {
                     onClick={() => {
                       requestConfirmationAlert({
                         title: "¿Estás seguro?",
-                        bodyText: "¿Deseas guardar los servicios adicionales?",
+                        bodyText: "¿Deseas guardar los externos?",
                         confirmButtonText: "Sí, guardar cambios",
                         confirmationEvent: () => {
                           if (isRoomTabSelected)
@@ -463,8 +463,8 @@ const BookService = () => {
                     (isReservationTabSelected &&
                       selectedReservation === null)) && (
                     <p>
-                      Para actualizar o agregar servicios adicionales, primero
-                      tiene que seleccionar un cuarto.
+                      Para actualizar o agregar servicios externos, primero
+                      tiene que seleccionar un cuarto o una reservación.
                     </p>
                   )}
                   {((isRoomTabSelected && selectedRoom) ||
@@ -515,7 +515,7 @@ const BookService = () => {
                     requestConfirmationAlert({
                       title: "¿Estás seguro?",
                       bodyText:
-                        "Tienes cambios sin guardar. ¿Deseas continuar sin guardar los servicios adicionales?",
+                        "Tienes cambios sin guardar. ¿Deseas continuar sin guardar los servicios externos?",
                       confirmButtonText: "Sí, Continuar",
                       confirmationEvent: handleChangeTab,
                     });

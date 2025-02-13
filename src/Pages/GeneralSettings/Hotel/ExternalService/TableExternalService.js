@@ -31,7 +31,7 @@ const TableExtraService = ({ ...props }) => {
                                 <td>{services.tipo.nombre}</td>
                                 <td>
                                     <div className="d-flex justify-content-center mx-1 my-1">
-                                        <Link to={`/hotelsettings/editextraservice/${services.id}`}>
+                                        <Link to={`/hotelsettings/editexternalservice/${services.id}`}>
                                             <ButtonIconTable icon='mdi mdi-pencil' color='warning' />
                                         </Link>
                                         <ButtonIconTable icon='mdi mdi-delete' color='danger' onClick={() => { onClickDelete(services.id, services.nombre) }} />

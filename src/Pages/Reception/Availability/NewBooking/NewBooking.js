@@ -175,7 +175,7 @@ const NewBooking = () => {
             if (!roomsAvailable || !typeRooms) return [];
 
             return typeRooms.map(type => {
-                const RoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre);
+                const RoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion?.nombre === type.nombre);
                 return {
                     lengthAvailable: RoomAvailable.length,
                     type,
