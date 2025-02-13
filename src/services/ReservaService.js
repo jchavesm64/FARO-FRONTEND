@@ -142,6 +142,7 @@ export const CHECKIN_RESERVA = gql`
       estado
       message
     }
+  }
 `;
 
 export const UPDATE_ESTADO_RESERVA = gql`
