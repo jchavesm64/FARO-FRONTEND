@@ -1,17 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  CardBody,
-  Col,
-  Container,
-  Input,
-  InputGroup,
-  Row,
-} from "reactstrap";
+import { Button, Card, CardBody, Col, Container, Input, InputGroup, Row } from "reactstrap";
 import ListSection from "../../../../components/Common/ListSelection";
 
 const Rooms = ({ ...props }) => {
+
     const { handleDecrease, handleChange, handleBlur, handleIncrease, setDisabledButton, amountTypeRooms, currentSeason, roomsBooking, typeBooking } = props.props;
 
     useEffect(() => { setDisabledButton(roomsBooking.length === 0) }, [setDisabledButton, roomsBooking]);
@@ -26,6 +18,7 @@ const Rooms = ({ ...props }) => {
         };
         setEnableRooms(valIndividualBooking)
     }, [typeBooking, roomsBooking])
+
 
     return (
         <React.Fragment>
@@ -54,7 +47,7 @@ const Rooms = ({ ...props }) => {
 
                                                         <div className="mb-1 mt-1 col-md-12 d-flex flex-column">Precio por noche:
                                                             {currentSeason.map(c =>
-                                                                <spam className='ms-3'>{c.nombre}: <span>${c.tiposHabitacion[type.type.nombre].price}</span>
+                                                                <spam className='ms-3'>{c.nombre}: <span>${c.tiposHabitacion[type.type.nombre]?.price}</span>
                                                                 </spam>
                                                             )}
                                                         </div>
@@ -134,46 +127,17 @@ const Rooms = ({ ...props }) => {
                                                 <label>Sin datos que mostrar</label>
                                             </div>
                                         )}
-                                        label="n.º de habitación"
-                                        emptyMessage="Sin datos"
-                                      />
-                                      <ListSection
-                                        key={`list2`}
-                                        title="Comodidades por habitación"
-                                        items={
-                                          roomsBooking?.find(
-                                            (rooms) =>
-                                              rooms.tipoHabitacion.nombre ===
-                                              type.type.nombre
-                                          ).comodidades
-                                        }
-                                        label="Comodidad"
-                                        emptyMessage="Sin datos"
-                                      />
-                                    </div>
-                                  </div>
+                                    </Card>
+
                                 </div>
-                              )
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        className="d-flex justify-content-center align-items-center"
-                        style={{ height: "100vh" }}
-                      >
-                        <label>Sin datos que mostrar</label>
-                      </div>
-                    )}
-                  </Card>
-                </div>
-              </Card>
-            </Col>
-          </Card>
-        </Container>
-      </div>
-    </React.Fragment>
-  );
+
+                            </Card>
+                        </Col>
+                    </Card>
+                </Container>
+            </div>
+        </React.Fragment>
+    );
 };
 
 export default Rooms;
