@@ -25,7 +25,6 @@ const ListBooking = () => {
         console.error("Error fetching reservas:", error);
       }
     };
-
     fetchReservas();
   }, [client]);
 
@@ -101,3 +100,4 @@ const ListBooking = () => {
 };
 
 export default ListBooking;
+

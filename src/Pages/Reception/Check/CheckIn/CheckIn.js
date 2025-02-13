@@ -76,13 +76,13 @@ const CheckIn = () => {
 
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className="page-content ">
                 <Container fluid={true}>
                     <Breadcrumbs title="CheckIn" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
                 </Container>
 
                 {booking.length > 0 ? (
-                    <div className="page-content">
+                    <Row >
                         <Row className="mb-4">
                             <div className="col-md-12">
                                 <Card>
@@ -177,7 +177,7 @@ const CheckIn = () => {
                                 ))}
                             </Row>
                         </div>
-                    </div>
+                    </Row>
                 ) : (
                     <div className="d-flex justify-content-center align-items-center h-100">
                         <h5 className="text-muted">No hay reservas</h5>

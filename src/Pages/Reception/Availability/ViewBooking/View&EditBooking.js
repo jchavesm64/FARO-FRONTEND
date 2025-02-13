@@ -96,6 +96,7 @@ const Booking = () => {
     useEffect(() => {
         filterBookings();
     }, [filterCriteria, booking]);
+    console.log(JSON.stringify(booking));
 
     return (
         <React.Fragment>
@@ -164,7 +165,7 @@ const Booking = () => {
                         <div className="scroll-container">
                             <Row className='row-cols-2 m-0 mt-3 row-cols-sm-3 row-cols-md-5 d-flex justify-content-center flex-wrap'>
                                 {filteredBooking.map(b => (
-                                    <Link to={`/reception/availability/editbooking/${b.id}`} style={{ textDecoration: 'none' }} className="card_home_link p-0 m-0" key={b.id}>
+                                    <Link to={b.estado === 'Pendiente' || b.estado === 'Incompleto' || b.estado === 'Conflicto'  ? `/reception/availability/editbooking/${b.id}` : '#'} style={{ textDecoration: 'none' }} className="card_home_link p-0 m-0" key={b.id}>
                                         <Card className="card_booking p-0 mb-2 overflow-hidden">
                                             <CardHeader className={`d-flex justify-content-between text-primary-foreground ${b.estado === 'Cancelada' ? 'bg-danger' : 'bg-primary'}`}>
                                                 <CardTitle className="text-lg">

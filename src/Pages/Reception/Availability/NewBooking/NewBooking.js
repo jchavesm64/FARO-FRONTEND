@@ -103,22 +103,22 @@ const NewBooking = () => {
     const [total, setTotal] = useState(0);
     const wizardRef = useRef(null);
 
-
     //Load data for edit booking 
     useEffect(() => {
         if (id !== undefined) {
             const getAmountTypeRooms = () => {
-                if (!roomsAvailable || !typeRooms) return [];
-
-                return typeRooms.map(type => {
-                    const RoomAvailable = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre);
-                    const totalRooms = roomsAvailable.filter(habitacion => habitacion.tipoHabitacion.nombre === type.nombre).length;
-
+                if (!amountTypeRooms || !bookingRoom?.obtenerReservaHabitacion || amountTypeRooms.length === 0 || bookingRoom?.obtenerReservaHabitacion.length === 0) return amountTypeRooms;
+                
+                return amountTypeRooms?.map(typeRoom => {
+                    
+                    if (typeRoom.amountBooking > 0) {
+                        return typeRoom; 
+                    }
+                    const reservasPorTipo = bookingRoom?.obtenerReservaHabitacion.filter(reserva => reserva.habitacion.tipoHabitacion.nombre === typeRoom.type.nombre);
+                    const amountBooking = reservasPorTipo.length;
                     return {
-                        lengthAvailable: RoomAvailable.length,
-                        type,
-                        amountBooking: totalRooms,
-                        rooms: RoomAvailable
+                        ...typeRoom,
+                        amountBooking 
                     };
                 });
             };
@@ -366,6 +366,8 @@ const NewBooking = () => {
     };
 
     const handleDecrease = (index) => {
+        
+        //solucionar cuando se disminuye la cantidad de habitaciones
         const currentRoomType = amountTypeRooms[index];
         if (currentRoomType.amountBooking === 0) return;
         const updatedRooms = [...amountTypeRooms];

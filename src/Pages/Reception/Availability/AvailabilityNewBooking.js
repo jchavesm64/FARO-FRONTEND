@@ -162,8 +162,74 @@ const ReceptionHome = () => {
             }
           );
         }
-      }
-      return [];
+        setTypeRoom(getTiposHabitacion())
+    }, [tiposHabitacion]);
+
+    const [roomAvailability, setRoomAvailability] = useState([]);
+
+    useEffect(() => {
+        const typeRoomAvailability = () => {
+            const availability = typeRoom?.map(room => ({
+                nombre: room.nombre,
+                cantidadTotal: 0,
+                cantidadDisponible: 0,
+                cantidadReservadas: 0,
+                porcentajeDisponible: 0
+            }));
+
+            const isRoomReserved = (habitacionId, month, year) => {
+                return reservaHabitacion.some(reserva => {
+                    const fechaEntrada = new Date(parseInt(reserva.fechaEntrada));
+                    const fechaSalida = new Date(parseInt(reserva.fechaSalida));
+
+                    const entradaMes = fechaEntrada.getMonth(); // Mes de entrada (0 = enero, 11 = diciembre)
+                    const entradaAño = fechaEntrada.getFullYear();
+                    const salidaMes = fechaSalida.getMonth();
+                    const salidaAño = fechaSalida.getFullYear();
+
+                    // Verificamos si la reserva está en el mismo mes y año
+                    const overlaps = (entradaAño === year && entradaMes === month) ||
+                        (salidaAño === year && salidaMes === month) ||
+                        (entradaAño < year && salidaAño >= year);
+
+                    return overlaps && reserva.habitacion.id === habitacionId;
+                });
+            };
+
+            rooms?.forEach(habitacion => {
+                const tipoNombre = habitacion.tipoHabitacion?.nombre;
+
+                const roomType = availability.find(room => room.nombre === tipoNombre);
+
+                if (roomType) {
+                    roomType.cantidadTotal += 1;
+
+                    if (!isRoomReserved(habitacion.id, month, year)) {
+                        roomType.cantidadDisponible += 1;
+                    } else if (habitacion.estado === 'Reservada') {
+                        roomType.cantidadReservadas += 1;
+                    }
+
+                    roomType.porcentajeDisponible =
+                        roomType.cantidadTotal > 0
+                            ? ((roomType.cantidadDisponible / roomType.cantidadTotal) * 100).toFixed(0)
+                            : 0;
+                }
+            });
+
+            return availability;
+        };
+        setRoomAvailability(typeRoomAvailability());
+    }, [typeRoom, rooms, month, year, reservaHabitacion]);
+
+    const getData = (day, show) => {
+
+        setModal(show);
+        setDataModal({
+            day: day.dia,
+            percent: day.porcentajeDisponibilidad,
+            rooms: day.habitacionesDisponibles
+        })
     };
     setTypeRoom(getTiposHabitacion());
   }, [tiposHabitacion]);

@@ -175,7 +175,7 @@ const BookingCheckIn = () => {
     if (error_booking || error_room) return <p>Error al cargar la reserva</p>;
     return (
         <React.Fragment>
-            <div className="page-content">
+            <div className="page-content p-4">
                 <Container fluid={true}>
                     <Breadcrumbs title="CheckIn" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
                 </Container>
