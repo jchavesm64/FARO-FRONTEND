@@ -129,3 +129,12 @@ export const CHECKIN_RESERVA = gql`
         }
     }
 `;
+
+export const UPDATE_ESTADO_RESERVA = gql`
+    mutation updateState($id: ID!){
+        updateState(id:$id){
+            estado
+            message
+        }
+    }
+`;

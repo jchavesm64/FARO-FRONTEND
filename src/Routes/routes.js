@@ -109,6 +109,9 @@ import EditTypeRoom from "../Pages/GeneralSettings/Hotel/TypeRoom/EditTypeRoom";
 import ExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/ExtraService";
 import NewExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/NewExtraService";
 import EditExtraService from "../Pages/GeneralSettings/Hotel/ExtraService/EditExtraService";
+import ExternalService from "../Pages/GeneralSettings/Hotel/ExternalService/ExternalService";
+import NewExternalService from "../Pages/GeneralSettings/Hotel/ExternalService/NewExternalService";
+import EditExternalService from "../Pages/GeneralSettings/Hotel/ExternalService/EditExternalService";
 import EditRoom from '../Pages/GeneralSettings/Hotel/Rooms/EditRoom'
 import Rooms from "../Pages/GeneralSettings/Hotel/Rooms/Roms";
 import NewRoom from "../Pages/GeneralSettings/Hotel/Rooms/NewRoom";
@@ -130,6 +133,7 @@ import EditOperativeAreas from "../Pages/GeneralSettings/Hotel/OperativeAreas/Ed
 import Booking from "../Pages/Reception/Availability/ViewBooking/View&EditBooking";
 import CheckIn from "../Pages/Reception/Check/CheckIn/CheckIn";
 import CheckOut from "../Pages/Reception/Check/CheckOut/CheckOut";
+import BookingCheckOut from "../Pages/Reception/Check/CheckOut/BookingCheckOut";
 import InHouse from "../Pages/Reception/InHouse/InHouse";
 import BookService from "../Pages/Reception/BookService/BookService";
 
@@ -205,18 +209,17 @@ const authProtectedRoutes = [
 
   { path: "/reception/checkin", component: <CheckIn /> },
   { path: "/reception/checkout", component: <CheckOut /> },
+  { path: "/reception/checkout/:id", component: <BookingCheckOut /> },
   { path: "/reception/checkin/:id", component: <BookingCheckIn /> },
-  
+
   { path: "/reception/inhouse", component: <InHouse /> },
   { path: "/reception/bookservice", component: <BookService /> },
   { path: "/reception/reports", component: <Reports /> },
   { path: "/reception/listbooking", component: <ListBooking /> },
-  
+
   { path: "/cleaningjobs", component: <CleaningJobs /> },
   { path: "/editcleaningjob/:id", component: <EditCleaningJobContainer /> },
   { path: "/newcleaningjob", component: <NewCleaningJob /> },
-
-
 
   { path: "/cleaningjobs/checks", component: <CleanlinessChecks /> },
   { path: "/cleaningjobs/newcheck", component: <NewCleanlinessCheck /> },
@@ -257,6 +260,9 @@ const authProtectedRoutes = [
   { path: "/hotelsettings/extraservices", component: <ExtraService /> },
   { path: "/hotelsettings/newextraservices", component: <NewExtraService /> },
   { path: "/hotelsettings/editextraservice/:id", component: <EditExtraService /> },
+  { path: "/hotelsettings/externalservices", component: <ExternalService /> },
+  { path: "/hotelsettings/newexternalservices", component: <NewExternalService /> },
+  { path: "/hotelsettings/editexternalservice/:id", component: <EditExternalService /> },
   { path: "/hotelsettings/rooms", component: <Rooms /> },
   { path: "/hotelsettings/newroom", component: <NewRoom /> },
   { path: "/hotelsettings/editroom/:id", component: <EditRoom /> },
@@ -275,7 +281,6 @@ const authProtectedRoutes = [
   { path: "/hotelsettings/operativeareas", component: <OperativeAreas /> },
   { path: "/hotelsettings/newoperativearea", component: <NewOperativeAreas /> },
   { path: "/hotelsettings/editoperativeareas/:id", component: <EditOperativeAreas /> },
-
 
   { path: "/invoice/maintenance", component: <InvoiceMaintenance /> },
   { path: "/invoice/credit/notes", component: <InvoiceCreditNote /> },
