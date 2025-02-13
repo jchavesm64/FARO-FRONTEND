@@ -28,7 +28,7 @@ import { keys } from "lodash";
 import { UPDATE_RESERVA_INFO } from "../../../../services/ReservaService";
 import { OBTENER_TOURS } from "../../../../services/TourService";
 
-const AdditionalServices = () => {
+const Tours = () => {
   const client = useApolloClient();
 
   const [selectedReservation, setSelectedReservation] = useState(null);
@@ -639,4 +639,4 @@ const AdditionalServices = () => {
   );
 };
 
-export default AdditionalServices;
+export default Tours;
