@@ -262,7 +262,6 @@ const Tours = () => {
                   onClick={() => {
                     setSelectedRoom(room);
                     const extraServicesKeys = keys(extraTours);
-                    debugger;
                     if (!extraServicesKeys.includes(room?.id)) {
                       setExtraTours({
                         ...extraTours,

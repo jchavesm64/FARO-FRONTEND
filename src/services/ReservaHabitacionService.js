@@ -19,6 +19,9 @@ export const OBTENER_RESERVAHABITACION = gql`
     obtenerReservaHabitacion(id: $id) {
       id
       serviciosExtra
+      toursExtra
+      cargosHabitacion
+      serviciosExternos
       habitacion {
         id
         numeroHabitacion

@@ -39,12 +39,9 @@ const BookingChecOut = () => {
   const navigate = useNavigate();
 
   const { id } = useParams(); // Obtener el ID de la reserva desde los parámetros de la URL
-  const { data: dataCustomer } = useQuery(OBTENER_CLIENTES, {
-    pollInterval: 1000,
-  });
+  const { data: dataCustomer } = useQuery(OBTENER_CLIENTES, {});
   const { loading: loadTypeRooms, data: typeRooms } = useQuery(
-    OBTENER_TIPOSHABITACION,
-    { pollInterval: 1000 }
+    OBTENER_TIPOSHABITACION
   );
   const {
     data: data_booking,
@@ -58,8 +55,50 @@ const BookingChecOut = () => {
   } = useQuery(OBTENER_RESERVAHABITACION, {
     variables: { id: data_booking?.obtenerReserva.id },
     skip: !id,
-    pollInterval: 1000,
   });
+
+  const tableData = [
+    {
+      descripcion: "Laptop HP ProBook 450",
+      codigoCabys: "43211507",
+      precioUnitario: 750.0,
+      cantidad: 2,
+      subtotal: 1500.0,
+      impuestos: 195.0,
+    },
+    {
+      descripcion: "Monitor Dell 24''",
+      codigoCabys: "43211900",
+      precioUnitario: 200.0,
+      cantidad: 1,
+      subtotal: 200.0,
+      impuestos: 26.0,
+    },
+    {
+      descripcion: "Teclado Mecánico RGB",
+      codigoCabys: "43211802",
+      precioUnitario: 85.0,
+      cantidad: 3,
+      subtotal: 255.0,
+      impuestos: 33.15,
+    },
+    {
+      descripcion: "Mouse Inalámbrico Logitech",
+      codigoCabys: "43211708",
+      precioUnitario: 50.0,
+      cantidad: 4,
+      subtotal: 200.0,
+      impuestos: 26.0,
+    },
+    {
+      descripcion: "Silla Ergonómica de Oficina",
+      codigoCabys: "56101504",
+      precioUnitario: 320.0,
+      cantidad: 1,
+      subtotal: 320.0,
+      impuestos: 41.6,
+    },
+  ];
 
   const [filter, setFilter] = useState("");
   const [booking, setBooking] = useState(null);
@@ -71,6 +110,8 @@ const BookingChecOut = () => {
   const [stateBooking, setStateBooking] = useState(false);
 
   const [billingOption, setBillingOption] = useState("init");
+
+  const [facturaData, setFacturaData] = useState([]);
 
   const [showListService, setShowListService] = useState(false);
   const [productsSelectBill, setProductsSelectBill] = useState(null);
@@ -105,7 +146,57 @@ const BookingChecOut = () => {
       confirmButtonText: "Sí, ¡realizar check-Out!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        //Acá check Out
+        const values = [];
+        // Habitacion
+        values.push({
+          descripcion: selectedRoom.habitacion.descripcion,
+          codigoCabys: "N/A",
+          precioCompra: selectedRoom.habitacion.tipoHabitacion.precioBase,
+          cantidadArticulo: 1,
+          impuestos: [{ impuesto: 13 }],
+        });
+        // Servicos Extras - inHouse
+        selectedRoom.serviciosExtra?.forEach((value) => {
+          values.push({
+            descripcion: value.nombre,
+            codigoCabys: value.cabys ?? "N/A",
+            precioCompra: value.precio,
+            cantidadArticulo: value.extra,
+            impuestos: [{ impuesto: 13 }],
+          });
+        });
+        // Tours - inHouse
+        selectedRoom.toursExtra?.forEach((value) => {
+          values.push({
+            descripcion: value.nombre,
+            codigoCabys: value.cabys ?? "N/A",
+            precioCompra: value.precio,
+            cantidadArticulo: value.extra,
+            impuestos: [{ impuesto: 13 }],
+          });
+        });
+        // Reservacion de servicios Externos
+        selectedRoom.serviciosExternos?.forEach((value) => {
+          values.push({
+            descripcion: value.nombre,
+            codigoCabys: value.cabys ?? "N/A",
+            precioCompra: value.precio,
+            cantidadArticulo: value.extra ?? 1,
+            impuestos: [{ impuesto: 13 }],
+          });
+        });
+        // Cargos a la habitacion - inHouse
+        selectedRoom.cargosHabitacion?.forEach((value) => {
+          values.push({
+            descripcion: value.cargo,
+            codigoCabys: value.cabys ?? "N/A",
+            precioCompra: value.monto,
+            cantidadArticulo: value.extra ?? 1,
+            impuestos: [{ impuesto: 13 }],
+          });
+        });
+
+        setFacturaData(values);
         setBillingModal(true);
         toggleModal();
       }
@@ -130,7 +221,6 @@ const BookingChecOut = () => {
       setHuespedes([]);
     } else if (newBillingOption === "bookingClient") {
       setHuespedes([booking.cliente]);
-      console.log(huespedes);
     }
   };
 
@@ -338,7 +428,9 @@ const BookingChecOut = () => {
                 <Tabs defaultActiveKey={`0`} id="builling-tab" className="mb-3">
                   {huespedes.map((huesped, index) => (
                     <Tab eventKey={`${index}`} title={huesped.nombre}>
-                      <InvoiceMaintenance />
+                      <InvoiceMaintenance
+                        data={{ articulosLista: facturaData }}
+                      />
                     </Tab>
                   ))}
                 </Tabs>

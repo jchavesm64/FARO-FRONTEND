@@ -114,7 +114,6 @@ const RoomCharges = () => {
     const newChargesPerRoom = [];
     rooms?.forEach((room) => {
       if (room.cargosHabitacion) {
-        debugger;
         newChargesPerRoom.push({
           roomId: room.id,
           chargesList: room.cargosHabitacion.map((cargo) => {
