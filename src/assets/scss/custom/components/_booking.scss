@@ -2,87 +2,259 @@
 // booking.scss
 //
 
+body {
+  --max-main-container-height: 400px;
+}
+
 .card_booking {
-    margin-right: 4px;
-    margin-left: 4px;
+  margin-right: 4px;
+  margin-left: 4px;
 }
 
 .card_booking:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    opacity: 0.9;
-    position: relative;
-    z-index: 2;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
+  position: relative;
+  z-index: 2;
 }
 
 .span_color {
-    color: white;
+  color: white;
 }
 
 .shadow_booking {
-    box-shadow: 0 3px 4px rgba(rgba($dark, 0.8), 0.2);
+  box-shadow: 0 3px 4px rgba(rgba($dark, 0.8), 0.2);
 }
 
 .col-md-1-5 {
-    flex: 0 0 auto;
-    width: 9.666667%;
+  flex: 0 0 auto;
+  width: 9.666667%;
 }
 
 .delete_icon:hover {
-    transform: scale(1.5);
-    color: red;
+  transform: scale(1.5);
+  color: red;
 }
 
 .pay_icon,
 .delete_icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .pay_icon i,
 .delete_icon i {
-    font-size: 24px;
+  font-size: 24px;
 }
 
 .pay_icon:hover {
-    transform: scale(1.5);
-    color: green !important;
+  transform: scale(1.5);
+  color: green !important;
 }
 
 .booking-details,
 .room-details {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .booking-title,
 .room-title {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
 }
 
 .booking-info,
 .room-info {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .info-item {
-    flex: 1 1 45%;
-    font-size: 16px;
-    color: #555;
+  flex: 1 1 45%;
+  font-size: 16px;
+  color: #555;
 }
 
 .info-item strong {
+  color: #333;
+}
+
+.flex {
+  display: flex;
+  justify-content: space-between;
+}
+
+.flex-direction-column {
+  flex-direction: column;
+}
+
+.w-50 {
+  width: 50%;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.align-items-left {
+  text-align: left;
+  align-items: start;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.pt-0 {
+  padding-top: 0 !important;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.reservations,
+.rooms {
+  max-height: var(--max-main-container-height);
+  &-container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+
+    .card {
+      color: #333;
+      &.bg-secondary {
+        color: #f8f9fa !important;
+        background-color: rgba(
+          var(--bs-primary-rgb),
+          var(--bs-bg-opacity)
+        ) !important;
+        opacity: 0.8;
+      }
+    }
+
+    .card-body {
+      cursor: pointer;
+    }
+  }
+}
+
+.non-content {
+  display: flex;
+  justify-content: center;
+}
+
+.services-container {
+  max-height: var(--max-main-container-height);
+  .card {
     color: #333;
+    width: 100%;
+  }
+}
+
+.z-0 {
+  z-index: 0;
+}
+
+.add-link {
+  color: #92a7bd;
+  cursor: pointer;
+  text-decoration: underline !important;
+}
+.draft-card-container {
+  display: flex;
+  .select-container {
+    width: 100%;
+    padding-right: 14px;
+  }
+}
+
+.rotate-45 {
+  transform: rotate(45deg);
+}
+
+.additional-service-container {
+  display: flex;
+  .additional-service-info {
+    width: 100%;
+  }
+}
+
+.charges-container {
+  max-height: var(--max-main-container-height);
+  .table {
+    margin: 0;
+  }
+}
+.button-actions-container {
+  display: flex;
+  justify-content: end;
+  gap: 15px;
+}
+
+.btn,
+.btn:hover {
+  transition: all 50ms ease-in-out;
+}
+
+.room-change-actions {
+  justify-content: space-between;
+}
+
+.plus-minus-input-container {
+  .btn {
+    z-index: 10;
+  }
+}
+
+.precio-td {
+}
+
+.actions-td {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.select2-selection__menu {
+  z-index: 999 !important;
+}
+
+.add-save-services-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.additional-services-container {
+  padding: 15px 24px;
+}
+
+.reservas-list-container {
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.search-container {
+  display: flex;
+  gap: 14px;
 }
