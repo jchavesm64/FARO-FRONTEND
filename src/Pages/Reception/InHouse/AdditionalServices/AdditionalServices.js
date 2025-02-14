@@ -1,35 +1,34 @@
 import React, { useState, useEffect } from "react";
 import {
-  Container,
-  Row,
   Card,
-  FormGroup,
   CardBody,
   Col,
-  ModalHeader,
-  ModalBody,
+  Container,
+  FormGroup,
   Modal,
+  ModalBody,
+  ModalHeader,
+  Row,
 } from "reactstrap";
-import Breadcrumbs from "../../../components/Common/Breadcrumb";
-import DataList from "../../../components/Common/DataList";
+import { useApolloClient, useMutation } from "@apollo/client";
 import Select from "react-select";
-import { infoAlert, requestConfirmationAlert } from "../../../helpers/alert";
-import DatePicker from "react-datepicker";
-import { Tab, Tabs } from "react-bootstrap";
-import { getFecha, timestampToDateLocal } from "../../../helpers/helpers";
-import { keys } from "lodash";
-import ButtonIconTable from "../../../components/Common/ButtonIconTable";
+import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import {
   OBTENER_FULL_RESERVAHABITACION,
   UPDATE_RESERVA_HABITACION,
-} from "../../../services/ReservaHabitacionService";
-import { UPDATE_RESERVA_INFO } from "../../../services/ReservaService";
-import { useApolloClient, useMutation } from "@apollo/client";
-import { OBTENER_SERVICIO_EXTERNOS } from "../../../services/ServiciosExternalService";
+} from "../../../../services/ReservaHabitacionService";
+import { OBTENER_SERVICIO } from "../../../../services/ServiciosExtraService";
+import PlusMinusInput from "../../../../components/Common/PlusMinusInput";
+import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
+import { Tab, Tabs } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import { getFecha, timestampToDateLocal } from "../../../../helpers/helpers";
+import DataList from "../../../../components/Common/DataList";
+import { infoAlert, requestConfirmationAlert } from "../../../../helpers/alert";
+import { keys } from "lodash";
+import { UPDATE_RESERVA_INFO } from "../../../../services/ReservaService";
 
-const BookService = () => {
-  document.title = "Servicios Externos | FARO";
-
+const AdditionalServices = () => {
   const client = useApolloClient();
 
   const [selectedReservation, setSelectedReservation] = useState(null);
@@ -65,20 +64,20 @@ const BookService = () => {
         console.error("Error fetching reservas:", error);
       }
     };
-    const fetchServiciosExternos = async () => {
+    const fetchServicios = async () => {
       try {
         const { data } = await client.query({
-          query: OBTENER_SERVICIO_EXTERNOS,
+          query: OBTENER_SERVICIO,
           fetchPolicy: "network-only",
         });
-        setServices(data.obtenerServiciosExternos);
+        setServices(data.obtenerServicios);
       } catch (error) {
-        console.error("Error fetching servicios externos:", error);
+        console.error("Error fetching servicios:", error);
       }
     };
 
     fetchReservas();
-    fetchServiciosExternos();
+    fetchServicios();
   }, [client, key]);
 
   const toggleCalendarModal = () => setCalendarModal(!calendarModal);
@@ -113,12 +112,14 @@ const BookService = () => {
         <thead>
           <tr>
             <th key="service" className="text-center">
-              Servicio Externo
+              Servicio
             </th>
             <th key="price" className="text-center">
               Precio
             </th>
-
+            <th style={{ width: "20%" }} key="extra" className="text-center">
+              Extra
+            </th>
             <th style={{ width: "28%" }} key="actions" className="text-center">
               Acciones
             </th>
@@ -131,6 +132,27 @@ const BookService = () => {
               <tr key={index}>
                 <td>{line.nombre}</td>
                 <td className="precio-td">{line.precio}</td>
+                <td>
+                  {isQuantifiable && (
+                    <PlusMinusInput
+                      value={line?.extra ?? 1}
+                      handleChange={(newNum) => {
+                        const newListValue = extraServices[
+                          currentIdSelected
+                        ]?.map((s, i) => {
+                          if (index === i) return { ...s, extra: newNum };
+                          return s;
+                        });
+                        setExtraServices({
+                          ...extraServices,
+                          [currentIdSelected]: newListValue,
+                        });
+                        if (!isInfoModified) setIsInfoModified(true);
+                      }}
+                      maxAvailable={100}
+                    />
+                  )}
+                </td>
                 <td className="actions-td">
                   {isQuantifiable && (
                     <ButtonIconTable
@@ -203,7 +225,7 @@ const BookService = () => {
                     if (!extraServicesKeys.includes(reservation?.id)) {
                       setExtraServices({
                         ...extraServices,
-                        [reservation?.id]: reservation?.serviciosExternos ?? [],
+                        [reservation?.id]: reservation?.serviciosGrupal ?? [],
                       });
                     }
                   }}
@@ -265,7 +287,7 @@ const BookService = () => {
                     if (!extraServicesKeys.includes(room?.id)) {
                       setExtraServices({
                         ...extraServices,
-                        [room?.id]: room?.serviciosExternos ?? [],
+                        [room?.id]: room?.serviciosExtra ?? [],
                       });
                     }
                   }}
@@ -313,7 +335,7 @@ const BookService = () => {
     const savedServicesPromises = [];
     keys(extraServices).forEach((key) => {
       const input = {
-        serviciosExternos: extraServices[key],
+        serviciosExtra: extraServices[key],
       };
       savedServicesPromises.push(
         updateReservaHabitacion({
@@ -330,7 +352,7 @@ const BookService = () => {
     const savedServicesPromises = [];
     keys(extraServices).forEach((key) => {
       const input = {
-        serviciosExternos: extraServices[key],
+        serviciosGrupal: extraServices[key],
       };
       savedServicesPromises.push(
         updateReserva({
@@ -349,7 +371,7 @@ const BookService = () => {
         <CardBody>
           <div>
             <div className="flex flex-col p-6 additional-services-container">
-              <h3>Servicios Externos</h3>
+              <h3>Servicios Adicionales</h3>
               {(selectedRoom != null || selectedReservation != null) &&
               isSelectingType ? (
                 <div className="row row-cols-lg-auto g-3 align-items-center justify-content-between">
@@ -371,6 +393,7 @@ const BookService = () => {
                       onClick={() => {
                         addExtraService({
                           ...selectedService.value,
+                          extra: 1,
                         });
                         setSelectedService(null);
                         setIsSelectingType(false);
@@ -403,14 +426,14 @@ const BookService = () => {
                       (isReservationTabSelected && !selectedReservation)
                     }
                   >
-                    Agregar Servicio Externo
+                    Agregar Servicio
                   </button>
                   <button
                     className="btn btn-outline-secondary"
                     onClick={() => {
                       requestConfirmationAlert({
                         title: "¿Estás seguro?",
-                        bodyText: "¿Deseas guardar los externos?",
+                        bodyText: "¿Deseas guardar los servicios adicionales?",
                         confirmButtonText: "Sí, guardar cambios",
                         confirmationEvent: () => {
                           if (isRoomTabSelected)
@@ -438,8 +461,8 @@ const BookService = () => {
                     (isReservationTabSelected &&
                       selectedReservation === null)) && (
                     <p>
-                      Para actualizar o agregar servicios externos, primero
-                      tiene que seleccionar un cuarto o una reservación.
+                      Para actualizar o agregar servicios adicionales, primero
+                      tiene que seleccionar un cuarto.
                     </p>
                   )}
                   {((isRoomTabSelected && selectedRoom) ||
@@ -490,7 +513,7 @@ const BookService = () => {
                     requestConfirmationAlert({
                       title: "¿Estás seguro?",
                       bodyText:
-                        "Tienes cambios sin guardar. ¿Deseas continuar sin guardar los servicios externos?",
+                        "Tienes cambios sin guardar. ¿Deseas continuar sin guardar los servicios adicionales?",
                       confirmButtonText: "Sí, Continuar",
                       confirmationEvent: handleChangeTab,
                     });
@@ -643,4 +666,4 @@ const BookService = () => {
   );
 };
 
-export default BookService;
+export default AdditionalServices;

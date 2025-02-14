@@ -1,161 +1,103 @@
-/* import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
-import { Container, Row, Card, CardHeader, FormGroup, Label, CardTitle, CardBody, Badge, Input, Button, Col } from 'reactstrap';
-import { OBTENER_RESERVAS } from "../../../../services/ReservaService";
-import Breadcrumbs from '../../../components/Common/Breadcrumb';
-import DataList from '../../../components/Common/DataList';
+import React, { useState, useEffect } from "react";
+import { Container, Card, CardBody, Input, Table } from "reactstrap";
+import Breadcrumbs from "../../../components/Common/Breadcrumb";
+import { OBTENER_RESERVAS } from "../../../services/ReservaService";
+import { useApolloClient } from "@apollo/client";
+import { first } from "lodash";
+import { timestampToDateLocal } from "../../../helpers/helpers";
 
-const ListBooking = ({ ...props }) => {
+const ListBooking = () => {
+  document.title = "Listado de reservas | FARO";
+  const client = useApolloClient();
 
-    document.title = "Listado de reservas | FARO";
-    const { data: data_booking, loading: loading_booking, error: error_booking } = useQuery(OBTENER_RESERVAS, { pollInterval: 1000 });
+  const [reservas, setReservas] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
-    const [booking, setBooking] = useState([]);
-    const [filteredBooking, setFilteredBooking] = useState([]);
-    const [filterCriteria, setFilterCriteria] = useState({
-        estado: '',
-        clienteNombre: '',
-        fechaReserva: '',
-        tipo: ''
-    });
-
-    useEffect(() => {
-        setBooking(data_booking?.obtenerReservas || []);
-        setFilteredBooking(data_booking?.obtenerReservas || []);
-    }, [data_booking]);
-
-
-
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilterCriteria({
-            ...filterCriteria,
-            [name]: value
+  useEffect(() => {
+    const fetchReservas = async () => {
+      try {
+        const { data } = await client.query({
+          query: OBTENER_RESERVAS,
+          fetchPolicy: "network-only",
         });
+        setReservas(data.obtenerReservas);
+      } catch (error) {
+        console.error("Error fetching reservas:", error);
+      }
     };
+    fetchReservas();
+  }, [client]);
 
-    const filterBookings = () => {
-        const filtered = booking.filter(b => {
-            let matches = true;
+  const handleSearchFilter = (value) => {
+    if (!searchTerm) return true;
+    return value.cliente?.nombre?.toLowerCase().includes(searchTerm);
+  };
 
-            if (filterCriteria.estado && b.estado !== filterCriteria.estado) {
-                matches = false;
-            }
-
-            if (filterCriteria.clienteNombre) {
-                const clienteNombreLower = b.cliente.nombre.toLowerCase();
-                const clienteCodigoLower = b.cliente.codigo.toLowerCase();
-                const filterLower = filterCriteria.clienteNombre.toLowerCase();
-                if (!clienteNombreLower.includes(filterLower) && !clienteCodigoLower.includes(filterLower)) {
-                    matches = false;
-                }
-            }
-
-            if (filterCriteria.fechaReserva && new Date(Number(b.fechaReserva)).toLocaleDateString() !== new Date(filterCriteria.fechaReserva).toLocaleDateString()) {
-                matches = false;
-            }
-
-            if (filterCriteria.tipo && b.tipo !== filterCriteria.tipo) {
-                matches = false;
-            }
-
-            return matches;
-        });
-
-        setFilteredBooking(filtered);
-    };
-
-
-    useEffect(() => {
-        filterBookings();
-    }, [filterCriteria, booking]);
-
-
-    return (
-        <React.Fragment>
-            <div className="page-content">
-                <Container fluid={true}>
-                    <Breadcrumbs title="Listado de reservas" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
-                </Container>
-
-                {booking.length > 0 ? (
-                    <div className="page-content">
-                        <Row className="mb-4">
-                            <div className="col-md-12">
-                                <Card>
-                                    <CardBody>
-                                        <h5 className="card-title">Filtrar Reservas</h5>
-                                        <Row form>
-                                            <Col >
-                                                <FormGroup>
-                                                    <Label for="clienteNombre">Nombre del cliente</Label>
-                                                    <Input type="text" name="clienteNombre" id="clienteNombre" placeholder="Nombre del cliente o cédula" value={filterCriteria.clienteNombre} onChange={handleFilterChange} />
-                                                </FormGroup>
-                                            </Col>
-                                            <Row>
-                                                <Col md={4}>
-                                                    <FormGroup>
-                                                        <Label for="fechaReserva">Fecha de reserva</Label>
-                                                        <Input type="date" name="fechaReserva" id="fechaReserva" placeholder="Fecha de reserva" value={filterCriteria.fechaReserva} onChange={handleFilterChange} />
-                                                    </FormGroup>
-                                                </Col>
-                                                <Col md={4}>
-                                                    <FormGroup>
-                                                        <Label for="estado">Estado</Label>
-                                                        <Input type="select" name="estado" id="estado" value={filterCriteria.estado} onChange={handleFilterChange}>
-                                                            <option value="">Todos los estados</option>
-                                                            <option value="Cancelada">Cancelada</option>
-                                                            <option value="Pendiente">Pendiente</option>
-                                                            <option value="Pagada">Pagada</option>
-                                                            <option value="Conflicto">Conflicto</option>
-                                                            <option value="Incompleto">Incompleto</option>
-                                                            <option value="Activa">Activa</option>
-                                                            <option value="CheckIn">CheckIn</option>
-                                                            <option value="CheckOut">CheckOut</option>
-                                                            <option value="Finalizada">Finalizada</option>
-                                                        </Input>
-                                                    </FormGroup>
-                                                </Col>
-                                                <Col md={4}>
-                                                    <FormGroup>
-                                                        <Label for="estado">Estado</Label>
-                                                        <Input type="select" name="tipo" id="tipo" value={filterCriteria.tipo} onChange={handleFilterChange}>
-                                                            <option value="">Todos los tipos</option>
-                                                            <option value="IN">Individual</option>
-                                                            <option value="GR">Grupales</option>
-                                                            <option value="BL">Bloqueo</option>
-                                                            <option value="OS">Sobreventa</option>
-                                                        </Input>
-                                                    </FormGroup>
-                                                </Col>
-                                            </Row>
-                                        </Row>
-                                        <Button color="primary" onClick={filterBookings}>Filtrar</Button>
-                                    </CardBody>
-                                </Card>
-                            </div>
-                        </Row>
-                        <div className="scroll-container">
-                            <Card>
-                                <CardBody>
-                                    <DataList data={booking} type="listbook" displayLength={9} {...props} />
-                                </CardBody>
-                            </Card>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="d-flex justify-content-center align-items-center h-100">
-                        <h5 className="text-muted">No hay reservas</h5>
-                    </div>
-                )
-                }
+  return (
+    <div className="page-content">
+      <Container fluid={true}>
+        <Breadcrumbs
+          title="Listado de reservas"
+          breadcrumbItem="Recepción"
+          breadcrumbItemUrl="/reception"
+        />
+        <Card className="p-4">
+          <CardBody className="reservas-list-container">
+            <div className="search-container pt-2 pb-2">
+              <Input
+                className=""
+                value={searchTerm}
+                type="search"
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                }}
+                placeholder="Buscar por nombre"
+              />
             </div>
-
-
-        </React.Fragment>
-
-
-    );
+            <Table striped>
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Correo</th>
+                  <th>Estado</th>
+                  <th>Tipo</th>
+                  <th>Fecha de Reserva</th>
+                  <th>Adultos</th>
+                  <th>Niños</th>
+                  <th>Total</th>
+                  <th>Método de Pago</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reservas.filter(handleSearchFilter).map((reserva, index) => (
+                  <tr key={index}>
+                    <td>{reserva.cliente?.nombre || "Desconocido"}</td>
+                    <td>
+                      {first(reserva.cliente?.correos)?.email ||
+                        "No disponible"}
+                    </td>
+                    <td>{reserva.estado}</td>
+                    <td>{reserva.tipo}</td>
+                    <td>
+                      {timestampToDateLocal(
+                        Number(reserva.fechaReserva),
+                        "date"
+                      )}
+                    </td>
+                    <td>{reserva.numeroPersonas.adulto}</td>
+                    <td>{reserva.numeroPersonas.ninos}</td>
+                    <td>₡{reserva.total.toLocaleString()}</td>
+                    <td>{reserva.metodoPago || "No especificado"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </CardBody>
+        </Card>
+      </Container>
+    </div>
+  );
 };
 
-export default ListBooking; */
+export default ListBooking;
+

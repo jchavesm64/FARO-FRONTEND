@@ -1,21 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Card, CardHeader, FormGroup, Label, CardTitle, CardBody, Badge, Input, Button, Col } from 'reactstrap';
-import Breadcrumbs from '../../../components/Common/Breadcrumb';
+import React from "react";
+import { Container, Row } from "reactstrap";
+import Breadcrumbs from "../../../components/Common/Breadcrumb";
+
+import { InHouseRoutes } from "../../../constants/routesConst";
+import ButtomCardHome from "../../Home/ButtonCardHome";
 
 const InHouse = () => {
+  document.title = "InHouse | FARO";
 
-    document.title = "InHouse | FARO";
-    return (
-        <React.Fragment>
-            <div className="page-content">
-                <Container fluid={true}>
-                    <Breadcrumbs title="InHouse" breadcrumbItem="Recepción" breadcrumbItemUrl="/reception" />
-                </Container>
-            </div>
-        </React.Fragment>
-
-
-    );
+  return (
+    <div className="page-content">
+      <Container fluid={true}>
+        <Breadcrumbs title="In House" />
+        <Row key="receprionHome" className="flex justify-content-center gap-3">
+          {InHouseRoutes.map((route, index) => (
+            <ButtomCardHome key={`${route}${index}`} route={route} />
+          ))}
+        </Row>
+      </Container>
+    </div>
+  );
 };
 
 export default InHouse;
