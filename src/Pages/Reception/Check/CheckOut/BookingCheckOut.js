@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { infoAlert } from "../../../../helpers/alert";
+import { Tab, Tabs } from "react-bootstrap";
 import {
   OBTENER_RESERVA,
   CHECKIN_RESERVA,
@@ -30,6 +30,8 @@ import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
 import NewCustomer from "../../../Customers/NewCustomer";
 import { typesBooking } from "../../../../constants/routesConst";
+import InvoiceMaintenance from "../../../Invoices/Maintenance";
+import { ServiceSelectCheckOut } from "./ServiceSelectCheckOut";
 
 const BookingChecOut = () => {
   document.title = "CheckOut | FARO";
@@ -62,12 +64,16 @@ const BookingChecOut = () => {
   const [filter, setFilter] = useState("");
   const [booking, setBooking] = useState(null);
   const [modal, setModal] = useState(false);
+  const [billingModal, setBillingModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [huespedes, setHuespedes] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [stateBooking, setStateBooking] = useState(false);
 
   const [billingOption, setBillingOption] = useState("init");
+
+  const [showListService, setShowListService] = useState(false);
+  const [productsSelectBill, setProductsSelectBill] = useState(null);
 
   useEffect(() => {
     if (data_booking) {
@@ -79,6 +85,10 @@ const BookingChecOut = () => {
     setSelectedRoom(room);
     setModal(!modal);
     setBillingOption("init");
+  };
+
+  const toggleBillingModal = () => {
+    setBillingModal(!billingModal);
   };
 
   const handleCheckOut = async () => {
@@ -96,6 +106,7 @@ const BookingChecOut = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         //Acá check Out
+        setBillingModal(true);
         toggleModal();
       }
     });
@@ -112,12 +123,14 @@ const BookingChecOut = () => {
   };
 
   const handleOptionChange = (event) => {
-    setBillingOption(event.target.value);
-    setHuespedes([]);
-    if (billingOption === "splitBill" && booking) {
-      setHuespedes([{ ...booking.cliente }]);
-    } else {
-      setHuespedes(huespedes.filter((h) => h.id !== booking.cliente.id));
+    const newBillingOption = event.target.value;
+    setBillingOption(newBillingOption);
+
+    if (newBillingOption === "splitBill" && booking) {
+      setHuespedes([]);
+    } else if (newBillingOption === "bookingClient") {
+      setHuespedes([booking.cliente]);
+      console.log(huespedes);
     }
   };
 
@@ -180,6 +193,10 @@ const BookingChecOut = () => {
     Completada: "primary",
     CheckOut: "purple-600",
     Finalizada: "teal-500",
+  };
+
+  const selectpaymentService = () => {
+    setShowListService(!showListService);
   };
 
   if (loading_booking || loading_room) return <p>Cargando...</p>;
@@ -306,6 +323,29 @@ const BookingChecOut = () => {
               </Col>
             </Row>
           )}
+        <Modal
+          classname=""
+          isOpen={billingModal}
+          toggle={() => toggleBillingModal(null)}
+          size="xl"
+        >
+          <ModalHeader toggle={() => toggleBillingModal(null)}>
+            Facturación
+          </ModalHeader>
+          <ModalBody>
+            <Card className="w-100">
+              <CardBody>
+                <Tabs defaultActiveKey={`0`} id="builling-tab" className="mb-3">
+                  {huespedes.map((huesped, index) => (
+                    <Tab eventKey={`${index}`} title={huesped.nombre}>
+                      <InvoiceMaintenance />
+                    </Tab>
+                  ))}
+                </Tabs>
+              </CardBody>
+            </Card>
+          </ModalBody>
+        </Modal>
 
         <Modal
           classname=""
@@ -314,161 +354,198 @@ const BookingChecOut = () => {
           size="lg"
         >
           <ModalHeader toggle={() => toggleModal(null)}>
-            Facturación
-          </ModalHeader>
-          <ModalBody>
-            <FormGroup>
-              <Row className="p-3">
-                <Col className="d-flex justify-content-center">
-                  <div className="form-check ms-3 mt-4">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      id="useBookingClient"
-                      name="billingOption"
-                      value="bookingClient"
-                      checked={billingOption === "bookingClient"}
-                      onClick={handleOptionChange}
-                    />
-                    <label
-                      htmlFor="useBookingClient"
-                      className="form-check-label ms-2"
-                    >
-                      Facturar a quien realizó la reserva
-                    </label>
-                  </div>
-                </Col>
-                <Col className="d-flex justify-content-center">
-                  <div className="form-check ms-3 mt-4">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      id="useSplitBill"
-                      name="billingOption"
-                      value="splitBill"
-                      checked={billingOption === "splitBill"}
-                      onClick={handleOptionChange}
-                    />
-                    <label
-                      htmlFor="useSplitBill"
-                      className="form-check-label ms-2"
-                    >
-                      Dividir cuenta
-                    </label>
-                  </div>
-                </Col>
-              </Row>
-            </FormGroup>
-            {(billingOption !== "init") & (billingOption !== null) ? (
-              <Row className="d-flex justify-content-between p-3">
-                <Row className="d-flex justify-content-between p-3 pb-0">
-                  <div className="col-md-12 mb-1">
-                    <label> Busca el cliente</label>
-                    <input
-                      className="form-control"
-                      id="search-input"
-                      value={filter}
-                      onChange={(e) => handleInputChange(e)}
-                      type="search"
-                      disabled={billingOption === "bookingClient"}
-                      placeholder="Escribe el nombre o la identificación del cliente"
-                    />
-                  </div>
-                </Row>
-
-                <Row className="col-md-12 d-flex align-items-center flex-wrap ps-4">
-                  {customers?.length > 0 ? (
-                    <ul
-                      className="list-group form-control ontent-scroll p-3 mb-3 border rounded-3"
-                      style={{
-                        zIndex: 1000,
-                        maxHeight: "300px",
-                        overflowY: "auto",
-                      }}
-                    >
-                      {customers.map((customer, index) => (
-                        <li
-                          key={customer.id}
-                          onClick={() => handleCustomer(customer)}
-                          className="ist-group-item list-group-item-action rounded p-2 search_customer_wizard"
-                        >
-                          {customer.nombre}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    filter !== "" && (
-                      <Row className="d-flex justify-content-between  p-3">
-                        <label>No existe el cliente, ¿Desea agregar uno?</label>
-                        <Card className="col-xl-12 col-md-12 p-0">
-                          <CardBody className="p-0">
-                            <NewCustomer
-                              props={{ addNewCustomer, stateBooking }}
-                            />
-                          </CardBody>
-                        </Card>
-                      </Row>
-                    )
-                  )}
-                </Row>
-                <Card className="p-3">
-                  {huespedes.map((huesped, index) => (
-                    <Row key={index} form>
-                      <Col md={5}>
-                        <FormGroup>
-                          <Label for={`nombre-${index}`}>
-                            <strong>Nombre:</strong>{" "}
-                            <span className="fs-5 label_package_color">
-                              {huesped.nombre}
-                            </span>
-                          </Label>
-                        </FormGroup>
-                      </Col>
-                      <Col md={5}>
-                        <FormGroup>
-                          <Label for={`documento-${index}`}>
-                            <strong>Identificación:</strong>{" "}
-                            <span className="fs-5 label_package_color">
-                              {huesped.codigo}
-                            </span>
-                          </Label>
-                        </FormGroup>
-                      </Col>
-                      <Col md={2} className="d-flex align-items-center">
-                        <ButtonIconTable
-                          icon="mdi mdi-delete"
-                          color="danger"
-                          onClick={() => {
-                            removeHuesped(index);
-                          }}
-                        />
-                      </Col>
-                    </Row>
-                  ))}
-                </Card>
-              </Row>
+            {!showListService ? (
+              <>¿A quién facturar? </>
             ) : (
-              <div className="d-flex justify-content-center p-3">
-                <label
-                  htmlFor="search-input"
-                  className="col-md-4 col-form-label text-center"
-                >
-                  Selecciona una opción
-                </label>
-              </div>
+              <>Selecionar servicios</>
             )}
-          </ModalBody>
+          </ModalHeader>
+          {!showListService ? (
+            <ModalBody>
+              <FormGroup>
+                <Row className="p-3">
+                  <Col className="d-flex justify-content-center">
+                    <div className="form-check ms-3 mt-4">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        id="useBookingClient"
+                        name="billingOption"
+                        value="bookingClient"
+                        checked={billingOption === "bookingClient"}
+                        onClick={handleOptionChange}
+                      />
+                      <label
+                        htmlFor="useBookingClient"
+                        className="form-check-label ms-2"
+                      >
+                        Facturar a quien realizó la reserva
+                      </label>
+                    </div>
+                  </Col>
+                  <Col className="d-flex justify-content-center">
+                    <div className="form-check ms-3 mt-4">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        id="useSplitBill"
+                        name="billingOption"
+                        value="splitBill"
+                        checked={billingOption === "splitBill"}
+                        onClick={handleOptionChange}
+                      />
+                      <label
+                        htmlFor="useSplitBill"
+                        className="form-check-label ms-2"
+                      >
+                        Dividir cuenta
+                      </label>
+                    </div>
+                  </Col>
+                </Row>
+              </FormGroup>
+              {(billingOption !== "init") & (billingOption !== null) ? (
+                <Row className="d-flex justify-content-between p-3">
+                  <Row className="d-flex justify-content-between p-3 pb-0">
+                    <div className="col-md-12 mb-1">
+                      <label> Busca el cliente</label>
+                      <input
+                        className="form-control"
+                        id="search-input"
+                        value={filter}
+                        onChange={(e) => handleInputChange(e)}
+                        type="search"
+                        disabled={billingOption === "bookingClient"}
+                        placeholder="Escribe el nombre o la identificación del cliente"
+                      />
+                    </div>
+                  </Row>
+
+                  <Row className="col-md-12 d-flex align-items-center flex-wrap ps-4">
+                    {customers?.length > 0 ? (
+                      <ul
+                        className="list-group form-control ontent-scroll p-3 mb-3 border rounded-3"
+                        style={{
+                          zIndex: 1000,
+                          maxHeight: "300px",
+                          overflowY: "auto",
+                        }}
+                      >
+                        {customers.map((customer, index) => (
+                          <li
+                            key={customer.id}
+                            onClick={() => handleCustomer(customer)}
+                            className="ist-group-item list-group-item-action rounded p-2 search_customer_wizard"
+                          >
+                            {customer.nombre}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      filter !== "" && (
+                        <Row className="d-flex justify-content-between  p-3">
+                          <label>
+                            No existe el cliente, ¿Desea agregar uno?
+                          </label>
+                          <Card className="col-xl-12 col-md-12 p-0">
+                            <CardBody className="p-0">
+                              <NewCustomer
+                                props={{ addNewCustomer, stateBooking }}
+                              />
+                            </CardBody>
+                          </Card>
+                        </Row>
+                      )
+                    )}
+                  </Row>
+                  <Card className="p-3">
+                    {huespedes.map((huesped, index) => (
+                      <Row key={index} form>
+                        <Col md={5}>
+                          <FormGroup>
+                            <Label for={`nombre-${index}`}>
+                              <strong>Nombre:</strong>{" "}
+                              <span className="fs-5 label_package_color">
+                                {huesped.nombre}
+                              </span>
+                            </Label>
+                          </FormGroup>
+                        </Col>
+                        <Col md={5}>
+                          <FormGroup>
+                            <Label for={`documento-${index}`}>
+                              <strong>Identificación:</strong>{" "}
+                              <span className="fs-5 label_package_color">
+                                {huesped.codigo}
+                              </span>
+                            </Label>
+                          </FormGroup>
+                        </Col>
+                        <Col md={2} className="d-flex align-items-center">
+                          <ButtonIconTable
+                            icon="mdi mdi-delete"
+                            color="danger"
+                            onClick={() => {
+                              removeHuesped(index);
+                            }}
+                          />
+                        </Col>
+                      </Row>
+                    ))}
+                  </Card>
+                </Row>
+              ) : (
+                <div className="d-flex justify-content-center p-3">
+                  <label
+                    htmlFor="search-input"
+                    className="col-md-4 col-form-label text-center"
+                  >
+                    Selecciona una opción
+                  </label>
+                </div>
+              )}
+            </ModalBody>
+          ) : (
+            <ModalBody>
+              <Card className="w-100">
+                <CardBody>
+                  <Tabs
+                    defaultActiveKey={`0`}
+                    id="builling-tab"
+                    className="mb-3"
+                  >
+                    {huespedes.map((huesped, index) => (
+                      <Tab eventKey={`${index}`} title={huesped.nombre}>
+                        <ServiceSelectCheckOut />
+                      </Tab>
+                    ))}
+                  </Tabs>
+                </CardBody>
+              </Card>
+            </ModalBody>
+          )}
+
           <ModalFooter>
             <Button color="secondary" onClick={() => toggleModal(null)}>
               Cancelar
             </Button>
-            <Button
-              disabled={huespedes.length === 0}
-              color="success"
-              onClick={handleCheckOut}
-            >
-              Realizar Check-Out
-            </Button>
+            {billingOption !== "init" && (
+              <Button
+                disabled={huespedes.length === 0}
+                color="success"
+                onClick={
+                  billingOption === "bookingClient"
+                    ? handleCheckOut
+                    : selectpaymentService
+                }
+              >
+                {billingOption === "bookingClient" ? (
+                  <>Realizar Check-Out</>
+                ) : (
+                  <>Selecionar servicios</>
+                )}
+              </Button>
+            )}
           </ModalFooter>
         </Modal>
       </div>

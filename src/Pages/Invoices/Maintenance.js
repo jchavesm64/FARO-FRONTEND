@@ -15,8 +15,6 @@ const InvoiceMaintenance = ({ ...props }) => {
 
     document.title = "Mantenimiento | FARO";
 
-    console.log("START")
-
     const { data: dataCurrencyTypes} = useQuery(OBTENER_FACTURAS_PARAMETROS_BY_TYPE, { variables: { type: 'currencyTypes' }, pollInterval: 1000 })
 
     const { data: dataPaymentMethods} = useQuery(OBTENER_FACTURAS_PARAMETROS_BY_TYPE, { variables: { type: 'paymentMethods' }, pollInterval: 1000 })
