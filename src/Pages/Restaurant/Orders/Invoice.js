@@ -28,7 +28,7 @@ const Invoice = (props) => {
     
     const { data: dataPaymentMethods} = useQuery(OBTENER_FACTURAS_PARAMETROS_BY_TYPE, { variables: { type: 'paymentMethods' }, pollInterval: 1000 })
     
-    const { data: dataSaleConditions} = useQuery(OBTENER_FACTURAS_PARAMETROS_BY_TYPE, { variables: { type: 'saleConditions' }, pollInterval: 1000 })
+    const { data: dataSaleConditions} = useQuery(OBTENER_FACTURAS_PARAMETROS_BY_TYPE, { variables: { type: 'restaurantSaleConditions' }, pollInterval: 1000 })
     
     const { data: dataDocumentTypes} = useQuery(OBTENER_FACTURAS_PARAMETROS_BY_TYPE, { variables: { type: 'documentTypes' }, pollInterval: 1000 })
 
@@ -68,6 +68,7 @@ const Invoice = (props) => {
     const toggle = () => setModal(!modal);
 
     const [modalClientes, setModalClientes] = useState(false);
+
     const toggleClientes = () => setModalClientes(!modalClientes);
 
     const [codigoArticulo, setCodigoArticulo] = useState("");
@@ -76,13 +77,18 @@ const Invoice = (props) => {
 
     const [articulosLista, setArticulosLista] = useState([]);
 
-    const [clienteFacturar, setClienteFacturar] = useState(false);
+    const [clienteFacturar, setClienteFacturar] = useState(null);
 
     const [subTotalValue, setSubTotalValue] = useState(0);
     const [descuentoTotalValue, setDescuentoTotalValue] = useState(0);
+    const [impuestoValueIVA, setImpuestoValueIVA] = useState(0);
+    const [impuestoServicioValue, setImpuestoServicioValue] = useState(0);
     const [impuestoIVA, setImpuestoIVA] = useState(0);
     const [impuestoServicio, setImpuestoServicio] = useState(0);
     const [totalPagarValue, setTotalPagarValue] = useState(0);
+    const [clientesFiltrados, setClientesFiltrados] = useState([]);
+    const [nombreFacturacion, setNombreFacturacion] = useState("");
+    const [servicesModal, setServicesModal] = useState(false);
 
     useEffect(() => {
         if (dataImpuestoIVA?.obtenerImpuestoByNombre?.valor !== undefined) {
@@ -98,16 +104,18 @@ const Invoice = (props) => {
     
 
     useEffect(() => {
-        if (data){
-            if (data?.subcuentas[0]?.platillos?.length > 0){
-                setPlatillos(data?.subcuentas[0]?.platillos)
+        if (data) {
+            if (data?.subcuentas[0]?.platillos?.length > 0) {
+                const filteredPlatillos = data.subcuentas[0].platillos.filter(platillo => platillo.estado !== 'Pendiente');
+                setPlatillos(filteredPlatillos);
             }
         }
-    }, [data])
+    }, [data]);
 
     useEffect(() => {
         const initialState = platillos.reduce((acc, platillo) => {
-            acc[platillo._id] = false; 
+            acc[platillo._id] = platillo.estado === 'Pagado'; 
+            document.getElementById(`checkbox-${platillo._id}`).checked = platillo.estado === 'Pagado';
             return acc;
         }, {});
     
@@ -364,7 +372,7 @@ const Invoice = (props) => {
     const calculateSubTotal = () => {
         let subTotal = 0;
         platillos.forEach((platillo) => {
-            if (selected[platillo._id]) { 
+            if (selected[platillo._id] && platillo.estado !== 'Pagado') { 
                 subTotal += platillo.precio;
             }
         });
@@ -373,8 +381,7 @@ const Invoice = (props) => {
 
     const calculateTotal = () => {
         let total = 0;
-        total = subTotalValue + (subTotalValue*(impuestoIVA/100)) + (subTotalValue*(impuestoServicio/100));
-        total = total - (total*descuentoTotalValue);
+        total = (subTotalValue + (subTotalValue*(impuestoIVA/100)) + (subTotalValue*(impuestoServicio/100)))-((subTotalValue/100)*descuentoTotalValue);
         return total;
     };
 
@@ -395,14 +402,18 @@ const Invoice = (props) => {
         const newSelectAll = !selectAll;
         setSelectAll(newSelectAll);
         platillos.forEach((platillo) => {
-            const checkbox = document.getElementById(`checkbox-${platillo._id}`);
-            if (checkbox) {
-                checkbox.checked = newSelectAll;
+            if (platillo.estado !== 'Pagado') {
+                const checkbox = document.getElementById(`checkbox-${platillo._id}`);
+                if (checkbox) {
+                    checkbox.checked = newSelectAll;
+                }
             }
         });
 
         const newSelectedState = platillos.reduce((acc, platillo) => {
-            acc[platillo._id] = newSelectAll;
+            if (platillo.estado !== 'Pagado') {
+                acc[platillo._id] = newSelectAll;
+            } 
             return acc;
         }, {});
 
@@ -416,7 +427,36 @@ const Invoice = (props) => {
     
     useEffect(() => {
         setTotalPagarValue(calculateTotal());
-    }, [subTotalValue, impuestoIVA, impuestoServicio, descuentoTotalValue]);
+        setImpuestoValueIVA(subTotalValue*(impuestoIVA/100));
+        setImpuestoServicioValue(subTotalValue*(impuestoServicio/100));
+    }, [subTotalValue, impuestoIVA, impuestoServicio, descuentoTotalValue, impuestoValueIVA, impuestoServicioValue]);
+
+
+    const handleInputChangeCliente = (e) => {
+        const valor = e.target.value;
+        setClienteCedula(valor);
+        if (valor.trim() === "") {
+            setClienteFacturar(null);
+            setNombreFacturacion("");
+        }
+
+        if (valor.length > 0) {
+            const filtrados = dataAllClientes.obtenerClientes.filter((cliente) =>
+                cliente.codigo.includes(valor) || cliente.nombre.toLowerCase().includes(valor.toLowerCase())
+            );
+            setClientesFiltrados(filtrados);
+            setModalClientes(filtrados.length > 0);
+        } else {
+            setModalClientes(false);
+        }
+    };
+    const seleccionarCliente = (cliente) => {
+        setClienteCedula(`${cliente.codigo} - ${cliente.nombre}`);
+        setNombreFacturacion(cliente.nombreFacturacion);
+        setClienteFacturar(cliente);
+        setModalClientes(false);
+        //onClienteSeleccionado(cliente); // Callback para manejar el cliente seleccionado
+    };
     
     const getOrders = () => {
         //console.log(table)
@@ -427,9 +467,9 @@ const Invoice = (props) => {
         return (
             <div>
                 {platillos.map((platillo) => (
-                    <Card key={platillo._id} className="mb-2 card-pending-orders" style={{ margin: "20px" }}>
+                    <Card key={platillo._id} className="mb-2 card-pending-orders" style={{ margin: "5px", opacity: platillo.estado === "Pagado" ? 0.6 : 1, backgroundColor: platillo.estado === "Pagado" ? "#f0f0f0" : "white"}}>
                         <CardBody>
-                            <div className="mb-2">
+                            <div className="mb-1">
                                 <div className="d-flex justify-content-between align-items-center">
                                     <div className="col-md-auto">
                                         <h5>{platillo.nombre}</h5>
@@ -440,19 +480,19 @@ const Invoice = (props) => {
                                             type="checkbox"
                                             id={`checkbox-${platillo?._id}`}
                                             onChange={() => handleCheckboxChange(platillo._id)}
-                                            autocomplete="off"
+                                            disabled={platillo.estado === 'Pagado'} 
                                         />
                                     </div>
                                 </div>
                                 <Row className="align-items-center">
-                                    <div className="col-md-12">
+                                    <div className="col-md-9">
                                         <h6 className="mb-0">{formatObservationsText(platillo.observaciones)}</h6>
                                     </div>
                                 </Row>
                                 <hr />
                                 <Row className="d-flex justify-content-between align-items-center">
                                     <div className="col-md-auto">
-                                        <h6>{"Estado: " + platillo.estado}</h6>
+                                        <h6 style={{ color: platillo.estado === "Pagado" ? "#020aaf" : "black" }}>{"Estado: " + platillo.estado}</h6>
                                     </div>
                                     <div className="col-md-auto text-end">
                                         <h5>₡{platillo.precio}</h5>
@@ -466,6 +506,12 @@ const Invoice = (props) => {
         );
     };
 
+    const openServicesModal = () => {
+        if (codigoArticulo.length > 0) {
+           setServicesModal(true);
+        }
+    };
+
 
 
     return (
@@ -474,56 +520,68 @@ const Invoice = (props) => {
                 <Container fluid={true}>
                 <Breadcrumbs title='Facturación' breadcrumbItem='Comandas' breadcrumbItemUrl='/restaurant/orders/' />
                     <Row className="justify-content-between">
-                        <div className="container-fluid">
-                            <div className="row justify-content-center">
-                                <div className="col-8 col-md-9">
+                        <div className="container-fluid ms-2">
+                            <div className="row">
+                                <div className="col-12 col-md-11">
                                     <Row>
                                         <h4 className="form-label">Datos del Cliente</h4>
-                                    </Row>
+                                    </Row> 
 
-                                    <Row>
-                                        {!props.data?.clienteFacturar && (
-                                            <>
-                                                <label className="form-label mt-2">Cédula</label>
-                                                <Row className="align-items-center">
-                                                    <div className="col-9 col-md-10">
-                                                        <input 
-                                                            className="form-control" 
-                                                            type="text" 
-                                                            placeholder="Cliente Cédula o Nombre" 
-                                                            onChange={(e) => setClienteCedula(e.target.value)} 
-                                                            value={clienteCedula} 
-                                                        />
-                                                    </div>
-                                                    <div className="col-3 col-md-2">
-                                                        <button 
-                                                            type="button" 
-                                                            className="btn btn-info btn-rounded waves-effect waves-light" 
-                                                            onClick={toggleClientes} 
-                                                            disabled={clienteCedula.length === 0}
-                                                        >
-                                                            <i className="mdi mdi-magnify"></i>
-                                                        </button>
-                                                    </div>
-                                                </Row>
-                                            </>
-                                        )}
-                                    </Row>
-
-                                    <Row className="mt-3">
-                                        <div className="col-12 col-md-7 mb-3">
-                                            <label className="form-label">Nombre de Facturación</label>
-                                            <input className="form-control" type="text" placeholder="Nombre de Facturación" value={clienteFacturar?.nombre || ""} readOnly />
+                                    <Row className="align-items-center position-relative">
+                                        <div className="col-6 col-md-5 position-relative">
+                                            <label className="form-label">Cédula - Nombre</label>
+                                            <input
+                                                className="form-control"
+                                                type="text"
+                                                placeholder="Cliente Cédula o Nombre"
+                                                value={clienteCedula}
+                                                onChange={handleInputChangeCliente}
+                                            />
+                                            {modalClientes && (
+                                                <div 
+                                                    className="position-absolute bg-white border rounded shadow w-100" 
+                                                    style={{ top: "100%", left: 0, zIndex: 1000, maxHeight: "200px", overflowY: "auto" }}
+                                                >
+                                                    {clientesFiltrados.length > 0 ? (
+                                                        clientesFiltrados.map((cliente) => (
+                                                            <div key={cliente.codigo} className="p-2 border-bottom cursor-pointer" onClick={() => seleccionarCliente(cliente)}>
+                                                                {cliente.codigo} - {cliente.nombre}
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="p-2 text-muted">No se encontraron clientes</div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="col-12 col-md-4 mb-3">
+
+                                        <div className="col-4 col-md-4">
+                                            <label className="form-label">Nombre de Facturación</label>
+                                            <input 
+                                                className="form-control" 
+                                                type="text" 
+                                                placeholder="Nombre de Facturación" 
+                                                value={nombreFacturacion}   
+                                                onChange={(e) => setNombreFacturacion(e.target.value)} 
+                                                disabled={clienteFacturar !== null} 
+                                            />
+                                        </div>
+
+                                        <div className="col-3 col-md-3">
                                             <label className="form-label">Estado de Crédito</label>
-                                            <input className="form-control" type="text" placeholder="Crédito Disponible" value={clienteFacturar?.estadoCredito || ""} readOnly />
+                                            <input 
+                                                className="form-control" 
+                                                type="text" 
+                                                placeholder="Crédito Disponible" 
+                                                value={clienteFacturar?.estadoCredito || ""} 
+                                                disabled 
+                                            />
                                         </div>
                                     </Row>
 
                                     <h4 className="form-label mt-3">Incluir Servicios</h4>
                                     <Row>
-                                        <label className="form-label mt-2">Número de habitación</label>
+                                        <label className="form-label mt-1">Número de habitación</label>
                                     </Row>
 
                                     <Row className="align-items-center">
@@ -540,16 +598,34 @@ const Invoice = (props) => {
                                             <button 
                                                 type="button" 
                                                 className="btn btn-info btn-rounded waves-effect waves-light" 
-                                                onClick={toggle} 
-                                                disabled={codigoArticulo.length === 0}
+                                                onClick={openServicesModal}
                                             >
                                                 <i className="mdi mdi-magnify"></i>
                                             </button>
                                         </div>
+                                        {servicesModal && (
+                                            <div className="modal fade" id="servicesModal" tabIndex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                <div className="modal-dialog">
+                                                    <div className="modal-content">
+                                                        <div className="modal-header">
+                                                            <h5 className="modal-title" id="modalLabel">Modal de Servicios</h5>
+                                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div className="modal-body">
+                                                            Contenido del modal...
+                                                        </div>
+                                                        <div className="modal-footer">
+                                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                            <button type="button" className="btn btn-primary">Aceptar</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </Row>
 
-                                    <Row className="mt-4">
-                                        <div className="col-12 col-md-5 mb-3">
+                                    <Row className="mt-3">
+                                        <div className="col-12 col-md-3 mb-3">
                                             <label className="form-label">Condición de Venta</label>
                                             <Select 
                                                 id="condicion_venta" 
@@ -561,42 +637,7 @@ const Invoice = (props) => {
                                                 menuPosition="fixed" 
                                             />
                                         </div>
-                                        <div className="col-12 col-md-5 mb-3">
-                                            <label className="form-label">Tipo de Factura</label>
-                                            <Select 
-                                                id="tipo_factura" 
-                                                value={selectedTipoFactura} 
-                                                onChange={onChangeTipoFactura} 
-                                                options={tipoFacturas} 
-                                                classNamePrefix="select2-selection" 
-                                                isSearchable={true} 
-                                                menuPosition="fixed" 
-                                                isDisabled={!!props.data?.selectedTipoFactura} 
-                                            />
-                                        </div>
-                                    </Row>
-
-                                    <Row>
-                                        <div className="col-12 col-md-5 mb-3">
-                                            <label className="form-label">Moneda de Pago</label>
-                                            <Select 
-                                                id="tipo_moneda" 
-                                                value={selectedTipoMoneda} 
-                                                onChange={onChangeTipoMoneda} 
-                                                options={tipoMonedas} 
-                                                classNamePrefix="select2-selection" 
-                                                isSearchable={true} 
-                                                menuPosition="fixed" 
-                                            />
-                                        </div>
-                                        <div className="col-12 col-md-5 mb-3">
-                                            <label className="form-label">Tipo de Cambio</label>
-                                            <input className="form-control" type="number" readOnly />
-                                        </div>
-                                    </Row>
-
-                                    <Row>
-                                        <div className="col-12 col-md-5 mb-3">
+                                        <div className="col-12 col-md-3 mb-3">
                                             <label className="form-label">Forma de Pago</label>
                                             <Select 
                                                 id="metodo_pago" 
@@ -608,23 +649,39 @@ const Invoice = (props) => {
                                                 menuPosition="fixed" 
                                             />
                                         </div>
+                                        <div className="col-12 col-md-3 mb-3">
+                                            <label className="form-label">Moneda de Pago</label>
+                                            <Select 
+                                                id="tipo_moneda" 
+                                                value={selectedTipoMoneda} 
+                                                onChange={onChangeTipoMoneda} 
+                                                options={tipoMonedas} 
+                                                classNamePrefix="select2-selection" 
+                                                isSearchable={true} 
+                                                menuPosition="fixed" 
+                                            />
+                                        </div>
+                                        <div className="col-12 col-md-3 mb-3">
+                                            <label className="form-label">Tipo de Cambio</label>
+                                            <input className="form-control" type="number" readOnly />
+                                        </div>
                                     </Row>
                                 </div>
                             </div>
                         </div>
 
-                        <Row className="justify-content-center mt-3">
+                        <Row className="justify-content-center mt-4">
                             <div style={{border: '1px solid #ced4da', borderRadius: '0.25rem', height: '500px', width:'850px', backgroundColor: '#ffffff',  margin: 'auto'}}>
                                 <Row>
-                                    <div className="text-center mt-4">
+                                    <div className="text-center mt-3">
                                         <h4><strong>{table.isChair === true ? "Silla "+ table?.name : table?.name}</strong></h4>
                                     </div>
-                                    <div className="ms-5 mt-3">
+                                    <div className="ms-5 mt-2">
                                         <h6><strong>Piso:</strong> {floor?.value.nombre}</h6>
                                         <h6><strong>Fecha:</strong> {getFechaTZ("fechaHora", data.fecha)}</h6>
                                     </div>
                                 </Row>
-                                <Row className="d-flex align-items-center justify-content-between mt-3 mb-2">
+                                <Row className="d-flex align-items-center justify-content-between mt-2 mb-2">
                                     <div className="col-md-auto text-center mb-1 mt-2 ms-5">
                                         <h5>Subcuenta</h5>
                                     </div>
@@ -639,45 +696,59 @@ const Invoice = (props) => {
                                 </div>
                             </div>
                         </Row>
-                        <div className="mt-5 mb-5">
+                        <div className="mt-4 mb-5">
                             <Row className="flex-column">
-                                <div className="col-9 mb-3 d-flex align-items-center">
-                                    <label className="form-label col-md-4 me-4 text-end">Subtotal</label>
-                                    <div className="input-group w-100">
-                                        <span class="input-group-text">₡</span>
-                                        <input className="form-control disabled-input fs-5 fw-bold" type="number" placeholder="0.00" value={subTotalValue} disabled/>
+                                <div className="col-12 mb-3">
+                                    <div className="row row-cols-1 row-cols-md-3 g-3">
+                                        <div className="col">
+                                            <label className="form-label">Subtotal</label>
+                                            <div className="input-group">
+                                                <span className="input-group-text">$</span>
+                                                <input className="form-control disabled-input fs-5 fw-bold" type="number" placeholder="0.00" value={subTotalValue} disabled />
+                                            </div>
+                                        </div>
+                                        <div className="col">
+                                            <label className="form-label">IVA</label>
+                                            <div className="input-group">
+                                                <span className="input-group-text">$</span>
+                                                <input className="form-control disabled-input fs-5 fw-bold" type="number" placeholder="0.00" value={impuestoValueIVA} disabled />
+                                            </div>
+                                        </div>
+                                        <div className="col d-flex align-items-center">
+                                            <input className="form-check-input fs-4 me-2" type="checkbox" />
+                                            <label className="form-check-label">Generar Factura Electrónica</label>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="col-9 mb-3 d-flex align-items-center">
-                                    <label className="form-label col-md-4 me-4 text-end">Descuento</label>
-                                    <div className="input-group w-100">
-                                        <span class="input-group-text">%</span>
-                                        <input className="form-control fs-5 fw-bold" type="number" placeholder="0" value={descuentoTotalValue} onChange={(e) => setDescuentoTotalValue(e.target.value)}/>
+
+                                <div className="col-12 mb-3">
+                                    <div className="row row-cols-1 row-cols-md-3 g-3">
+                                        <div className="col">
+                                            <label className="form-label">Descuento</label>
+                                            <div className="input-group">
+                                                <span className="input-group-text">%</span>
+                                                <input className="form-control fs-5 fw-bold" type="number" placeholder="0" value={descuentoTotalValue} onChange={(e) => setDescuentoTotalValue(e.target.value)} />
+                                            </div>
+                                        </div>
+                                        <div className="col">
+                                            <label className="form-label">Impuesto por servicio</label>
+                                            <div className="input-group">
+                                                <span className="input-group-text">$</span>
+                                                <input className="form-control fs-5 fw-bold" type="number" placeholder="0.00" value={impuestoServicioValue ?? 0} disabled />
+                                            </div>
+                                        </div>
+                                        <div className="col">
+                                            <label className="form-label">Total a Pagar</label>
+                                            <div className="input-group">
+                                                <span className="input-group-text">$</span>
+                                                <input className="form-control disabled-input fs-5 fw-bold" type="number" placeholder="0.00" value={totalPagarValue} disabled />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="col-9 mb-3 d-flex align-items-center">
-                                    <label className="form-label col-md-4 me-4 text-end">IVA</label>
-                                    <div className="input-group w-100">
-                                        <span class="input-group-text">%</span>
-                                        <input className="form-control disabled-input fs-5 fw-bold" type="number" placeholder="0.00" value={impuestoIVA} disabled/>
-                                    </div>
-                                </div>
-                                <div className="col-9 mb-3 d-flex align-items-center">
-                                    <label className="form-label col-md-4 me-4 text-end">Impuesto por servicio</label>
-                                    <div className="input-group w-100">
-                                        <span class="input-group-text">%</span>
-                                        <input className="form-control disabled-input fs-5 fw-bold" type="number" placeholder="0.00" value={impuestoServicio ?? 0}/>
-                                    </div>
-                                </div>
-                                <div className="col-9 mb-3 d-flex align-items-center">
-                                    <label className="form-label col-md-4 me-4 text-end">Total a Pagar</label>
-                                    <div className="input-group w-100">
-                                        <span class="input-group-text">₡</span>
-                                        <input className="form-control disabled-input fs-5 fw-bold" type="number" placeholder="0.00" value={totalPagarValue} disabled/>
-                                    </div>
-                                </div>
-                                <div className="col-9 mb-3 mt-4 d-flex align-items-center" style={{ marginLeft: "140px" }}>
-                                    <button type="button" className="col-md-4 btn btn-primary waves-effect waves-light w-100" onClick={()=>toEmit()}>
+
+                                <div className="col-12 mb-3 mt-4 d-flex justify-content-center">
+                                    <button type="button" className="btn btn-primary waves-effect waves-light w-50" onClick={()=>toEmit()}>
                                         Emitir
                                     </button>
                                 </div>

@@ -61,6 +61,7 @@ const TableOrders = ({ data, onDelete }) => {
                                     icon="mdi mdi-delete"
                                     color="danger"
                                     onClick={() => onDelete(order.subcuenta, order._id, order.nombre, order.estado)}
+                                    disabled={order.estado !== 'Pendiente'}
                                 />
                             </td>
                         </tr>
