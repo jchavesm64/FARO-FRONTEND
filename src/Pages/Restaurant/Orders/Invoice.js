@@ -698,7 +698,7 @@ const Invoice = (props) => {
                         </Row>
                         <div className="mt-4 mb-5">
                             <Row className="flex-column">
-                                <div className="col-12 mb-3">
+                                <div className="col-12 col-md-11 mb-3">
                                     <div className="row row-cols-1 row-cols-md-3 g-3">
                                         <div className="col">
                                             <label className="form-label">Subtotal</label>
@@ -708,10 +708,10 @@ const Invoice = (props) => {
                                             </div>
                                         </div>
                                         <div className="col">
-                                            <label className="form-label">IVA</label>
+                                            <label className="form-label">Descuento</label>
                                             <div className="input-group">
-                                                <span className="input-group-text">$</span>
-                                                <input className="form-control disabled-input fs-5 fw-bold" type="number" placeholder="0.00" value={impuestoValueIVA} disabled />
+                                                <span className="input-group-text">%</span>
+                                                <input className="form-control fs-5 fw-bold" type="number" placeholder="0" value={descuentoTotalValue} onChange={(e) => setDescuentoTotalValue(e.target.value)} />
                                             </div>
                                         </div>
                                         <div className="col d-flex align-items-center">
@@ -721,13 +721,13 @@ const Invoice = (props) => {
                                     </div>
                                 </div>
 
-                                <div className="col-12 mb-3">
+                                <div className="col-12 col-md-11 mb-3">
                                     <div className="row row-cols-1 row-cols-md-3 g-3">
                                         <div className="col">
-                                            <label className="form-label">Descuento</label>
+                                            <label className="form-label">IVA</label>
                                             <div className="input-group">
-                                                <span className="input-group-text">%</span>
-                                                <input className="form-control fs-5 fw-bold" type="number" placeholder="0" value={descuentoTotalValue} onChange={(e) => setDescuentoTotalValue(e.target.value)} />
+                                                <span className="input-group-text">$</span>
+                                                <input className="form-control disabled-input fs-5 fw-bold" type="number" placeholder="0.00" value={impuestoValueIVA} disabled />
                                             </div>
                                         </div>
                                         <div className="col">
@@ -747,7 +747,7 @@ const Invoice = (props) => {
                                     </div>
                                 </div>
 
-                                <div className="col-12 mb-3 mt-4 d-flex justify-content-center">
+                                <div className="col-12 col-md-11 mb-3 mt-4 d-flex justify-content-center">
                                     <button type="button" className="btn btn-primary waves-effect waves-light w-50" onClick={()=>toEmit()}>
                                         Emitir
                                     </button>
