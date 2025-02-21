@@ -1,6 +1,17 @@
-import { Card, CardBody, Container } from "reactstrap";
+import {
+  Button,
+  Card,
+  CardBody,
+  Container,
+  Input,
+  Label,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useApolloClient, useMutation } from "@apollo/client";
 import {
   OBTENER_FULL_RESERVAHABITACION,
@@ -10,11 +21,20 @@ import {
   OBTENER_HABITACIONES_DISPONIBLES,
   UPDATE_HABITACION,
 } from "../../../../services/HabitacionesService";
-import {
-  askForInputAlert,
-  requestConfirmationAlert,
-  requestConfirmationAlertAsync,
-} from "../../../../helpers/alert";
+import { requestConfirmationAlertAsync } from "../../../../helpers/alert";
+import { useYupValidationResolver } from "../../../../helpers/yupValidations";
+import * as yup from "yup";
+import { useForm } from "react-hook-form";
+import Swal from "sweetalert2";
+
+const validationSchema = yup.object({
+  reason: yup.string().required("Campo requerido"),
+  amount: yup
+    .number()
+    .min(0, "El monto debe ser mayor a 0")
+    .typeError("Solo números son permitidos")
+    .required("Campo requerido"),
+});
 
 const RoomChange = () => {
   const client = useApolloClient();
@@ -22,9 +42,28 @@ const RoomChange = () => {
   const [selectedNewRoom, setSelectedNewRoom] = useState(null);
   const [roomsReservation, setRoomsReservation] = useState([]);
   const [availableRooms, setAvailableRooms] = useState([]);
+  const formRef = useRef(null);
+
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [actualizarHabitacion] = useMutation(UPDATE_HABITACION);
   const [actualizarReservaHabitacion] = useMutation(UPDATE_RESERVA_HABITACION);
+
+  const resolver = useYupValidationResolver(validationSchema);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    setError,
+    clearErrors,
+    getValues,
+    reset: resetForm,
+    formState: { errors },
+  } = useForm({
+    resolver,
+    defaultValues: { reason: "", amount: 0 },
+  });
 
   const RoomsSelection = () => {
     const buildPersonQuantity = (adults, children) => {
@@ -57,9 +96,10 @@ const RoomChange = () => {
                   b.habitacion.numeroHabitacion
                 )
               )
-              .map((room) => {
+              .map((room, index) => {
                 return (
                   <RoomCard
+                    key={index}
                     roomName={room.habitacion.numeroHabitacion}
                     description={buildPersonQuantity(
                       room.reserva?.numeroPersonas?.adulto,
@@ -96,32 +136,46 @@ const RoomChange = () => {
     );
   };
 
-  const handleRoomChange = async () => {
+  const handleRoomChange = async (data) => {
     // se actualiza la habitacion "vieja"
-    const oldRoominput = {
-      estado: "Disponible",
-    };
-    const { data: oldRoomData } = await actualizarHabitacion({
-      variables: { id: selectedRoom.habitacion.id, input: oldRoominput },
+    await actualizarHabitacion({
+      variables: {
+        id: selectedRoom.habitacion.id,
+        input: {
+          estado: "Disponible",
+        },
+      },
       errorPolicy: "all",
     });
-    // const { estado, message } = data.actualizarHabitacion;
 
     // se actualiza la habitacion "nueva"
-    const newRoominput = {
-      estado: "Ocupada",
-    };
-    const { data: newRoomData } = await actualizarHabitacion({
-      variables: { id: selectedNewRoom.id, input: newRoominput },
+    await actualizarHabitacion({
+      variables: {
+        id: selectedNewRoom.id,
+        input: {
+          estado: "Ocupada",
+        },
+      },
       errorPolicy: "all",
     });
-    // const { estado, message } = data.actualizarHabitacion;
 
     //se actualiza la reservaHabitacion
     const reservaHabitacionInput = {
       habitacion: selectedNewRoom.id,
     };
-    const { data: reservaHabitacionData } = await actualizarReservaHabitacion({
+
+    const oldPrice = selectedRoom?.habitacion?.tipoHabitacion?.precioBase || 0;
+    const newPrice = selectedNewRoom?.tipoHabitacion?.precioBase || 0;
+    if (newPrice > oldPrice) {
+      reservaHabitacionInput.cargosHabitacion = [
+        ...(selectedRoom.cargosHabitacion || []),
+        {
+          cargo: data.reason,
+          monto: data.amount,
+        },
+      ];
+    }
+    await actualizarReservaHabitacion({
       variables: { id: selectedRoom.id, input: reservaHabitacionInput },
       errorPolicy: "all",
     });
@@ -129,6 +183,7 @@ const RoomChange = () => {
     fetchInitialInfo();
     setSelectedNewRoom(null);
     setSelectedRoom(null);
+    Swal.fire("Guardado!", "Los cambios han sido guardados.", "success");
   };
 
   const collator = new Intl.Collator(undefined, {
@@ -136,7 +191,23 @@ const RoomChange = () => {
     sensitivity: "base",
   });
 
-  const fetchInitialInfo = () => {
+  const onSubmit = (data) => {
+    requestConfirmationAlertAsync({
+      title: "Confirmación",
+      bodyText: `Se creará un cargo a la habitacion por el monto de ${
+        watch("amount") || 0
+      }.`,
+      confirmButtonText: "Confirmar",
+      omitSuccessAlert: true,
+      asyncConfirmationEvent: () => {
+        handleRoomChange(data);
+        resetForm();
+        setModalOpen(false);
+      },
+    });
+  };
+
+  const fetchInitialInfo = useCallback(() => {
     const fetchReservas = async () => {
       try {
         const { data } = await client.query({
@@ -163,11 +234,11 @@ const RoomChange = () => {
 
     fetchReservas();
     fetchHabitacionesDisponibles();
-  };
+  }, [client]);
 
   useEffect(() => {
     fetchInitialInfo();
-  }, [client]);
+  }, [fetchInitialInfo]);
 
   return (
     <div className="page-content">
@@ -193,15 +264,27 @@ const RoomChange = () => {
                         <p>Seleccione la habitación destino</p>
                         <button
                           type="button"
-                          class="btn btn-primary"
+                          className="btn btn-primary"
                           disabled={!selectedNewRoom}
                           onClick={() => {
-                            requestConfirmationAlertAsync({
-                              title: "Antes de guardar",
-                              bodyText: `La habitación número ${selectedRoom.habitacion.numeroHabitacion} sera cambiada por la número ${selectedNewRoom.numeroHabitacion}`,
-                              confirmButtonText: "Confirmar",
-                              asyncConfirmationEvent: handleRoomChange,
-                            });
+                            const oldPrice =
+                              selectedRoom?.habitacion?.tipoHabitacion
+                                ?.precioBase || 0;
+                            const newPrice =
+                              selectedNewRoom?.tipoHabitacion?.precioBase || 0;
+                            if (newPrice > oldPrice) {
+                              setValue("amount", newPrice - oldPrice);
+                              setModalOpen(true);
+                            } else {
+                              requestConfirmationAlertAsync({
+                                title: "Confirmación",
+                                bodyText: `¿Desea realizar el cambio de habitación?.`,
+                                confirmButtonText: "Confirmar",
+                                asyncConfirmationEvent: () => {
+                                  handleRoomChange();
+                                },
+                              });
+                            }
                           }}
                         >
                           Realizar cambio de Habitación
@@ -222,9 +305,10 @@ const RoomChange = () => {
                               b.numeroHabitacion
                             )
                           )
-                          .map((room) => {
+                          .map((room, index) => {
                             return (
                               <RoomCard
+                                key={index}
                                 roomName={room.numeroHabitacion}
                                 description={room.descripcion}
                                 defaultDescription={"N/A"}
@@ -242,6 +326,72 @@ const RoomChange = () => {
           </Card>
         </div>
       </Container>
+      <Modal
+        isOpen={modalOpen}
+        toggle={() => {
+          setModalOpen(false);
+          resetForm();
+        }}
+      >
+        <ModalHeader
+          toggle={() => {
+            setModalOpen(false);
+            resetForm();
+          }}
+        >
+          Confirmar Cambio de Habitación
+        </ModalHeader>
+        <ModalBody>
+          <form
+            ref={formRef}
+            className="needs-validation"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <Label for="reason">Motivo del cambio</Label>
+            <textarea
+              className="form-control"
+              id="reason"
+              {...register("reason")}
+            />
+            {errors?.["reason"] && (
+              <p className="errorMessage">{errors?.["reason"].message}</p>
+            )}
+            <Label for="amount" className="mt-3">
+              Monto a cobrar
+            </Label>
+            <input
+              className="form-control"
+              type="number"
+              id="amount"
+              {...register("amount")}
+            />
+            {errors?.["amount"] && (
+              <p className="errorMessage">{errors?.["amount"].message}</p>
+            )}
+          </form>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="secondary"
+            onClick={() => {
+              setModalOpen(false);
+              resetForm();
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            color="primary"
+            onClick={() => {
+              const triggerSubmit = handleSubmit(onSubmit);
+              triggerSubmit();
+            }}
+            disabled={!!(errors?.["reason"] || errors?.["amount"])}
+          >
+            Confirmar Cambio
+          </Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 };

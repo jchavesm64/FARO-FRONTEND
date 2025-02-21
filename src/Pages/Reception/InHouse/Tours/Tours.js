@@ -103,7 +103,7 @@ const Tours = () => {
     return datos;
   };
 
-  const AdditionalServicesTable = () => {
+  const AdditionalToursTable = () => {
     const currentIdSelected = isRoomTabSelected
       ? selectedRoom?.id
       : selectedReservation?.id;
@@ -113,6 +113,9 @@ const Tours = () => {
           <tr>
             <th key="service" className="text-center">
               Tour
+            </th>
+            <th key="assistance" className="text-center">
+              Personas que asistiran
             </th>
             <th key="price" className="text-center">
               Precio
@@ -125,14 +128,40 @@ const Tours = () => {
         </thead>
         <tbody>
           {extraTours[currentIdSelected]?.map((line, index) => {
-            const isQuantifiable = line.tipo?.cuantificable === "true";
             return (
               <tr key={index}>
-                <td>{line.nombre}</td>
-                <td className="precio-td">{line.precio}</td>
+                <td className="text-center">{line.nombre}</td>
+                <td
+                  className={`${line.isNew ? "assistance-td" : "text-center"}`}
+                >
+                  {line.isNew ? (
+                    <PlusMinusInput
+                      value={line?.assistanceNumber ?? 1}
+                      handleChange={(newNum) => {
+                        const newListValue = extraTours[currentIdSelected]?.map(
+                          (s, i) => {
+                            if (index === i)
+                              return { ...s, assistanceNumber: newNum };
+                            return s;
+                          }
+                        );
+                        setExtraTours({
+                          ...extraTours,
+                          [currentIdSelected]: newListValue,
+                        });
+                        if (!isInfoModified) setIsInfoModified(true);
+                      }}
+                      minLimit={1}
+                      maxAvailable={100}
+                    />
+                  ) : (
+                    line?.assistanceNumber ?? 0
+                  )}
+                </td>
+                <td className="text-center">{line.precio}</td>
 
-                <td className="actions-td">
-                  {isQuantifiable && (
+                <td className="assistance-td">
+                  {((line?.useExtra?.length ?? 0) <= 0 || line.isNew) && (
                     <ButtonIconTable
                       icon="mdi mdi-calendar-range"
                       color="info"
@@ -142,6 +171,7 @@ const Tours = () => {
                       }}
                     />
                   )}
+
                   {
                     <ButtonIconTable
                       icon="mdi mdi-delete"
@@ -262,7 +292,6 @@ const Tours = () => {
                   onClick={() => {
                     setSelectedRoom(room);
                     const extraServicesKeys = keys(extraTours);
-                    debugger;
                     if (!extraServicesKeys.includes(room?.id)) {
                       setExtraTours({
                         ...extraTours,
@@ -299,23 +328,32 @@ const Tours = () => {
       const list = extraTours[selectedRoom?.id] ?? [];
       setExtraTours({
         ...extraTours,
-        [selectedRoom?.id]: [...list, service],
+        [selectedRoom?.id]: [...list, { ...service, isNew: true, extra: 1 }],
       });
     } else if (isReservationTabSelected) {
       const list = extraTours[selectedReservation?.id] ?? [];
       setExtraTours({
         ...extraTours,
-        [selectedReservation?.id]: [...list, service],
+        [selectedReservation?.id]: [
+          ...list,
+          { ...service, isNew: true, extra: 1 },
+        ],
       });
     }
   };
 
   const saveServicesForReservaHabitacion = async () => {
     const savedServicesPromises = [];
+    const newInfoUpdated = {};
     keys(extraTours).forEach((key) => {
+      const newToursExtra = extraTours[key].map((tours) => {
+        const { isNew, ...rest } = tours;
+        return rest;
+      });
       const input = {
-        toursExtra: extraTours[key],
+        toursExtra: newToursExtra,
       };
+      newInfoUpdated[key] = newToursExtra;
       savedServicesPromises.push(
         updateReservaHabitacion({
           variables: { id: key, input },
@@ -324,15 +362,22 @@ const Tours = () => {
       );
     });
 
+    setExtraTours(newInfoUpdated);
     await Promise.all(savedServicesPromises);
   };
 
   const saveServicesForReserva = async () => {
     const savedServicesPromises = [];
+    const newInfoUpdated = {};
     keys(extraTours).forEach((key) => {
+      const newToursExtra = extraTours[key].map((tours) => {
+        const { isNew, ...rest } = tours;
+        return rest;
+      });
       const input = {
-        tours: extraTours[key],
+        tours: newToursExtra,
       };
+      newInfoUpdated[key] = newToursExtra;
       savedServicesPromises.push(
         updateReserva({
           variables: { id: key, input },
@@ -341,10 +386,11 @@ const Tours = () => {
       );
     });
 
+    setExtraTours(newInfoUpdated);
     await Promise.all(savedServicesPromises);
   };
 
-  const AdditionalServices = () => {
+  const AdditionalTours = () => {
     return (
       <Card className="w-50">
         <CardBody>
@@ -354,9 +400,9 @@ const Tours = () => {
               {(selectedRoom != null || selectedReservation != null) &&
               isSelectingType ? (
                 <div className="row row-cols-lg-auto g-3 align-items-center justify-content-between">
-                  <div className="col-xl-8 col-md-12">
+                  <div className="tours-select-container">
                     <Select
-                      id="service"
+                      id="tours"
                       value={selectedService}
                       onChange={(e) => {
                         if (e?.value) setSelectedService(e);
@@ -372,7 +418,7 @@ const Tours = () => {
                       onClick={() => {
                         addExtraService({
                           ...selectedService.value,
-                          extra: 1,
+                          assistanceNumber: 1,
                         });
                         setSelectedService(null);
                         setIsSelectingType(false);
@@ -410,18 +456,37 @@ const Tours = () => {
                   <button
                     className="btn btn-outline-secondary"
                     onClick={() => {
-                      requestConfirmationAlert({
-                        title: "¿Estás seguro?",
-                        bodyText: "¿Deseas guardar los tours?",
-                        confirmButtonText: "Sí, guardar cambios",
-                        confirmationEvent: () => {
-                          if (isRoomTabSelected)
-                            saveServicesForReservaHabitacion();
-                          if (isReservationTabSelected)
-                            saveServicesForReserva();
-                          setIsInfoModified(false);
-                        },
-                      });
+                      const isAnyDatesNotSelected = keys(extraTours).find(
+                        (key) => {
+                          return extraTours[key].find((tour) => {
+                            return !tour.useExtra || tour.useExtra?.length <= 0;
+                          });
+                        }
+                      );
+
+                      debugger;
+                      if (isAnyDatesNotSelected) {
+                        infoAlert(
+                          "Advertencia",
+                          "Existen tours a los que no se a indicado la fecha en que se realizaran",
+                          "warning",
+                          3000,
+                          "top-center"
+                        );
+                      } else {
+                        requestConfirmationAlert({
+                          title: "¿Estás seguro?",
+                          bodyText: "¿Deseas guardar los tours?",
+                          confirmButtonText: "Sí, guardar cambios",
+                          confirmationEvent: () => {
+                            if (isRoomTabSelected)
+                              saveServicesForReservaHabitacion();
+                            if (isReservationTabSelected)
+                              saveServicesForReserva();
+                            setIsInfoModified(false);
+                          },
+                        });
+                      }
                     }}
                     disabled={
                       (isRoomTabSelected && !selectedRoom) ||
@@ -446,7 +511,7 @@ const Tours = () => {
                   )}
                   {((isRoomTabSelected && selectedRoom) ||
                     (isReservationTabSelected && selectedReservation)) && (
-                    <AdditionalServicesTable />
+                    <AdditionalToursTable />
                   )}
                 </div>
               </div>
@@ -511,7 +576,7 @@ const Tours = () => {
               </Tabs>
             </CardBody>
           </Card>
-          <AdditionalServices />
+          <AdditionalTours />
         </div>
         <Modal
           key="modalCustomer"

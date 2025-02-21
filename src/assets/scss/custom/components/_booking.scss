@@ -227,6 +227,11 @@ body {
   }
 }
 
+.assistance-td {
+  display: flex;
+  justify-content: center;
+}
+
 .precio-td {
 }
 
@@ -257,4 +262,19 @@ body {
 .search-container {
   display: flex;
   gap: 14px;
+}
+
+.tours-select-container {
+  display: flex;
+  gap: 14px;
+  width: 70%;
+  #tours {
+    width: 100%;
+  }
+}
+
+.errorMessage {
+  color: #b32318;
+  font-size: 14px;
+  margin-left: 16px;
 }

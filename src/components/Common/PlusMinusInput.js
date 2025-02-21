@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Input, InputGroup } from "reactstrap";
 
-const PlusMinusInput = ({ value, handleChange, maxAvailable }) => {
+const PlusMinusInput = ({ value, handleChange, maxAvailable, minLimit }) => {
   return (
     <InputGroup
       style={{ maxWidth: "7rem" }}
@@ -10,11 +10,12 @@ const PlusMinusInput = ({ value, handleChange, maxAvailable }) => {
       <Button
         color="primary"
         onClick={() => {
-          if (value > 0) {
+          const minimum = minLimit ?? 0;
+          if (value > minimum) {
             handleChange(value - 1);
           }
         }}
-        disabled={value === 0}
+        disabled={value <= (minLimit ?? 0)}
       >
         -
       </Button>

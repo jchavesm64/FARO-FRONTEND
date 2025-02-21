@@ -51,6 +51,10 @@ export const OBTENER_FULL_RESERVAHABITACION = gql`
       habitacion {
         id
         numeroHabitacion
+        tipoHabitacion {
+          nombre
+          precioBase
+        }
       }
       serviciosExtra
       serviciosExternos
@@ -67,6 +71,7 @@ export const OBTENER_FULL_RESERVAHABITACION = gql`
         }
         serviciosGrupal
         fechaReserva
+        tours
       }
       cargosHabitacion
       estado
