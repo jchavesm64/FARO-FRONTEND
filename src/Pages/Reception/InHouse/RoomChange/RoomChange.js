@@ -349,9 +349,9 @@ const RoomChange = () => {
           >
             <Label for="reason">Motivo del cambio</Label>
             <textarea
+              {...register("reason")}
               className="form-control"
               id="reason"
-              {...register("reason")}
             />
             {errors?.["reason"] && (
               <p className="errorMessage">{errors?.["reason"].message}</p>
@@ -360,10 +360,11 @@ const RoomChange = () => {
               Monto a cobrar
             </Label>
             <input
+              {...register("amount")}
               className="form-control"
               type="number"
               id="amount"
-              {...register("amount")}
+              disabled={true}
             />
             {errors?.["amount"] && (
               <p className="errorMessage">{errors?.["amount"].message}</p>

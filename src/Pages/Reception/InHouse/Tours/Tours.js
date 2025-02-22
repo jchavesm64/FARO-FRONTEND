@@ -673,8 +673,7 @@ const Tours = () => {
                       }}
                       inline
                       className="form-control"
-                      minDate={getFechaFromReservaHabitacion("fechaEntrada")}
-                      maxDate={getFechaFromReservaHabitacion("fechaSalida")}
+                      minDate={getFecha(new Date())}
                     />
                   </FormGroup>
                 </Col>

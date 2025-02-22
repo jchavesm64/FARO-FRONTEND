@@ -13,6 +13,7 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
+  UncontrolledTooltip,
 } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import React, { useEffect, useState } from "react";
@@ -39,6 +40,8 @@ const RoomCharges = () => {
 
   // Modal functions
   const toggle = () => setModal(!modal);
+
+  const hasDeletePermissions = false;
 
   const handleChange = (e) => {
     setNewCharge({ ...newCharge, [e.target.name]: e.target.value });
@@ -114,7 +117,6 @@ const RoomCharges = () => {
     const newChargesPerRoom = [];
     rooms?.forEach((room) => {
       if (room.cargosHabitacion) {
-        debugger;
         newChargesPerRoom.push({
           roomId: room.id,
           chargesList: room.cargosHabitacion.map((cargo) => {
@@ -274,7 +276,7 @@ const RoomCharges = () => {
                               <tr key={charge.id}>
                                 <td>{charge.cargo}</td>
                                 <td>₡{charge.monto}</td>
-                                <td>
+                                <td className="charges-actions">
                                   <ButtonIconTable
                                     icon="mdi mdi-pencil"
                                     color="warning"
@@ -284,27 +286,45 @@ const RoomCharges = () => {
                                       toggle();
                                     }}
                                   />
-                                  <ButtonIconTable
-                                    icon="bx bx-x"
-                                    color="danger"
-                                    onClick={() => {
-                                      const newChargesPerRoom =
-                                        chargesPerRoom.map((cpr) => {
-                                          if (cpr.roomId === selectedRoom.id) {
-                                            return {
-                                              ...cpr,
-                                              chargesList:
-                                                cpr.chargesList.filter((cl) => {
-                                                  if (cl.id !== charge.id)
-                                                    return cl;
-                                                }),
-                                            };
-                                          }
-                                          return cpr;
-                                        });
-                                      setChargesPerRoom(newChargesPerRoom);
-                                    }}
-                                  />
+                                  <span
+                                    id={"deleteChargeButton" + index}
+                                    className="charges-span-container"
+                                  >
+                                    <ButtonIconTable
+                                      icon="bx bx-x"
+                                      color="danger"
+                                      onClick={() => {
+                                        const newChargesPerRoom =
+                                          chargesPerRoom.map((cpr) => {
+                                            if (
+                                              cpr.roomId === selectedRoom.id
+                                            ) {
+                                              return {
+                                                ...cpr,
+                                                chargesList:
+                                                  cpr.chargesList.filter(
+                                                    (cl) => {
+                                                      if (cl.id !== charge.id)
+                                                        return cl;
+                                                    }
+                                                  ),
+                                              };
+                                            }
+                                            return cpr;
+                                          });
+                                        setChargesPerRoom(newChargesPerRoom);
+                                      }}
+                                      disabled={!hasDeletePermissions}
+                                    />
+                                  </span>
+                                  {!hasDeletePermissions && (
+                                    <UncontrolledTooltip
+                                      target={"deleteChargeButton" + index}
+                                    >
+                                      Solicita permiso del administrador para
+                                      realizar esta acción
+                                    </UncontrolledTooltip>
+                                  )}
                                 </td>
                               </tr>
                             ))}

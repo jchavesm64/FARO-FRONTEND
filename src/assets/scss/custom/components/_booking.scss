@@ -278,3 +278,11 @@ body {
   font-size: 14px;
   margin-left: 16px;
 }
+
+.charges-actions {
+  display: flex;
+  .charges-span-container {
+    height: 40px;
+    width: 40px;
+  }
+}
