@@ -225,6 +225,15 @@ export const UPDATE_COMANDA = gql`
     }
 `;
 
+export const FINISH_COMANDA = gql`
+    mutation finalizarComanda($id:ID){
+        finalizarComanda(id:$id){
+            estado
+            message
+        }
+    }
+`;
+
 export const DELETE_COMANDA = gql`
     mutation desactivarComanda($id:ID){
         desactivarComanda(id:$id){

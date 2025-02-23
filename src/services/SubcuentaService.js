@@ -150,6 +150,15 @@ export const UPDATE_SERVED = gql`
     }
 `;
 
+export const UPDATE_PAID = gql`
+    mutation actualizarPagados($id:ID, $input:[PlatillosInput]){
+        actualizarPagados(id:$id,input:$input){
+            estado
+            message
+        }
+    }
+`;
+
 export const DELETE_SUBCUENTA = gql`
     mutation desactivarSubcuenta($id:ID){
         desactivarSubcuenta(id:$id){

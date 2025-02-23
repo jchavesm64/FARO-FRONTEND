@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Container, Modal, ModalBody, ModalHeader, Row, Card, CardBody, Button, Col} from "reactstrap";
+import { Container, Modal, ModalBody, ModalHeader, Row, Card, CardBody, Button, Col, ModalFooter} from "reactstrap";
 import Breadcrumbs from "../../../components/Common/Breadcrumb";
 import Select from "react-select";
-import { useQuery } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import { OBTENER_FACTURAS_PARAMETROS_BY_TYPE } from "../../../services/FacturasParametrosService";
-import { OBTENER_TODAS_MATERIAS_PRIMAS } from "../../../services/MateriaPrimaService";
+import { UPDATE_PAID } from "../../../services/SubcuentaService";
+import { UPDATE_MESA } from "../../../services/MesaService";
+import { INSERTAR_MOVIMIENTO_RESTAURANTE} from "../../../services/MovimientosRestauranteService";
+import { OBTENER_TODAS_MATERIAS_PRIMAS, UPDATE_EXISTENCIAS_MATERIA_PRIMA } from "../../../services/MateriaPrimaService";
 import { OBTENER_IMPUESTO_BY_NOMBRE } from "../../../services/ImpuestoService";
 import ButtonIconTable from "../../../components/Common/ButtonIconTable";
 import { OBTENER_CLIENTES } from "../../../services/ClienteService";
@@ -13,6 +16,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { use } from "react";
 import { getFechaTZ } from "../../../helpers/helpers";
 import { set } from "lodash";
+import { infoAlert } from "../../../helpers/alert";
+import { FINISH_COMANDA } from "../../../services/ComandaService";
+import { useApolloClient } from "@apollo/client";
+import { OBTENER_LINEAS_MENU } from "../../../services/MenuLineaService";
 
 const Invoice = (props) => {
     document.title = "Facturación | FARO";
@@ -23,6 +30,11 @@ const Invoice = (props) => {
     const [platillos, setPlatillos] = useState([]);
     const [selected, setSelected] = useState({}); 
     const [selectAll, setSelectAll] = useState(false);
+    const [updatePlatillo] = useMutation(UPDATE_PAID);
+    const [updateMesa] = useMutation(UPDATE_MESA);
+    const [finishComanda] = useMutation(FINISH_COMANDA);
+    const [updateMateriaPrima] = useMutation(UPDATE_EXISTENCIAS_MATERIA_PRIMA);
+    const client = useApolloClient();
     
     const { data: dataCurrencyTypes} = useQuery(OBTENER_FACTURAS_PARAMETROS_BY_TYPE, { variables: { type: 'currencyTypes' }, pollInterval: 1000 })
     
@@ -32,9 +44,10 @@ const Invoice = (props) => {
     
     const { data: dataDocumentTypes} = useQuery(OBTENER_FACTURAS_PARAMETROS_BY_TYPE, { variables: { type: 'documentTypes' }, pollInterval: 1000 })
 
+    const [insertarMovimientoRestaurante] = useMutation(INSERTAR_MOVIMIENTO_RESTAURANTE);
+
     const { loading: loadingImpuestoIVA, error: errorImpuestoIVA, data: dataImpuestoIVA, refetch: refetchImpuestoIVA } = useQuery(OBTENER_IMPUESTO_BY_NOMBRE, { variables: { nombre: 'IVA' }, fetchPolicy: 'network-only', pollInterval: 1000, notifyOnNetworkStatusChange: true });
     const { loading: loadingImpuestoServicio, error: errorImpuestoServicio, data: dataImpuestoServicio, refetch: refetchImpuestoServicio } = useQuery(OBTENER_IMPUESTO_BY_NOMBRE, { variables: { nombre: 'Servicio Restaurante' }, fetchPolicy: 'network-only', pollInterval: 1000, notifyOnNetworkStatusChange: true });
-
     const { data: dataAllClientes} = useQuery(OBTENER_CLIENTES, { pollInterval: 1000 })
     const [selectedTipoMoneda, setSelectedTipoMoneda] = useState(null);
     const onChangeTipoMoneda = (option) => {
@@ -72,6 +85,7 @@ const Invoice = (props) => {
     const toggleClientes = () => setModalClientes(!modalClientes);
 
     const [codigoArticulo, setCodigoArticulo] = useState("");
+    const [numeroHabitacion, setNumeroHabitacion] = useState("");
 
     const [clienteCedula, setClienteCedula] = useState("");
 
@@ -89,6 +103,7 @@ const Invoice = (props) => {
     const [clientesFiltrados, setClientesFiltrados] = useState([]);
     const [nombreFacturacion, setNombreFacturacion] = useState("");
     const [servicesModal, setServicesModal] = useState(false);
+    const toggleServices = () => setServicesModal(!servicesModal);
 
     useEffect(() => {
         if (dataImpuestoIVA?.obtenerImpuestoByNombre?.valor !== undefined) {
@@ -270,6 +285,86 @@ const Invoice = (props) => {
         
     }, [props, dataAllClientes, dataDocumentTypes, dataSaleConditions, dataPaymentMethods, dataCurrencyTypes, clienteFacturar, selectedTipoFactura, selectedCondicionVenta, selectedMetodoPago, selectedTipoMoneda]);
 
+    const updateExistencias = async () => {
+        for (const platillo of platillos) {
+            if (selected[platillo._id] && platillo.estado !== "Pagado") {
+                try {
+                    const { data } = await client.query({
+                        query: OBTENER_LINEAS_MENU,
+                        variables: { id: platillo.id }, 
+                        fetchPolicy: "network-only",
+                    });
+    
+                    if (data?.obtenerLineasMenu) {
+                        for (const linea of data.obtenerLineasMenu) {
+                            await updateMateriaPrima({
+                                variables: {
+                                    id: linea.producto.id,
+                                    cantidad: linea.cantidad
+                                }
+                            });
+                        }
+                    }
+                } catch (error) {
+                    infoAlert('Oops', `Error obteniendo líneas de menú para el platillo ${platillo.id}:`, 'error', 3000, 'top-end')
+                }
+            }
+        }
+    };
+    
+    
+    const saveInvoice = async (movimiento) => {
+        try {
+            /*let newOrderId = orderId;
+            const order = {
+                mesa: table.id,
+                preFactura: false,
+                estado: "GENERADA",
+            }
+            if (!orderId) {
+                order['fecha'] = new Date();
+                const { data } = await insertarComanda({ variables: { input: order }, errorPolicy: 'all' });
+                const { estado, message, data: comandaData } = data.insertarComanda;
+                if (!estado) {
+                    infoAlert('Oops', message, 'error', 3000, 'top-end');
+                    setDisableSave(false)
+                    return;
+                }
+                setOrderId(comandaData.id);
+                newOrderId = comandaData.id;
+            }
+            await actualizarComanda({ variables: { id: newOrderId, input: order }, errorPolicy: 'all' });
+            const { data } = await actualizarMesa({ variables: { id: table.id, input: { disponibilidad: "OCUPADA" } }, errorPolicy: 'all' });
+            const { estado, message } = data.actualizarMesa;
+            if (!estado) {
+                infoAlert('Oops', message, 'error', 3000, 'top-end');
+                setDisableSave(true)
+                return;
+            }*/
+            console.log(movimiento)
+            const { data: savedMovimiento } = await insertarMovimientoRestaurante({ variables: { input: movimiento }, errorPolicy: 'all' });
+            const { estado: estadoSubcuenta, message: messageSubcuenta } = savedMovimiento.insertarMovimientoRestaurante;
+            if (!estadoSubcuenta) {
+                infoAlert('Oops', messageSubcuenta, 'error', 3000, 'top-end');
+                return;
+            }
+            updateExistencias();
+            const selectedItems = platillos.filter(platillo => selected[platillo._id] && platillo.estado !== 'Pagado');
+            console.log(selectedItems)
+            
+            await updatePlatillo({ variables: { id: data.subcuentas[0].id, input: selectedItems}});
+
+            if (Object.values(selected).every(value => value)) {
+                await finishComanda({ variables: { id: data.id } });
+                await updateMesa({ variables: { id: table.id, input: { disponibilidad: "LIBRE" } } });
+            }
+
+            infoAlert('Excelente', 'Movimiento de facturación enviado correctamente', 'success', 3000, 'top-end');
+            navigate('/restaurant/orders');
+        } catch (error) {
+            infoAlert('Oops', 'Ocurrió un error inesperado al guardar el movimiento', 'error', 3000, 'top-end')
+        }
+    }
     
     const toEmit = () => {
         Swal.fire({
@@ -283,9 +378,54 @@ const Invoice = (props) => {
           confirmButtonText: "Sí, ¡Emitir!"
         }).then(async (result) => {
           if (result.isConfirmed) {
-            if (clienteFacturar && selectedTipoFactura && selectedCondicionVenta && selectedMetodoPago && selectedTipoMoneda){
-                console.log("emitida")
-                const myHeaders = new Headers();
+            if (nombreFacturacion != "" && selectedCondicionVenta && selectedMetodoPago && selectedTipoMoneda){
+                if(Object.values(selected).some(value => value)){
+                    console.log("emitida")
+                    const selectedItems = platillos.filter(platillo => selected[platillo._id] && platillo.estado !== 'Pagado');
+
+                    const selectedPaymentMethod = metodoPagos.find(method => method.value === selectedMetodoPago.value);
+                    const selectedSaleCondition = condicionVentas.find(condition => condition.value === selectedCondicionVenta.value);
+                    const selectedCurrencyType = tipoMonedas.find(currency => currency.value === selectedTipoMoneda.value);
+
+                    const movimiento = {
+                        fecha: new Date(),
+                        cliente: clienteFacturar?.id || null,
+                        nombreFacturacion: nombreFacturacion,
+                        comanda: data.id,
+                        caja: null,
+                        condicionVenta: selectedSaleCondition ? selectedSaleCondition.label : selectedCondicionVenta.value,
+                        medioPago: selectedPaymentMethod ? selectedPaymentMethod.label : selectedMetodoPago.value,
+                        tipoCambio: 0,
+                        codigoMoneda: selectedCurrencyType ? selectedCurrencyType.label : selectedTipoMoneda.value,
+                        platillos: selectedItems.map(item => ({
+                            id: item.id,
+                            nombre: item.nombre,
+                            precio: Number(item.precio),
+                            observaciones: item.observaciones
+                        })),
+                        numeroHabitacion: numeroHabitacion || "",
+                        reserva: null,
+                        subtotal: Number(subTotalValue),
+                        descuento: Number(descuentoTotalValue),
+                        IVA: Number(impuestoValueIVA),
+                        impuestoServicio: Number(impuestoServicioValue),
+                        total: Number(totalPagarValue)
+                    };
+                    saveInvoice(movimiento);
+
+                }else{
+                    Swal.fire({
+                        title: "Emición de factura",
+                        text: `Debe seleccionar almenos un platillo para emitir la factura`,
+                        icon: "Info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#0BB197",
+                        cancelButtonColor: "#FF3D60",
+                      })
+
+                }
+                
+                /*const myHeaders = new Headers();
                 myHeaders.append("Content-Type", "application/json");
                 myHeaders.append("Cookie", "session=qifO9RMl_v6U89RqK1yBNeYrK40-gYum763TWWpGmus");
 
@@ -336,7 +476,7 @@ const Invoice = (props) => {
                         })
                     }
                 })
-                .catch((error) => console.error(error));
+                .catch((error) => console.error(error));*/
             }else{
                 Swal.fire({
                     title: "Emición de factura",
@@ -386,9 +526,9 @@ const Invoice = (props) => {
     };
 
     const handleCheckboxChange = (id) => {
+        console.log(data)
         setSelected((prevState) => {
             const newState = { ...prevState, [id]: !prevState[id] };
-            // Verificar si todos los checkboxes están seleccionados
             const allSelected =
                 platillos.length > 0 &&
                 platillos.every((p) => newState[p._id]);
@@ -455,11 +595,9 @@ const Invoice = (props) => {
         setNombreFacturacion(cliente.nombreFacturacion);
         setClienteFacturar(cliente);
         setModalClientes(false);
-        //onClienteSeleccionado(cliente); // Callback para manejar el cliente seleccionado
     };
     
     const getOrders = () => {
-        //console.log(table)
         if (!platillos.length) {
             return <div className="text-center"><h5>No hay órdenes pendientes.</h5></div>;
         }
@@ -469,7 +607,7 @@ const Invoice = (props) => {
                 {platillos.map((platillo) => (
                     <Card key={platillo._id} className="mb-2 card-pending-orders" style={{ margin: "5px", opacity: platillo.estado === "Pagado" ? 0.6 : 1, backgroundColor: platillo.estado === "Pagado" ? "#f0f0f0" : "white"}}>
                         <CardBody>
-                            <div className="mb-1">
+                            <div className="mb-0">
                                 <div className="d-flex justify-content-between align-items-center">
                                     <div className="col-md-auto">
                                         <h5>{platillo.nombre}</h5>
@@ -519,7 +657,7 @@ const Invoice = (props) => {
             <div className="page-content">
                 <Container fluid={true}>
                 <Breadcrumbs title='Facturación' breadcrumbItem='Comandas' breadcrumbItemUrl='/restaurant/orders/' />
-                    <Row className="justify-content-between">
+                    <Row className="justify-content-between" >
                         <div className="container-fluid ms-2">
                             <div className="row">
                                 <div className="col-12 col-md-11">
@@ -588,40 +726,22 @@ const Invoice = (props) => {
                                         <div className="col-9 col-md-10">
                                             <input 
                                                 className="form-control" 
-                                                type="text" 
+                                                type="number" 
                                                 placeholder="Número de habitación" 
-                                                onChange={(e) => setCodigoArticulo(e.target.value)} 
-                                                value={codigoArticulo} 
+                                                onChange={(e) => setNumeroHabitacion(e.target.value)} 
+                                                value={numeroHabitacion} 
                                             />
                                         </div>
                                         <div className="col-3 col-md-2">
                                             <button 
                                                 type="button" 
                                                 className="btn btn-info btn-rounded waves-effect waves-light" 
-                                                onClick={openServicesModal}
+                                                onClick={toggleServices}
+                                                disabled={!numeroHabitacion.trim()}
                                             >
                                                 <i className="mdi mdi-magnify"></i>
                                             </button>
                                         </div>
-                                        {servicesModal && (
-                                            <div className="modal fade" id="servicesModal" tabIndex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                                                <div className="modal-dialog">
-                                                    <div className="modal-content">
-                                                        <div className="modal-header">
-                                                            <h5 className="modal-title" id="modalLabel">Modal de Servicios</h5>
-                                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div className="modal-body">
-                                                            Contenido del modal...
-                                                        </div>
-                                                        <div className="modal-footer">
-                                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                                            <button type="button" className="btn btn-primary">Aceptar</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
                                     </Row>
 
                                     <Row className="mt-3">
@@ -650,8 +770,9 @@ const Invoice = (props) => {
                                             />
                                         </div>
                                         <div className="col-12 col-md-3 mb-3">
-                                            <label className="form-label">Moneda de Pago</label>
+                                            <label for="tipo_moneda" className="form-label">Moneda de Pago</label>
                                             <Select 
+                                                class="form-select"
                                                 id="tipo_moneda" 
                                                 value={selectedTipoMoneda} 
                                                 onChange={onChangeTipoMoneda} 
@@ -676,17 +797,17 @@ const Invoice = (props) => {
                                     <div className="text-center mt-3">
                                         <h4><strong>{table.isChair === true ? "Silla "+ table?.name : table?.name}</strong></h4>
                                     </div>
-                                    <div className="ms-5 mt-2">
+                                    <div className="ms-5 mt-1">
                                         <h6><strong>Piso:</strong> {floor?.value.nombre}</h6>
                                         <h6><strong>Fecha:</strong> {getFechaTZ("fechaHora", data.fecha)}</h6>
                                     </div>
                                 </Row>
-                                <Row className="d-flex align-items-center justify-content-between mt-2 mb-2">
-                                    <div className="col-md-auto text-center mb-1 mt-2 ms-5">
+                                <Row className="d-flex align-items-center justify-content-between mt-1 mb-2">
+                                    <div className="col-md-auto text-center mb-1 mt-1 ms-5">
                                         <h5>Subcuenta</h5>
                                     </div>
                                     <div className="col-md-auto d-flex justify-content-end">
-                                        <Button color="primary" className="mb-1 me-3" onClick={toggleAllCheckboxes}>
+                                        <Button color="primary" className="me-3" onClick={toggleAllCheckboxes}>
                                             {selectAll ? "Deseleccionar Todo" : "Seleccionar Todo"}
                                         </Button>
                                     </div>
@@ -757,6 +878,16 @@ const Invoice = (props) => {
                     </Row>
                 </Container>
             </div>
+            <Modal isOpen={servicesModal} toggle={toggleServices}>
+                <ModalHeader toggle={toggleServices}>Servicios de la Habitación {numeroHabitacion}</ModalHeader>
+                <ModalBody>
+                Contenido del modal...
+                </ModalBody>
+                <ModalFooter>
+                    <Button color="secondary" onClick={toggleServices}>Cerrar</Button>
+                    <Button color="primary">Aceptar</Button>
+                </ModalFooter>
+            </Modal>
         </React.Fragment>
     );
 };

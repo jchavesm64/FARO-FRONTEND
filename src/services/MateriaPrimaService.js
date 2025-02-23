@@ -142,6 +142,15 @@ export const UPDATE_MATERIA_PRIMA = gql`
     }
 `;
 
+export const UPDATE_EXISTENCIAS_MATERIA_PRIMA = gql`
+    mutation actualizarExistenciasMateriaPrima($id:ID, $cantidad:Number){
+        actualizarExistenciasMateriaPrima(id:$id, cantidad:$cantidad){
+            estado
+            message
+        }
+    }
+`;
+
 export const DELETE_MATERIA_PRIMA = gql`
     mutation desactivarMateriaPrima($id:ID){
         desactivarMateriaPrima(id:$id){
