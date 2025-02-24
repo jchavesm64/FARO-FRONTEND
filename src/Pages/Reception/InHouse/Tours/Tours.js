@@ -27,6 +27,8 @@ import { infoAlert, requestConfirmationAlert } from "../../../../helpers/alert";
 import { keys } from "lodash";
 import { UPDATE_RESERVA_INFO } from "../../../../services/ReservaService";
 import { OBTENER_TOURS } from "../../../../services/TourService";
+import RequestPermissions from "../../../../components/Common/RequestPermissions";
+import { OBTENER_USUARIO_CODIGO } from "../../../../services/UsuarioService";
 
 const Tours = () => {
   const client = useApolloClient();
@@ -47,6 +49,9 @@ const Tours = () => {
 
   const isRoomTabSelected = key === "room";
   const isReservationTabSelected = key === "reservation";
+
+  const [permissionModal, setPermissionModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Services
   const [updateReservaHabitacion] = useMutation(UPDATE_RESERVA_HABITACION);
@@ -75,9 +80,24 @@ const Tours = () => {
         console.error("Error fetching tours:", error);
       }
     };
+    const fetchCurrentUser = async () => {
+      try {
+        const codigo = localStorage.getItem("cedula");
+        const { data } = await client.query({
+          variables: { codigo },
+          query: OBTENER_USUARIO_CODIGO,
+          fetchPolicy: "network-only",
+        });
+
+        setCurrentUser(data.obtenerUsuarioByCodigo);
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+      }
+    };
 
     fetchReservas();
     fetchTours();
+    fetchCurrentUser();
   }, [client, key]);
 
   const toggleCalendarModal = () => setCalendarModal(!calendarModal);
@@ -101,6 +121,20 @@ const Tours = () => {
         });
     }
     return datos;
+  };
+
+  const handleDeleteTour = (index) => {
+    const currentIdSelected = isRoomTabSelected
+      ? selectedRoom?.id
+      : selectedReservation?.id;
+    const newListValue = extraTours[currentIdSelected]?.filter((s, i) => {
+      return index !== i;
+    });
+    setExtraTours({
+      ...extraTours,
+      [currentIdSelected]: newListValue,
+    });
+    if (!isInfoModified) setIsInfoModified(true);
   };
 
   const AdditionalToursTable = () => {
@@ -172,27 +206,26 @@ const Tours = () => {
                     />
                   )}
 
-                  {
-                    <ButtonIconTable
-                      icon="mdi mdi-delete"
-                      color="danger"
-                      onClick={() => {
-                        const currentIdSelected = isRoomTabSelected
-                          ? selectedRoom?.id
-                          : selectedReservation?.id;
-                        const newListValue = extraTours[
-                          currentIdSelected
-                        ]?.filter((s, i) => {
-                          return index !== i;
+                  <ButtonIconTable
+                    icon="mdi mdi-delete"
+                    color="danger"
+                    onClick={() => {
+                      let hasPermissionToDelete = false;
+                      currentUser?.roles.forEach((rol) => {
+                        rol?.permisos.forEach((permiso) => {
+                          if (permiso?.modulo === "INHOUSE") {
+                            hasPermissionToDelete = !!permiso?.eliminar;
+                          }
                         });
-                        setExtraTours({
-                          ...extraTours,
-                          [currentIdSelected]: newListValue,
-                        });
-                        if (!isInfoModified) setIsInfoModified(true);
-                      }}
-                    />
-                  }
+                      });
+                      // Remove the false condition when testing finish
+                      if (hasPermissionToDelete && false) {
+                        // handleDeleteTour(index);
+                      } else {
+                        setPermissionModal(true);
+                      }
+                    }}
+                  />
                 </td>
               </tr>
             );
@@ -698,6 +731,16 @@ const Tours = () => {
             </Card>
           </ModalBody>
         </Modal>
+        {/* This modal is for request admin access to the options not available for the current user */}
+        <RequestPermissions
+          modalOpen={permissionModal}
+          setModalOpen={setPermissionModal}
+          onSuccessConfirmation={() => {
+            console.log("Success you have permission to continue");
+          }}
+          modules={["INHOUSE"]}
+          permissions={["eliminar"]}
+        />
       </Container>
     </div>
   );
