@@ -13,7 +13,6 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
-  UncontrolledTooltip,
 } from "reactstrap";
 import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import React, { useEffect, useState } from "react";
@@ -25,6 +24,9 @@ import {
 import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
 import { v4 as uuidv4 } from "uuid";
 import { requestConfirmationAlert } from "../../../../helpers/alert";
+import RequestPermissions from "../../../../components/Common/RequestPermissions";
+import { OBTENER_USUARIO_CODIGO } from "../../../../services/UsuarioService";
+import { checkUserPermissions } from "../../../../helpers/roles";
 
 const chargeInitialValue = { id: null, cargo: "", monto: "" };
 
@@ -36,12 +38,17 @@ const RoomCharges = () => {
   const [modal, setModal] = useState(false);
   const [newCharge, setNewCharge] = useState(chargeInitialValue);
 
+  const [tempCharge, setTempCharge] = useState(null);
+
+  const [permissionEditModal, setPermissionEditModal] = useState(false);
+  const [permissionDeleteModal, setPermissionDeleteModal] = useState(false);
+
+  const [currentUser, setCurrentUser] = useState(null);
+
   const [update] = useMutation(UPDATE_RESERVA_HABITACION);
 
   // Modal functions
   const toggle = () => setModal(!modal);
-
-  const hasDeletePermissions = false;
 
   const handleChange = (e) => {
     setNewCharge({ ...newCharge, [e.target.name]: e.target.value });
@@ -129,23 +136,6 @@ const RoomCharges = () => {
     setChargesPerRoom(newChargesPerRoom);
   };
 
-  useEffect(() => {
-    const fetchReservas = async () => {
-      try {
-        const { data } = await client.query({
-          query: OBTENER_FULL_RESERVAHABITACION,
-          fetchPolicy: "network-only",
-        });
-        setRoomsReservation(data.obtenerReservaHabitaciones);
-        mapChargesPerRoom(data.obtenerReservaHabitaciones);
-      } catch (error) {
-        console.error("Error fetching reservas:", error);
-      }
-    };
-
-    fetchReservas();
-  }, [client]);
-
   const RoomsSelection = () => {
     const buildPersonQuantity = (adults, children) => {
       let verbiage = "";
@@ -200,6 +190,51 @@ const RoomCharges = () => {
       </Card>
     );
   };
+
+  const handleDeleteCharge = (chargeId) => {
+    const newChargesPerRoom = chargesPerRoom.map((cpr) => {
+      if (cpr.roomId === selectedRoom.id) {
+        return {
+          ...cpr,
+          chargesList: cpr.chargesList.filter((cl) => cl.id !== chargeId),
+        };
+      }
+      return cpr;
+    });
+    setChargesPerRoom(newChargesPerRoom);
+  };
+
+  useEffect(() => {
+    const fetchReservas = async () => {
+      try {
+        const { data } = await client.query({
+          query: OBTENER_FULL_RESERVAHABITACION,
+          fetchPolicy: "network-only",
+        });
+        setRoomsReservation(data.obtenerReservaHabitaciones);
+        mapChargesPerRoom(data.obtenerReservaHabitaciones);
+      } catch (error) {
+        console.error("Error fetching reservas:", error);
+      }
+    };
+    const fetchCurrentUser = async () => {
+      try {
+        const codigo = localStorage.getItem("cedula");
+        const { data } = await client.query({
+          variables: { codigo },
+          query: OBTENER_USUARIO_CODIGO,
+          fetchPolicy: "network-only",
+        });
+
+        setCurrentUser(data.obtenerUsuarioByCodigo);
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+      }
+    };
+
+    fetchReservas();
+    fetchCurrentUser();
+  }, [client]);
 
   return (
     <div className="page-content">
@@ -282,8 +317,19 @@ const RoomCharges = () => {
                                     color="warning"
                                     disabled={false}
                                     onClick={() => {
-                                      setNewCharge(charge);
-                                      toggle();
+                                      let hasPermissionToEdit =
+                                        checkUserPermissions(
+                                          currentUser?.roles,
+                                          ["INHOUSE"],
+                                          ["editar"]
+                                        );
+                                      if (hasPermissionToEdit) {
+                                        setNewCharge(charge);
+                                        toggle();
+                                      } else {
+                                        setPermissionEditModal(true);
+                                        setTempCharge(charge);
+                                      }
                                     }}
                                   />
                                   <span
@@ -294,37 +340,21 @@ const RoomCharges = () => {
                                       icon="bx bx-x"
                                       color="danger"
                                       onClick={() => {
-                                        const newChargesPerRoom =
-                                          chargesPerRoom.map((cpr) => {
-                                            if (
-                                              cpr.roomId === selectedRoom.id
-                                            ) {
-                                              return {
-                                                ...cpr,
-                                                chargesList:
-                                                  cpr.chargesList.filter(
-                                                    (cl) => {
-                                                      if (cl.id !== charge.id)
-                                                        return cl;
-                                                    }
-                                                  ),
-                                              };
-                                            }
-                                            return cpr;
-                                          });
-                                        setChargesPerRoom(newChargesPerRoom);
+                                        let hasPermissionToDelete =
+                                          checkUserPermissions(
+                                            currentUser?.roles,
+                                            ["INHOUSE"],
+                                            ["eliminar"]
+                                          );
+                                        if (hasPermissionToDelete) {
+                                          handleDeleteCharge(charge.id);
+                                        } else {
+                                          setTempCharge(charge);
+                                          setPermissionDeleteModal(true);
+                                        }
                                       }}
-                                      disabled={!hasDeletePermissions}
                                     />
                                   </span>
-                                  {!hasDeletePermissions && (
-                                    <UncontrolledTooltip
-                                      target={"deleteChargeButton" + index}
-                                    >
-                                      Solicita permiso del administrador para
-                                      realizar esta acción
-                                    </UncontrolledTooltip>
-                                  )}
                                 </td>
                               </tr>
                             ))}
@@ -383,6 +413,30 @@ const RoomCharges = () => {
             </CardBody>
           </Card>
         </div>
+        {/* This is to request edit permissions */}
+        <RequestPermissions
+          modalOpen={permissionEditModal}
+          setModalOpen={setPermissionEditModal}
+          onSuccessConfirmation={() => {
+            setNewCharge(tempCharge);
+            toggle();
+            setTempCharge(null);
+          }}
+          modules={["INHOUSE"]}
+          permissions={["editar"]}
+          enableConfirmationMessage
+        />
+        <RequestPermissions
+          modalOpen={permissionDeleteModal}
+          setModalOpen={setPermissionDeleteModal}
+          onSuccessConfirmation={() => {
+            handleDeleteCharge(tempCharge.id);
+            setTempCharge(null);
+          }}
+          modules={["INHOUSE"]}
+          permissions={["eliminar"]}
+          enableConfirmationMessage
+        />
       </Container>
     </div>
   );

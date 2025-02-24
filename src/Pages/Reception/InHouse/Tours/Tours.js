@@ -21,7 +21,7 @@ import PlusMinusInput from "../../../../components/Common/PlusMinusInput";
 import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
 import { Tab, Tabs } from "react-bootstrap";
 import DatePicker from "react-datepicker";
-import { getFecha, timestampToDateLocal } from "../../../../helpers/helpers";
+import { getFecha } from "../../../../helpers/helpers";
 import DataList from "../../../../components/Common/DataList";
 import { infoAlert, requestConfirmationAlert } from "../../../../helpers/alert";
 import { keys } from "lodash";
@@ -29,6 +29,7 @@ import { UPDATE_RESERVA_INFO } from "../../../../services/ReservaService";
 import { OBTENER_TOURS } from "../../../../services/TourService";
 import RequestPermissions from "../../../../components/Common/RequestPermissions";
 import { OBTENER_USUARIO_CODIGO } from "../../../../services/UsuarioService";
+import { checkUserPermissions } from "../../../../helpers/roles";
 
 const Tours = () => {
   const client = useApolloClient();
@@ -52,6 +53,8 @@ const Tours = () => {
 
   const [permissionModal, setPermissionModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+
+  const [indexTour, setIndexTour] = useState(-1);
 
   // Services
   const [updateReservaHabitacion] = useMutation(UPDATE_RESERVA_HABITACION);
@@ -210,18 +213,15 @@ const Tours = () => {
                     icon="mdi mdi-delete"
                     color="danger"
                     onClick={() => {
-                      let hasPermissionToDelete = false;
-                      currentUser?.roles.forEach((rol) => {
-                        rol?.permisos.forEach((permiso) => {
-                          if (permiso?.modulo === "INHOUSE") {
-                            hasPermissionToDelete = !!permiso?.eliminar;
-                          }
-                        });
-                      });
-                      // Remove the false condition when testing finish
-                      if (hasPermissionToDelete && false) {
-                        // handleDeleteTour(index);
+                      let hasPermissionToDelete = checkUserPermissions(
+                        currentUser?.roles,
+                        ["INHOUSE"],
+                        ["eliminar"]
+                      );
+                      if (hasPermissionToDelete) {
+                        handleDeleteTour(index);
                       } else {
+                        setIndexTour(index);
                         setPermissionModal(true);
                       }
                     }}
@@ -496,8 +496,6 @@ const Tours = () => {
                           });
                         }
                       );
-
-                      debugger;
                       if (isAnyDatesNotSelected) {
                         infoAlert(
                           "Advertencia",
@@ -553,14 +551,6 @@ const Tours = () => {
         </CardBody>
       </Card>
     );
-  };
-
-  const getFechaFromReservaHabitacion = (fechaField) => {
-    const date = timestampToDateLocal(
-      Number(selectedRoom?.[fechaField]),
-      "date"
-    );
-    return getFecha(date);
   };
 
   return (
@@ -736,10 +726,12 @@ const Tours = () => {
           modalOpen={permissionModal}
           setModalOpen={setPermissionModal}
           onSuccessConfirmation={() => {
-            console.log("Success you have permission to continue");
+            handleDeleteTour(indexTour);
+            setIndexTour(-1);
           }}
           modules={["INHOUSE"]}
           permissions={["eliminar"]}
+          enableConfirmationMessage
         />
       </Container>
     </div>

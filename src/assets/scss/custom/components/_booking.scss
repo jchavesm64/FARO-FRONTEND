@@ -286,3 +286,12 @@ body {
     width: 40px;
   }
 }
+
+.amount-container {
+  display: flex;
+  max-height: 40px;
+  gap: 14px;
+  .amount-input {
+    max-width: 336px;
+  }
+}

@@ -3,7 +3,6 @@ import {
   Card,
   CardBody,
   Container,
-  Input,
   Label,
   Modal,
   ModalBody,
@@ -26,6 +25,10 @@ import { useYupValidationResolver } from "../../../../helpers/yupValidations";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
+import RequestPermissions from "../../../../components/Common/RequestPermissions";
+import React from "react";
+import { OBTENER_USUARIO_CODIGO } from "../../../../services/UsuarioService";
+import { checkUserPermissions } from "../../../../helpers/roles";
 
 const validationSchema = yup.object({
   reason: yup.string().required("Campo requerido"),
@@ -48,21 +51,20 @@ const RoomChange = () => {
 
   const [actualizarHabitacion] = useMutation(UPDATE_HABITACION);
   const [actualizarReservaHabitacion] = useMutation(UPDATE_RESERVA_HABITACION);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const resolver = useYupValidationResolver(validationSchema);
+  const [permissionModal, setPermissionModal] = useState(false);
   const {
     register,
     handleSubmit,
     watch,
     setValue,
-    setError,
-    clearErrors,
-    getValues,
     reset: resetForm,
     formState: { errors },
   } = useForm({
     resolver,
-    defaultValues: { reason: "", amount: 0 },
+    defaultValues: { reason: "", amount: 0, disableAmount: true },
   });
 
   const RoomsSelection = () => {
@@ -232,8 +234,24 @@ const RoomChange = () => {
       }
     };
 
+    const fetchCurrentUser = async () => {
+      try {
+        const codigo = localStorage.getItem("cedula");
+        const { data } = await client.query({
+          variables: { codigo },
+          query: OBTENER_USUARIO_CODIGO,
+          fetchPolicy: "network-only",
+        });
+
+        setCurrentUser(data.obtenerUsuarioByCodigo);
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+      }
+    };
+
     fetchReservas();
     fetchHabitacionesDisponibles();
+    fetchCurrentUser();
   }, [client]);
 
   useEffect(() => {
@@ -359,13 +377,35 @@ const RoomChange = () => {
             <Label for="amount" className="mt-3">
               Monto a cobrar
             </Label>
-            <input
-              {...register("amount")}
-              className="form-control"
-              type="number"
-              id="amount"
-              disabled={true}
-            />
+            <div className="amount-container">
+              <input
+                {...register("amount")}
+                className={`form-control ${
+                  watch("disableAmount") ? "amount-input" : ""
+                }`}
+                type="number"
+                id="amount"
+                disabled={watch("disableAmount")}
+              />
+              {watch("disableAmount") && (
+                <Button
+                  color="primary"
+                  onClick={() => {
+                    let hasPermissionToEdit = checkUserPermissions(
+                      currentUser?.roles,
+                      ["INHOUSE"],
+                      ["editar"]
+                    );
+                    if (hasPermissionToEdit) {
+                      setValue("disableAmount", false);
+                    } else setPermissionModal(true);
+                  }}
+                >
+                  Editar Monto
+                </Button>
+              )}
+            </div>
+
             {errors?.["amount"] && (
               <p className="errorMessage">{errors?.["amount"].message}</p>
             )}
@@ -393,6 +433,17 @@ const RoomChange = () => {
           </Button>
         </ModalFooter>
       </Modal>
+      {/* This request modal it is to enable the amount field */}
+      <RequestPermissions
+        modalOpen={permissionModal}
+        setModalOpen={setPermissionModal}
+        onSuccessConfirmation={() => {
+          setValue("disableAmount", false);
+        }}
+        modules={["INHOUSE"]}
+        permissions={["editar"]}
+        enableConfirmationMessage
+      />
     </div>
   );
 };

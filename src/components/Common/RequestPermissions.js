@@ -12,8 +12,8 @@ import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { COMPROBAR_USUARIO } from "../../services/UsuarioService";
-import { keys } from "lodash";
 import Swal from "sweetalert2";
+import { checkUserPermissions } from "../../helpers/roles";
 
 const validationSchema = yup.object({
   user: yup.string().required("Campo requerido"),
@@ -26,6 +26,7 @@ const RequestPermissions = ({
   onSuccessConfirmation,
   modules,
   permissions,
+  enableConfirmationMessage,
 }) => {
   const formRef = useRef(null);
 
@@ -35,11 +36,6 @@ const RequestPermissions = ({
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
-    setError,
-    clearErrors,
-    getValues,
     reset: resetForm,
     formState: { errors },
   } = useForm({
@@ -54,15 +50,21 @@ const RequestPermissions = ({
     });
     if (userFound) {
       const currentUser = userFound?.data?.comprobarUsuario;
-      const isAllowed = currentUser?.roles.some((rol) =>
-        rol?.permisos.some(
-          (permiso) =>
-            modules.includes(permiso?.modulo) &&
-            permissions.some((perm) => permiso?.[perm])
-        )
+      const isAllowed = checkUserPermissions(
+        currentUser?.roles,
+        modules,
+        permissions
       );
       if (isAllowed) {
         onSuccessConfirmation?.();
+        setModalOpen(false);
+        resetForm();
+        enableConfirmationMessage &&
+          Swal.fire({
+            icon: "success",
+            title: "Autorización exitosa",
+            text: "El usuario ingresado cuenta con los permisos necesarios para realizar esta acción",
+          });
       } else {
         Swal.fire({
           icon: "error",
