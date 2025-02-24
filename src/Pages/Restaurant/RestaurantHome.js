@@ -2,7 +2,11 @@ import React from "react";
 import DatePicker from "react-datepicker";
 import { Container, Row, Card, CardTitle, Col , Modal, ModalHeader, ModalBody, ModalFooter, Button, Form, FormGroup, Label, Input} from "reactstrap";
 import { Link } from "react-router-dom";
-
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { OBTENER_MOVIMIENTOS_POR_FECHA } from "../../services/MovimientosRestauranteService";
+import { OBTENER_LINEAS_MENU } from "../../services/MenuLineaService";
+import { useApolloClient } from "@apollo/client";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import { restaurantRoutes } from "../../constants/routesConst";
 import ButtomCardHome from "../Home/ButtonCardHome";
@@ -14,16 +18,28 @@ const RestaurantHome = () => {
     const [reportType, setReportType] = React.useState("mostSoldDishes");
     const [startDate, setStartDate] = React.useState(new Date());
     const [endDate, setEndDate] = React.useState(new Date(new Date().setDate(new Date().getDate() + 1)));
-    const handleGenerateReport = () => {
+    const [movements, setMovements] = React.useState([]);
+    const client = useApolloClient();
+    const handleGenerateReport = async () => {
+      const startDateFormatted = startDate.toISOString().split('T')[0];
+      const endDateFormatted = endDate.toISOString().split('T')[0];
+      const { data } = await client.query({
+        query: OBTENER_MOVIMIENTOS_POR_FECHA,
+        variables: { fechaInicio: startDate, fechaFin: endDate }, 
+        fetchPolicy: "network-only",
+      });
+      let fileName;
       if (reportType === "mostSoldDishes") {
-        console.log("Generando reporte de platillos más vendidos...");
-        
+        platillosMasVendidos(data);
+        fileName = `reporte_platillos_mas_vendidos_${startDateFormatted}_a_${endDateFormatted}.xlsx`;
       } else if (reportType === "mostConsumedIngredients") {
-        console.log("Generando reporte de ingredientes más consumidos...");
-      
+        ingredientesMasConsumidos(data.obtenerMovimientosPorFecha);
+        fileName = `reporte_ingredientes_mas_consumidos_${startDateFormatted}_a_${endDateFormatted}.xlsx`;
       }
+      exportToExcel(fileName);
       toggle();
     };
+
     const handleStartDateChange = (date) => {
       setStartDate(date);
       const minEndDate = new Date(date);
@@ -34,6 +50,73 @@ const RestaurantHome = () => {
       }
     };
 
+
+    const ingredientesMasConsumidos = async (movimientos) => {
+      const platillos = movimientos.flatMap((movimiento) => movimiento.platillos);
+      const platillosCount = platillos.reduce((acc, platillo) => {
+        const { nombre } = platillo;
+        if (!acc[nombre]) {
+          acc[nombre] = { ...platillo, cantidad: 0 };
+        }
+        acc[nombre].cantidad += 1;
+        return acc;
+      }, {});
+      const filteredPlatillos = Object.values(platillosCount);
+      const ingredientes = filteredPlatillos.map(async (platillo) => {
+        const { data } = await client.query({
+            query: OBTENER_LINEAS_MENU,
+            variables: { id: platillo.id }, 
+            fetchPolicy: "network-only",
+        });
+        const ingredientes = data.obtenerLineasMenu.map((linea) => {
+          const { producto, cantidad } = linea;
+          return { ...producto, cantidad: cantidad * platillo.cantidad };
+        });
+        return ingredientes;
+      }, []);
+      
+      const ingredientesConsumidos = await Promise.all(ingredientes);
+      const ingredientesCount = ingredientesConsumidos.flat().reduce((acc, ingrediente) => {
+        const {cantidad, unidad ,nombre, precioCompra} = ingrediente;
+        if (!acc[nombre]) {
+          acc[nombre] = {cantidad: 0, unidad, nombre, precioCompra };
+        }
+        acc[nombre].cantidad += cantidad;
+        return acc;
+      }, {});
+      const ingredientesMasConsumidos = Object.values(ingredientesCount);
+      setMovements(ingredientesMasConsumidos);
+
+    };
+
+    const platillosMasVendidos = async (data) => {
+      const platillos = data.obtenerMovimientosPorFecha.flatMap((movimiento) => movimiento.platillos);
+      const platillosCount = platillos.reduce((acc, platillo) => {
+        const { nombre, precio } = platillo;
+        if (!acc[nombre]) {
+          acc[nombre] = { nombre, precio, cantidad: 0 };
+        }
+        acc[nombre].cantidad += 1;
+        return acc;
+      }, {});
+
+      const platillosMasVendidos = Object.values(platillosCount);
+      setMovements(platillosMasVendidos);
+    };
+
+    const exportToExcel = async (fileName) => {
+      if (movements == undefined && movements.length == 0) {
+        console.warn("No hay datos para exportar.");
+        return;
+      }
+      const worksheet = XLSX.utils.json_to_sheet(movements);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Datos");
+    
+      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      saveAs(blob, fileName);
+    };
 
     return (
       <React.Fragment>

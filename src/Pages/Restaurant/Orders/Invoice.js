@@ -162,8 +162,6 @@ const Invoice = (props) => {
                 label: item.value
             }));
 
-            console.log(options)
-
             setCondicionVentas(options)
         }
 
