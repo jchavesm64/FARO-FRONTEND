@@ -4,6 +4,7 @@ import { OBTENER_RESERVAS } from "../../../../services/ReservaService";
 import { Container, Row, Card, CardHeader, FormGroup, Label, CardTitle, CardBody, Badge, Input, Button, Col, } from 'reactstrap';
 import Breadcrumbs from '../../../../components/Common/Breadcrumb';
 import { Link } from 'react-router-dom';
+import { typesBooking } from "../../../../constants/routesConst";
 
 
 const CheckIn = () => {
@@ -38,7 +39,7 @@ const CheckIn = () => {
         const filtered = booking.filter(b => {
             let matches = true;
 
-            const allowedStates = ["Pendiente", "Pagada", "Incompleto", "Conflicto","Activa"];
+            const allowedStates = ["Pendiente", "Pagada", "Incompleto", "Conflicto", "Activa"];
             if (!allowedStates.includes(b.estado)) {
                 matches = false;
             }
@@ -73,6 +74,21 @@ const CheckIn = () => {
     useEffect(() => {
         filterBookings();
     }, [filterCriteria, booking]);
+
+    
+
+
+    const estadoColores = {
+        Cancelada: "danger",
+        Pendiente: "warning",
+        Pagada: "success",
+        Conflicto: "dark",
+        Incompleto: "secondary",
+        Activa: "info",
+        CheckIn: "primary",
+        CheckOut: "purple-600",
+        Finalizada: "teal-500",
+    };
 
     return (
         <React.Fragment>
@@ -138,7 +154,7 @@ const CheckIn = () => {
                                 {filteredBooking.map(b => (
                                     <Link to={`/reception/checkin/${b.id}`} style={{ textDecoration: 'none' }} className="card_home_link p-0 m-0" key={b.id}>
                                         <Card className="card_booking p-0 mb-2 overflow-hidden">
-                                            <CardHeader className={`d-flex justify-content-between text-primary-foreground ${b.estado === 'Cancelada' ? 'bg-danger' : 'bg-primary'}`}>
+                                            <CardHeader className={`d-flex justify-content-between text-primary-foreground bg-${estadoColores[b.estado] || 'bg-primary'}`}>
                                                 <CardTitle className="text-lg">
                                                     <span className="fs-5 m-0 ms-1 mb-2 span_color">Reservación:</span> {b.id.slice(0, 10)}...
                                                 </CardTitle>
@@ -152,10 +168,10 @@ const CheckIn = () => {
                                                     </span>
                                                 </div>
                                                 <div className="d-flex justify-content-around">
-                                                    <Badge color={`${b.estado === 'Cancelada' ? 'danger' : 'primary'}`} className="mr-2 fs-6" variant={b.estado === 'Pendiente' ? 'outline' : 'default'}>
+                                                    <Badge color={`${estadoColores[b.estado] || 'bg-primary'}`} className="mr-2 fs-6" variant={b.estado === 'Pendiente' ? 'outline' : 'default'}>
                                                         {b.estado}
                                                     </Badge>
-                                                    <Badge color={`${b.estado === 'Cancelada' ? 'danger' : 'primary'}`} className="fs-6 p-1 text-center">{b.tipo}</Badge>
+                                                    <Badge color={`${estadoColores[b.estado] || 'bg-primary'}`} className="fs-6 p-1 text-center">{typesBooking.find(item => item.value === b.tipo).label}</Badge>
                                                 </div>
 
                                                 <div className="m-0 mt-1 text-sm">

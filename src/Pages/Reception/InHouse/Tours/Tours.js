@@ -1,42 +1,44 @@
 import React, { useState, useEffect } from "react";
 import {
-  Container,
-  Row,
   Card,
-  FormGroup,
   CardBody,
   Col,
-  ModalHeader,
-  ModalBody,
+  Container,
+  FormGroup,
   Modal,
+  ModalBody,
+  ModalHeader,
+  Row,
 } from "reactstrap";
-import Breadcrumbs from "../../../components/Common/Breadcrumb";
-import DataList from "../../../components/Common/DataList";
+import { useApolloClient, useMutation } from "@apollo/client";
 import Select from "react-select";
-import { infoAlert, requestConfirmationAlert } from "../../../helpers/alert";
-import DatePicker from "react-datepicker";
-import { Tab, Tabs } from "react-bootstrap";
-import { getFecha, timestampToDateLocal } from "../../../helpers/helpers";
-import { keys } from "lodash";
-import ButtonIconTable from "../../../components/Common/ButtonIconTable";
+import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import {
   OBTENER_FULL_RESERVAHABITACION,
   UPDATE_RESERVA_HABITACION,
-} from "../../../services/ReservaHabitacionService";
-import { UPDATE_RESERVA_INFO } from "../../../services/ReservaService";
-import { useApolloClient, useMutation } from "@apollo/client";
-import { OBTENER_SERVICIO_EXTERNOS } from "../../../services/ServiciosExternalService";
+} from "../../../../services/ReservaHabitacionService";
+import PlusMinusInput from "../../../../components/Common/PlusMinusInput";
+import ButtonIconTable from "../../../../components/Common/ButtonIconTable";
+import { Tab, Tabs } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import { getFecha } from "../../../../helpers/helpers";
+import DataList from "../../../../components/Common/DataList";
+import { infoAlert, requestConfirmationAlert } from "../../../../helpers/alert";
+import { keys } from "lodash";
+import { UPDATE_RESERVA_INFO } from "../../../../services/ReservaService";
+import { OBTENER_TOURS } from "../../../../services/TourService";
+import RequestPermissions from "../../../../components/Common/RequestPermissions";
+import { OBTENER_USUARIO_CODIGO } from "../../../../services/UsuarioService";
+import { checkUserPermissions } from "../../../../helpers/roles";
 
-const BookService = () => {
-  document.title = "Servicios Externos | FARO";
-
+const Tours = () => {
   const client = useApolloClient();
 
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [roomsReservation, setRoomsReservation] = useState([]);
-  const [services, setServices] = useState([]);
-  const [extraServices, setExtraServices] = useState({});
+  const [tours, setTours] = useState([]);
+  const [extraTours, setExtraTours] = useState({});
   const [selectedService, setSelectedService] = useState(null);
   const [isSelectingType, setIsSelectingType] = useState(false);
   const [isInfoModified, setIsInfoModified] = useState(false);
@@ -48,6 +50,11 @@ const BookService = () => {
 
   const isRoomTabSelected = key === "room";
   const isReservationTabSelected = key === "reservation";
+
+  const [permissionModal, setPermissionModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const [indexTour, setIndexTour] = useState(-1);
 
   // Services
   const [updateReservaHabitacion] = useMutation(UPDATE_RESERVA_HABITACION);
@@ -65,34 +72,49 @@ const BookService = () => {
         console.error("Error fetching reservas:", error);
       }
     };
-    const fetchServiciosExternos = async () => {
+    const fetchTours = async () => {
       try {
         const { data } = await client.query({
-          query: OBTENER_SERVICIO_EXTERNOS,
+          query: OBTENER_TOURS,
           fetchPolicy: "network-only",
         });
-        setServices(data.obtenerServiciosExternos);
+        setTours(data.obtenerTours);
       } catch (error) {
-        console.error("Error fetching servicios externos:", error);
+        console.error("Error fetching tours:", error);
+      }
+    };
+    const fetchCurrentUser = async () => {
+      try {
+        const codigo = localStorage.getItem("cedula");
+        const { data } = await client.query({
+          variables: { codigo },
+          query: OBTENER_USUARIO_CODIGO,
+          fetchPolicy: "network-only",
+        });
+
+        setCurrentUser(data.obtenerUsuarioByCodigo);
+      } catch (error) {
+        console.error("Error fetching current user:", error);
       }
     };
 
     fetchReservas();
-    fetchServiciosExternos();
+    fetchTours();
+    fetchCurrentUser();
   }, [client, key]);
 
   const toggleCalendarModal = () => setCalendarModal(!calendarModal);
 
   const getServices = () => {
     const datos = [];
-    if (services) {
+    if (tours) {
       const currentIdSelected = isRoomTabSelected
         ? selectedRoom?.id
         : selectedReservation?.id;
-      const alreadySelectedServices = extraServices[currentIdSelected]?.map(
+      const alreadySelectedServices = extraTours[currentIdSelected]?.map(
         (service) => service?.id
       );
-      services
+      tours
         .filter((item) => !alreadySelectedServices?.includes(item.id))
         .forEach((item) => {
           datos.push({
@@ -104,7 +126,21 @@ const BookService = () => {
     return datos;
   };
 
-  const AdditionalServicesTable = () => {
+  const handleDeleteTour = (index) => {
+    const currentIdSelected = isRoomTabSelected
+      ? selectedRoom?.id
+      : selectedReservation?.id;
+    const newListValue = extraTours[currentIdSelected]?.filter((s, i) => {
+      return index !== i;
+    });
+    setExtraTours({
+      ...extraTours,
+      [currentIdSelected]: newListValue,
+    });
+    if (!isInfoModified) setIsInfoModified(true);
+  };
+
+  const AdditionalToursTable = () => {
     const currentIdSelected = isRoomTabSelected
       ? selectedRoom?.id
       : selectedReservation?.id;
@@ -113,7 +149,10 @@ const BookService = () => {
         <thead>
           <tr>
             <th key="service" className="text-center">
-              Servicio Externo
+              Tour
+            </th>
+            <th key="assistance" className="text-center">
+              Personas que asistiran
             </th>
             <th key="price" className="text-center">
               Precio
@@ -125,14 +164,41 @@ const BookService = () => {
           </tr>
         </thead>
         <tbody>
-          {extraServices[currentIdSelected]?.map((line, index) => {
-            const isQuantifiable = line.tipo?.cuantificable === "true";
+          {extraTours[currentIdSelected]?.map((line, index) => {
             return (
               <tr key={index}>
-                <td>{line.nombre}</td>
-                <td className="precio-td">{line.precio}</td>
-                <td className="actions-td">
-                  {isQuantifiable && (
+                <td className="text-center">{line.nombre}</td>
+                <td
+                  className={`${line.isNew ? "assistance-td" : "text-center"}`}
+                >
+                  {line.isNew ? (
+                    <PlusMinusInput
+                      value={line?.assistanceNumber ?? 1}
+                      handleChange={(newNum) => {
+                        const newListValue = extraTours[currentIdSelected]?.map(
+                          (s, i) => {
+                            if (index === i)
+                              return { ...s, assistanceNumber: newNum };
+                            return s;
+                          }
+                        );
+                        setExtraTours({
+                          ...extraTours,
+                          [currentIdSelected]: newListValue,
+                        });
+                        if (!isInfoModified) setIsInfoModified(true);
+                      }}
+                      minLimit={1}
+                      maxAvailable={100}
+                    />
+                  ) : (
+                    line?.assistanceNumber ?? 0
+                  )}
+                </td>
+                <td className="text-center">{line.precio}</td>
+
+                <td className="assistance-td">
+                  {((line?.useExtra?.length ?? 0) <= 0 || line.isNew) && (
                     <ButtonIconTable
                       icon="mdi mdi-calendar-range"
                       color="info"
@@ -142,27 +208,24 @@ const BookService = () => {
                       }}
                     />
                   )}
-                  {
-                    <ButtonIconTable
-                      icon="mdi mdi-delete"
-                      color="danger"
-                      onClick={() => {
-                        const currentIdSelected = isRoomTabSelected
-                          ? selectedRoom?.id
-                          : selectedReservation?.id;
-                        const newListValue = extraServices[
-                          currentIdSelected
-                        ]?.filter((s, i) => {
-                          return index !== i;
-                        });
-                        setExtraServices({
-                          ...extraServices,
-                          [currentIdSelected]: newListValue,
-                        });
-                        if (!isInfoModified) setIsInfoModified(true);
-                      }}
-                    />
-                  }
+
+                  <ButtonIconTable
+                    icon="mdi mdi-delete"
+                    color="danger"
+                    onClick={() => {
+                      let hasPermissionToDelete = checkUserPermissions(
+                        currentUser?.roles,
+                        ["INHOUSE"],
+                        ["eliminar"]
+                      );
+                      if (hasPermissionToDelete) {
+                        handleDeleteTour(index);
+                      } else {
+                        setIndexTour(index);
+                        setPermissionModal(true);
+                      }
+                    }}
+                  />
                 </td>
               </tr>
             );
@@ -199,11 +262,11 @@ const BookService = () => {
                   rangeDates={date.toLocaleDateString("es-ES")}
                   onClick={() => {
                     setSelectedReservation(reservation);
-                    const extraServicesKeys = keys(extraServices);
+                    const extraServicesKeys = keys(extraTours);
                     if (!extraServicesKeys.includes(reservation?.id)) {
-                      setExtraServices({
-                        ...extraServices,
-                        [reservation?.id]: reservation?.serviciosExternos ?? [],
+                      setExtraTours({
+                        ...extraTours,
+                        [reservation?.id]: reservation?.tours ?? [],
                       });
                     }
                   }}
@@ -261,11 +324,11 @@ const BookService = () => {
                   )}
                   onClick={() => {
                     setSelectedRoom(room);
-                    const extraServicesKeys = keys(extraServices);
+                    const extraServicesKeys = keys(extraTours);
                     if (!extraServicesKeys.includes(room?.id)) {
-                      setExtraServices({
-                        ...extraServices,
-                        [room?.id]: room?.serviciosExternos ?? [],
+                      setExtraTours({
+                        ...extraTours,
+                        [room?.id]: room?.toursExtra ?? [],
                       });
                     }
                   }}
@@ -295,26 +358,35 @@ const BookService = () => {
 
   const addExtraService = (service) => {
     if (isRoomTabSelected) {
-      const list = extraServices[selectedRoom?.id] ?? [];
-      setExtraServices({
-        ...extraServices,
-        [selectedRoom?.id]: [...list, service],
+      const list = extraTours[selectedRoom?.id] ?? [];
+      setExtraTours({
+        ...extraTours,
+        [selectedRoom?.id]: [...list, { ...service, isNew: true, extra: 1 }],
       });
     } else if (isReservationTabSelected) {
-      const list = extraServices[selectedReservation?.id] ?? [];
-      setExtraServices({
-        ...extraServices,
-        [selectedReservation?.id]: [...list, service],
+      const list = extraTours[selectedReservation?.id] ?? [];
+      setExtraTours({
+        ...extraTours,
+        [selectedReservation?.id]: [
+          ...list,
+          { ...service, isNew: true, extra: 1 },
+        ],
       });
     }
   };
 
   const saveServicesForReservaHabitacion = async () => {
     const savedServicesPromises = [];
-    keys(extraServices).forEach((key) => {
+    const newInfoUpdated = {};
+    keys(extraTours).forEach((key) => {
+      const newToursExtra = extraTours[key].map((tours) => {
+        const { isNew, ...rest } = tours;
+        return rest;
+      });
       const input = {
-        serviciosExternos: extraServices[key],
+        toursExtra: newToursExtra,
       };
+      newInfoUpdated[key] = newToursExtra;
       savedServicesPromises.push(
         updateReservaHabitacion({
           variables: { id: key, input },
@@ -323,15 +395,22 @@ const BookService = () => {
       );
     });
 
+    setExtraTours(newInfoUpdated);
     await Promise.all(savedServicesPromises);
   };
 
   const saveServicesForReserva = async () => {
     const savedServicesPromises = [];
-    keys(extraServices).forEach((key) => {
+    const newInfoUpdated = {};
+    keys(extraTours).forEach((key) => {
+      const newToursExtra = extraTours[key].map((tours) => {
+        const { isNew, ...rest } = tours;
+        return rest;
+      });
       const input = {
-        serviciosExternos: extraServices[key],
+        tours: newToursExtra,
       };
+      newInfoUpdated[key] = newToursExtra;
       savedServicesPromises.push(
         updateReserva({
           variables: { id: key, input },
@@ -340,28 +419,29 @@ const BookService = () => {
       );
     });
 
+    setExtraTours(newInfoUpdated);
     await Promise.all(savedServicesPromises);
   };
 
-  const AdditionalServices = () => {
+  const AdditionalTours = () => {
     return (
       <Card className="w-50">
         <CardBody>
           <div>
             <div className="flex flex-col p-6 additional-services-container">
-              <h3>Servicios Externos</h3>
+              <h3>Tours</h3>
               {(selectedRoom != null || selectedReservation != null) &&
               isSelectingType ? (
                 <div className="row row-cols-lg-auto g-3 align-items-center justify-content-between">
-                  <div className="col-xl-8 col-md-12">
+                  <div className="tours-select-container">
                     <Select
-                      id="service"
+                      id="tours"
                       value={selectedService}
                       onChange={(e) => {
                         if (e?.value) setSelectedService(e);
                       }}
                       options={getServices()}
-                      placeholder="Servicios"
+                      placeholder="Tours"
                       classNamePrefix="select2-selection"
                     />
                   </div>
@@ -371,6 +451,7 @@ const BookService = () => {
                       onClick={() => {
                         addExtraService({
                           ...selectedService.value,
+                          assistanceNumber: 1,
                         });
                         setSelectedService(null);
                         setIsSelectingType(false);
@@ -403,30 +484,47 @@ const BookService = () => {
                       (isReservationTabSelected && !selectedReservation)
                     }
                   >
-                    Agregar Servicio Externo
+                    Agregar Tour
                   </button>
                   <button
                     className="btn btn-outline-secondary"
                     onClick={() => {
-                      requestConfirmationAlert({
-                        title: "¿Estás seguro?",
-                        bodyText: "¿Deseas guardar los externos?",
-                        confirmButtonText: "Sí, guardar cambios",
-                        confirmationEvent: () => {
-                          if (isRoomTabSelected)
-                            saveServicesForReservaHabitacion();
-                          if (isReservationTabSelected)
-                            saveServicesForReserva();
-                          setIsInfoModified(false);
-                        },
-                      });
+                      const isAnyDatesNotSelected = keys(extraTours).find(
+                        (key) => {
+                          return extraTours[key].find((tour) => {
+                            return !tour.useExtra || tour.useExtra?.length <= 0;
+                          });
+                        }
+                      );
+                      if (isAnyDatesNotSelected) {
+                        infoAlert(
+                          "Advertencia",
+                          "Existen tours a los que no se a indicado la fecha en que se realizaran",
+                          "warning",
+                          3000,
+                          "top-center"
+                        );
+                      } else {
+                        requestConfirmationAlert({
+                          title: "¿Estás seguro?",
+                          bodyText: "¿Deseas guardar los tours?",
+                          confirmButtonText: "Sí, guardar cambios",
+                          confirmationEvent: () => {
+                            if (isRoomTabSelected)
+                              saveServicesForReservaHabitacion();
+                            if (isReservationTabSelected)
+                              saveServicesForReserva();
+                            setIsInfoModified(false);
+                          },
+                        });
+                      }
                     }}
                     disabled={
                       (isRoomTabSelected && !selectedRoom) ||
                       (isReservationTabSelected && !selectedReservation)
                     }
                   >
-                    Guardar Servicios
+                    Guardar Tours
                   </button>
                 </div>
               )}
@@ -438,13 +536,13 @@ const BookService = () => {
                     (isReservationTabSelected &&
                       selectedReservation === null)) && (
                     <p>
-                      Para actualizar o agregar servicios externos, primero
-                      tiene que seleccionar un cuarto o una reservación.
+                      Para actualizar o agregar Tours, primero tiene que
+                      seleccionar un cuarto.
                     </p>
                   )}
                   {((isRoomTabSelected && selectedRoom) ||
                     (isReservationTabSelected && selectedReservation)) && (
-                    <AdditionalServicesTable />
+                    <AdditionalToursTable />
                   )}
                 </div>
               </div>
@@ -453,14 +551,6 @@ const BookService = () => {
         </CardBody>
       </Card>
     );
-  };
-
-  const getFechaFromReservaHabitacion = (fechaField) => {
-    const date = timestampToDateLocal(
-      Number(selectedRoom?.[fechaField]),
-      "date"
-    );
-    return getFecha(date);
   };
 
   return (
@@ -479,7 +569,7 @@ const BookService = () => {
                 activeKey={key}
                 onSelect={(k) => {
                   const handleChangeTab = () => {
-                    setExtraServices({});
+                    setExtraTours({});
                     setSelectedRoom(null);
                     setSelectedReservation(null);
                     setIsSelectingType(false);
@@ -490,7 +580,7 @@ const BookService = () => {
                     requestConfirmationAlert({
                       title: "¿Estás seguro?",
                       bodyText:
-                        "Tienes cambios sin guardar. ¿Deseas continuar sin guardar los servicios externos?",
+                        "Tienes cambios sin guardar. ¿Deseas continuar sin guardar los tours?",
                       confirmButtonText: "Sí, Continuar",
                       confirmationEvent: handleChangeTab,
                     });
@@ -509,7 +599,7 @@ const BookService = () => {
               </Tabs>
             </CardBody>
           </Card>
-          <AdditionalServices />
+          <AdditionalTours />
         </div>
         <Modal
           key="modalCustomer"
@@ -519,33 +609,29 @@ const BookService = () => {
             const currentIdSelected = isRoomTabSelected
               ? selectedRoom?.id
               : selectedReservation?.id;
-            const currentServiceEdited = extraServices[currentIdSelected].find(
+            const currentServiceEdited = extraTours[currentIdSelected].find(
               (es) => es.id === extraDate.id
             );
             if (!currentServiceEdited.useExtra?.length) {
-              const newListValue = extraServices[currentIdSelected]?.map(
-                (s) => {
-                  if (s.id === extraDate.id) {
-                    return { ...s, useExtra: extraDate.useExtra };
-                  }
-                  return s;
+              const newListValue = extraTours[currentIdSelected]?.map((s) => {
+                if (s.id === extraDate.id) {
+                  return { ...s, useExtra: extraDate.useExtra };
                 }
-              );
-              setExtraServices({
-                ...extraServices,
+                return s;
+              });
+              setExtraTours({
+                ...extraTours,
                 [currentIdSelected]: newListValue,
               });
             } else {
-              const newListValue = extraServices[currentIdSelected]?.map(
-                (se) => {
-                  if (se.id === extraDate.id) {
-                    return { ...se, useExtra: extraDate.useExtra };
-                  }
-                  return se;
+              const newListValue = extraTours[currentIdSelected]?.map((se) => {
+                if (se.id === extraDate.id) {
+                  return { ...se, useExtra: extraDate.useExtra };
                 }
-              );
-              setExtraServices({
-                ...extraServices,
+                return se;
+              });
+              setExtraTours({
+                ...extraTours,
                 [currentIdSelected]: newListValue,
               });
             }
@@ -554,12 +640,10 @@ const BookService = () => {
         >
           <ModalHeader key="modalheader" toggle={toggleCalendarModal}>
             {extraDate.length === 0 ? (
-              <span className="fs-4 m-0 span_package_color">
-                Editar sevicio
-              </span>
+              <span className="fs-4 m-0 span_package_color">Editar tour</span>
             ) : (
               <span className="fs-4 m-0 span_package_color">
-                Fechas para el uso de cada servicio extra
+                Fechas para el uso de cada tour extra
               </span>
             )}
           </ModalHeader>
@@ -569,7 +653,7 @@ const BookService = () => {
               <Row>
                 <div className="d-flex flex-column">
                   <label className="fs-5 m-0 ms-1 mb-2 span_package_color">
-                    <strong>Servicio: </strong>
+                    <strong>Tour: </strong>
                     <span className="fs-5 label_package_color">
                       {extraDate?.nombre}
                     </span>
@@ -603,7 +687,7 @@ const BookService = () => {
                         } else {
                           infoAlert(
                             "Oops",
-                            "Ya completó las fechas para los servicios extra",
+                            "Ya completó las fechas para los tours extra",
                             "warning",
                             3000,
                             "top-end"
@@ -612,8 +696,7 @@ const BookService = () => {
                       }}
                       inline
                       className="form-control"
-                      minDate={getFechaFromReservaHabitacion("fechaEntrada")}
-                      maxDate={getFechaFromReservaHabitacion("fechaSalida")}
+                      minDate={getFecha(new Date())}
                     />
                   </FormGroup>
                 </Col>
@@ -638,9 +721,21 @@ const BookService = () => {
             </Card>
           </ModalBody>
         </Modal>
+        {/* This modal is for request admin access to the options not available for the current user */}
+        <RequestPermissions
+          modalOpen={permissionModal}
+          setModalOpen={setPermissionModal}
+          onSuccessConfirmation={() => {
+            handleDeleteTour(indexTour);
+            setIndexTour(-1);
+          }}
+          modules={["INHOUSE"]}
+          permissions={["eliminar"]}
+          enableConfirmationMessage
+        />
       </Container>
     </div>
   );
 };
 
-export default BookService;
+export default Tours;

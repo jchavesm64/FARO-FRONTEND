@@ -1,7 +1,7 @@
-import React, { StrictMode } from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React, { StrictMode } from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
 
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
@@ -9,17 +9,17 @@ import "./i18n";
 
 import { configureStore } from "./store/store";
 
-import { ApolloClient, InMemoryCache, ApolloProvider, gql } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: 'http://localhost:4000/graphql', //local database
+  uri: "http://localhost:4000/graphql", //local database
   //uri: process.env.REACT_APP_DATABASEURI, //production database
   cache: new InMemoryCache({
-    addTypename: false
+    addTypename: false,
   }),
 });
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <StrictMode>
@@ -32,9 +32,8 @@ root.render(
         </React.Fragment>
       </Provider>
     </ApolloProvider>
-  </StrictMode>,
+  </StrictMode>
 );
 
 reportWebVitals();
 // serviceWorker.unregister();
-

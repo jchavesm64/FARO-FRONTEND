@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 import { infoAlert } from '../../../../helpers/alert';
-import { OBTENER_RESERVA, CHECKIN_RESERVA } from "../../../../services/ReservaService";
+import { OBTENER_RESERVA, CHECKIN_RESERVA, UPDATE_ESTADO_RESERVA } from "../../../../services/ReservaService";
 import { OBTENER_CLIENTES } from '../../../../services/ClienteService';
 import { OBTENER_RESERVAHABITACION } from '../../../../services/ReservaHabitacionService';
 import { OBTENER_TIPOSHABITACION } from "../../../../services/TipoHabitacionService";
@@ -25,6 +25,7 @@ const BookingCheckIn = () => {
     const { data: bookingRoom, loading: loading_room, error: error_room } = useQuery(OBTENER_RESERVAHABITACION, { variables: { id: data_booking?.obtenerReserva.id }, skip: !id, pollInterval: 1000 });
 
     const [checkIn] = useMutation(CHECKIN_RESERVA);
+    const [updateBooking] = useMutation(UPDATE_ESTADO_RESERVA);
 
     const [filter, setFilter] = useState('')
     const [typeRoom, setTypeRoom] = useState('');
@@ -48,6 +49,7 @@ const BookingCheckIn = () => {
         setModal(!modal);
     };
 
+    //Se requieren filtros por tipos de habitación
     const getTypeRooms = () => {
         const data = []
         if (typeRooms?.obtenerTiposHabitaciones) {
@@ -60,6 +62,12 @@ const BookingCheckIn = () => {
         }
         return data;
     }
+
+    function checkLastActiveReservation(reservations) {
+        const activeReservations = reservations.filter(reservation => reservation.estado !== "CheckIn");
+        return activeReservations.length === 1;
+    }
+
 
     const handleCheckIn = async () => {
         if (!selectedRoom) return;
@@ -75,7 +83,10 @@ const BookingCheckIn = () => {
             confirmButtonText: "Sí, ¡realizar check-in!"
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const { data } = await checkIn({ variables: {id:selectedRoom.id, reserva: booking.id, huespedes } });
+                const { data } = await checkIn({ variables: { id: selectedRoom.id, reserva: booking.id, huespedes } });
+                if (checkLastActiveReservation(bookingRoom?.obtenerReservaHabitacion)) {
+                    await updateBooking({ variables: { id: booking.id } })
+                }
                 const { estado, message } = data.checkIn;
                 if (estado) {
                     infoAlert('Check-In realizado', message, 'success', 3000, 'top-end');
@@ -136,9 +147,6 @@ const BookingCheckIn = () => {
         return []
     };
 
-    /* const handleCantidadPersonasChange = (e) => {
-        setCantidadPersonas(e.target.value);
-    }; */
 
     const handleCustomer = (c) => {
         setHuespedes([{ ...c }, ...huespedes]);
@@ -164,13 +172,6 @@ const BookingCheckIn = () => {
         setFilter('');
     };
 
-
-    /* const filteredHabitaciones = bookingRoom?.obtenerReservaHabitacion.filter(habitacion => {
-        const matchTipo = typeRooms ? habitacion.habitacion.tipoHabitacion.nombre === typeRooms : true;
-        const matchCantidad = cantidadPersonas ? habitacion.habitacion.capacidad >= cantidadPersonas : true;
-        return matchTipo && matchCantidad;
-    }); */
-
     if (loading_booking || loading_room) return <p>Cargando...</p>;
     if (error_booking || error_room) return <p>Error al cargar la reserva</p>;
     return (
@@ -181,7 +182,7 @@ const BookingCheckIn = () => {
                 </Container>
 
                 {booking && (
-                    <Row className="mb-4">
+                    <Row className="m-4">
                         <Col md={12}>
                             <div className="booking-details">
                                 <h2 className="booking-title">Detalles de la Reservación</h2>
@@ -221,38 +222,9 @@ const BookingCheckIn = () => {
                     </Row>
                 )}
 
-                <Row className="mb-4">
-                    {/* <Col md={6}>
-                        <FormGroup>
-                        <label htmlFor="supplier" className="form-label">Tipo de habitación</label>
-                                        <Select
-                                            id="supplier"
-                                            value={typeRoom}
-                                            onChange={(e) => {
-                                                setTypeRoom(e);
-                                            }}
-                                            options={getTypeRooms()}
-                                            classNamePrefix="select2-selection"
-                                        />
-                        </FormGroup>
-                    </Col>
-                    <Col md={6}>
-                        <FormGroup>
-                            <Label for="cantidadPersonas">Cantidad de Personas</Label>
-                            <input
-                            className="form-control"
-                            type="number"
-                            id="checkOutDate"
-                            value={cantidadPersonas}
-                            onChange={ handleCantidadPersonasChange }
-                            min='0'
-                            />
-                            </FormGroup>
-                    </Col> */}
-                </Row>
 
                 {bookingRoom && bookingRoom.obtenerReservaHabitacion && bookingRoom.obtenerReservaHabitacion.length > 0 && (
-                    <Row className="mb-4">
+                    <Row className="mb-4 p-0">
                         <Col md={12}>
                             <div className="room-details">
                                 <h2 className="room-title">Detalles de la Habitación</h2>

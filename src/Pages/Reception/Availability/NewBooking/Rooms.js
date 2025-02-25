@@ -19,7 +19,6 @@ const Rooms = ({ ...props }) => {
         setEnableRooms(valIndividualBooking)
     }, [typeBooking, roomsBooking])
 
-console.log('roomsBooking', roomsBooking)
 
     return (
         <React.Fragment>
@@ -48,7 +47,7 @@ console.log('roomsBooking', roomsBooking)
 
                                                         <div className="mb-1 mt-1 col-md-12 d-flex flex-column">Precio por noche:
                                                             {currentSeason.map(c =>
-                                                                <spam className='ms-3'>{c.nombre}: <span>${c.tiposHabitacion[type.type.nombre].price}</span>
+                                                                <spam className='ms-3'>{c.nombre}: <span>${c.tiposHabitacion[type.type.nombre]?.price}</span>
                                                                 </spam>
                                                             )}
                                                         </div>

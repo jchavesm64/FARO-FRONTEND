@@ -24,7 +24,8 @@ import TableInvoicesIssued from '../../Pages/Invoices/TableInvoicesIssued';
 import TableInvoicesParameters from '../../Pages/Invoices/TableInvoicesParameters';
 import TableTypeRoom from '../../Pages/GeneralSettings/Hotel/TypeRoom/TableTypeRoom'
 import TableAmenities from '../../Pages/GeneralSettings/Hotel/Amenities/TableAmenities'
-import TableExtraService from '../../Pages/GeneralSettings/Hotel/ExtraService/TableExtraService'
+import TableExtraService from '../../Pages/GeneralSettings/Hotel/ExtraService/TableExtraService';
+import TableExternalService from '../../Pages/GeneralSettings/Hotel/ExternalService/TableExternalService';
 import TableRooms from '../../Pages/GeneralSettings/Hotel/Rooms/TableRooms';
 import TableSeason from '../../Pages/GeneralSettings/Hotel/Season/TableSeason';
 import TablePackage from '../../Pages/GeneralSettings/Hotel/AdminPackage/TablePackage';
@@ -171,6 +172,10 @@ const DataList = ({ ...props }) => {
                 {
                     type === 'extraservice' &&
                     <TableExtraService {...props} data={datos} onDelete={onDelete} />
+                }
+                {
+                    type === 'externalservice' &&
+                    <TableExternalService {...props} data={datos} onDelete={onDelete} />
                 }
                 {
                     type === 'rooms' &&
