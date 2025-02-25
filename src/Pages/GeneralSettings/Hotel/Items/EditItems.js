@@ -1,32 +1,30 @@
-import React, { useState, useEffect } from "react";
-import { Card, Col, Container, Row } from "reactstrap";
-import Breadcrumbs from "../../../../components/Common/Breadcrumb";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery, useMutation } from "@apollo/client";
-import SpanSubtitleForm from "../../../../components/Forms/SpanSubtitleForm";
-import { infoAlert } from "../../../../helpers/alert";
+import { useMutation, useQuery } from "@apollo/client";
 import {
-  OBTENER_AREA_BY_ID,
-  UPDATE_AREA,
-} from "../../../../services/AreasOperativasService";
+  OBTENER_ITEMS_BY_ID,
+  UPDATE_ITEM,
+} from "../../../../services/ItemsService";
+import React, { useEffect, useState } from "react";
+import { infoAlert } from "../../../../helpers/alert";
+import { Breadcrumb, Card, Col, Container, Row } from "reactstrap";
+import SpanSubtitleForm from "../../../../components/Forms/SpanSubtitleForm";
 
-const EditOperativeAreas = () => {
-  document.title = "Áreas Operativas | FARO";
-
+const EditItems = () => {
+  document.title = "Edit Items | FARO";
   const navigate = useNavigate();
 
   const { id } = useParams();
   const {
-    loading: loading_areas,
-    error: error_areas,
-    data: data_areas,
+    loading: loading_items,
+    error: error_items,
+    data: data_items,
     startPolling,
     stopPolling,
-  } = useQuery(OBTENER_AREA_BY_ID, {
+  } = useQuery(OBTENER_ITEMS_BY_ID, {
     variables: { id: id },
     pollInterval: 1000,
   });
-  const [actualizar] = useMutation(UPDATE_AREA);
+  const [actualizar] = useMutation(UPDATE_ITEM);
 
   useEffect(() => {
     startPolling(1000);
@@ -36,14 +34,15 @@ const EditOperativeAreas = () => {
   }, [startPolling, stopPolling]);
 
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [description, setDescripcion] = useState("");
+  const [price, setPrice] = useState(0);
 
   useEffect(() => {
-    if (data_areas) {
-      setName(data_areas.obtenerArea.nombre);
-      setDescription(data_areas.obtenerArea.descripcion);
+    if (data_items) {
+      setName(data_items.obtenerItem.nombre);
+      setDescripcion(data_items.obtenerItem.descripcion);
     }
-  }, [data_areas]);
+  }, [data_items]);
 
   const [disableSave, setDisableSave] = useState(true);
 
@@ -59,22 +58,21 @@ const EditOperativeAreas = () => {
         descripcion: description,
         estado: "ACTIVO",
       };
-
       const { data } = await actualizar({
         variables: { id, input },
         errorPolicy: "all",
       });
-      const { estado, message } = data.actualizarArea;
+      const { estado, message } = data.actualizarItem;
       if (estado) {
         infoAlert("Excelente", message, "success", 3000, "top-end");
-        navigate("/hotelsettings/operativeareas");
+        navigate("/hotelsettings/items");
       } else {
         infoAlert("Oops", message, "error", 3000, "top-end");
       }
     } catch (error) {
       infoAlert(
         "Oops",
-        "Ocurrió un error inesperado al guardar el área",
+        "Ocurrió un error inesperado al guardar el tipo de item",
         "error",
         3000,
         "top-end"
@@ -83,19 +81,19 @@ const EditOperativeAreas = () => {
     }
   };
 
-  if (loading_areas) {
+  if (loading_items) {
     return (
       <React.Fragment>
         <div className="page-content">
           <Container fluid={true}>
-            <Breadcrumbs
-              title="Nuevo área operativa"
-              breadcrumbItem="Áreas operativas"
-              breadcrumbItemUrl="/hotelsettings/operativeareas"
+            <Breadcrumb
+              title="Edit Item"
+              breadcrumbItem="Item"
+              breadcrumbItemUrl="/hotelsettings/item"
             />
             <Row>
               <div className="col text-center pt-3 pb-3">
-                <div className="spinner-border" role="status">
+                <div className="spinner-border text-primary" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
@@ -106,18 +104,17 @@ const EditOperativeAreas = () => {
     );
   }
 
-  if (error_areas) {
+  if (error_items) {
     return null;
   }
-
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumbs
-            title="Nuevo área operativa"
-            breadcrumbItem="Áreas operativas"
-            breadcrumbItemUrl="/hotelsettings/operativeareas"
+          <Breadcrumb
+            title="Nuevo tipo de item"
+            breadcrumbItem="Tipo de item"
+            breadcrumbItemUrl="/hotelsettings/items"
           />
           <Card className="p-4">
             <Row>
@@ -133,38 +130,49 @@ const EditOperativeAreas = () => {
               </div>
             </Row>
             <Row>
-              <div className="col mb-3">
-                <SpanSubtitleForm subtitle="Información del área operativa" />
+              <div className="col-md-6">
+                <SpanSubtitleForm subtitle="Información del artículo" />
               </div>
             </Row>
             <Row className="d-flex justify-content-between shadow_service rounded-5 p-3">
-              <Col className="col-md-6  d-flex justify-content-center flex-wrap">
-                <div className="col-md-11 col-sm-9 m-2">
+              <Col className=" shadow_service rounded-5 p-3">
+                <div className="col-md-6 col-sm-9 m-2">
+                  <label htmlFor="name" className="form-label">
+                    * Nombre del artículo
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="name"
+                    placeholder="Escribe el nombre del artículo"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-6 col-sm-9 m-2">
                   <label htmlFor="type" className="form-label">
-                    * Nombre del área
+                    * Precio del artículo
                   </label>
                   <input
                     className="form-control"
-                    type="text"
+                    type="number"
                     id="type"
-                    value={name}
+                    value={price}
                     onChange={(e) => {
-                      setName(e.target.value);
+                      setPrice(e.target.value);
                     }}
                   />
                 </div>
-                <div className="col-md-11 col-sm-9 m-2">
-                  <label htmlFor="type" className="form-label">
-                    * Descripción del área
+                <div className="col-md-6 col-sm-9 m-2">
+                  <label htmlFor="description" className="form-label">
+                    Descripción
                   </label>
                   <textarea
                     className="form-control"
-                    type="text"
-                    id="type"
+                    id="description"
+                    placeholder="Escribe la descripción del artículo"
                     value={description}
-                    onChange={(e) => {
-                      setDescription(e.target.value);
-                    }}
+                    onChange={(e) => setDescripcion(e.target.value)}
                   />
                 </div>
               </Col>
@@ -176,4 +184,4 @@ const EditOperativeAreas = () => {
   );
 };
 
-export default EditOperativeAreas;
+export default EditItems;

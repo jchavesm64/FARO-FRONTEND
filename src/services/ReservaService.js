@@ -153,3 +153,6 @@ export const UPDATE_ESTADO_RESERVA = gql`
     }
   }
 `;
+
+
+

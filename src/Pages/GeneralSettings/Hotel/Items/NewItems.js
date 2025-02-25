@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { Card, Col, Container, Row } from "reactstrap";
-import Breadcrumbs from "../../../../components/Common/Breadcrumb";
-import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client";
-import SpanSubtitleForm from "../../../../components/Forms/SpanSubtitleForm";
+import { useNavigate } from "react-router-dom";
+import { SAVE_ITEM } from "../../../../services/ItemsService";
+import React, { useEffect, useState } from "react";
 import { infoAlert } from "../../../../helpers/alert";
-import { SAVE_COMODIDAD } from "../../../../services/ComodidadesService";
+import { Breadcrumb, Card, Col, Container, Row } from "reactstrap";
+import SpanSubtitleForm from "../../../../components/Forms/SpanSubtitleForm";
 
-const NewAmenities = () => {
-  document.title = "Comodidades | FARO";
+const NewItems = () => {
+  document.title = "Items | FARO";
 
   const navigate = useNavigate();
-  const [insertar] = useMutation(SAVE_COMODIDAD);
+  const [insertar] = useMutation(SAVE_ITEM);
 
   const [name, setName] = useState("");
   const [description, setDescripcion] = useState("");
+  const [price, setPrice] = useState(0);
 
   const [disableSave, setDisableSave] = useState(true);
 
@@ -35,18 +35,18 @@ const NewAmenities = () => {
         variables: { input },
         errorPolicy: "all",
       });
-      const { estado, message } = data.insertarComodidad;
+      const { estado, message } = data.insertarItem;
 
       if (estado) {
         infoAlert("Excelente", message, "success", 3000, "top-end");
-        navigate("/hotelsettings/amenities");
+        navigate("/hotelsettings/items");
       } else {
         infoAlert("Oops", message, "error", 3000, "top-end");
       }
     } catch (error) {
       infoAlert(
         "Oops",
-        "Ocurrió un error inesperado al guardar el tipo de comodidad",
+        "Ocurrió un error inesperado al guardar el tipo de item",
         "error",
         3000,
         "top-end"
@@ -59,10 +59,10 @@ const NewAmenities = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumbs
-            title="Nuevo tipo de comodidad"
-            breadcrumbItem="Tipo de comodidad"
-            breadcrumbItemUrl="/hotelsettings/amenities"
+          <Breadcrumb
+            title="Nuevo tipo de item"
+            breadcrumbItem="Tipo de item"
+            breadcrumbItemUrl="/hotelsettings/items"
           />
           <Card className="p-4">
             <Row>
@@ -78,38 +78,49 @@ const NewAmenities = () => {
               </div>
             </Row>
             <Row>
-              <div className="col mb-3">
-                <SpanSubtitleForm subtitle="Información de la comodidad" />
+              <div className="col-md-6">
+                <SpanSubtitleForm subtitle="Información del artículo" />
               </div>
             </Row>
             <Row className="d-flex justify-content-between shadow_service rounded-5 p-3">
-              <Col className="col-md-6  d-flex justify-content-center flex-wrap">
-                <div className="col-md-11 col-sm-9 m-2">
+              <Col className=" shadow_service rounded-5 p-3">
+                <div className="col-md-6 col-sm-9 m-2">
+                  <label htmlFor="name" className="form-label">
+                    * Nombre del artículo
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="name"
+                    placeholder="Escribe el nombre del artículo"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-6 col-sm-9 m-2">
                   <label htmlFor="type" className="form-label">
-                    * Nombre del tipo de comodidad
+                    * Precio del servicio
                   </label>
                   <input
                     className="form-control"
-                    type="text"
+                    type="number"
                     id="type"
-                    value={name}
+                    value={price}
                     onChange={(e) => {
-                      setName(e.target.value);
+                      setPrice(e.target.value);
                     }}
                   />
                 </div>
-                <div className="col-md-11 col-sm-9 m-2">
-                  <label htmlFor="type" className="form-label">
-                    * Descripción del tipo de comodidad
+                <div className="col-md-6 col-sm-9 m-2">
+                  <label htmlFor="description" className="form-label">
+                    Descripción
                   </label>
-                  <input
+                  <textarea
                     className="form-control"
-                    type="text"
-                    id="type"
+                    id="description"
+                    placeholder="Escribe la descripción del artículo"
                     value={description}
-                    onChange={(e) => {
-                      setDescripcion(e.target.value);
-                    }}
+                    onChange={(e) => setDescripcion(e.target.value)}
                   />
                 </div>
               </Col>
@@ -120,5 +131,4 @@ const NewAmenities = () => {
     </React.Fragment>
   );
 };
-
-export default NewAmenities;
+export default NewItems;

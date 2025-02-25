@@ -1,32 +1,25 @@
-import React, { useState } from "react";
-import { Card, Container, Row, CardBody } from "reactstrap";
 import { useMutation, useQuery } from "@apollo/client";
-import { Link } from "react-router-dom";
-
-import Breadcrumbs from "../../../../components/Common/Breadcrumb";
-import DataList from "../../../../components/Common/DataList";
-import { infoAlert } from "../../../../helpers/alert";
+import React, { useState } from "react";
 import Swal from "sweetalert2";
-import {
-  DELETE_COMODIDAD,
-  OBTENER_COMODIDADES,
-} from "../../../../services/ComodidadesService";
+import { infoAlert } from "../../../../helpers/alert";
+import { DELETE_ITEM, OBTENER_ITEMS } from "../../../../services/ItemsService";
+import { Breadcrumb, Card, CardBody, Container, Row } from "reactstrap";
+import { Link } from "react-router-dom";
+import DataList from "../../../../components/Common/DataList";
 
-const Amenities = ({ ...props }) => {
-  document.title = "Comodidades | FARO";
+const Items = ({ ...props }) => {
+  document.title = "Items | FARO";
 
   const [filter, setFilter] = useState("");
   const [modo] = useState("1");
 
-  const { data: tiposComodidades } = useQuery(OBTENER_COMODIDADES, {
-    pollInterval: 1000,
-  });
-  const [desactivar] = useMutation(DELETE_COMODIDAD);
+  const { data: tiposItems } = useQuery(OBTENER_ITEMS, { pollInterval: 1000 });
+  const [desactivar] = useMutation(DELETE_ITEM);
 
-  const onDeleteAmenities = (id, nombre) => {
+  const onDeleteItem = (id, nombre) => {
     Swal.fire({
-      title: "Eliminar Comodidad",
-      text: `¿Está seguro de eliminar la comodidad ${nombre}?`,
+      title: "Eliminar Item",
+      text: `¿Está seguro de eliminar el item ${nombre}?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#0BB197",
@@ -36,11 +29,11 @@ const Amenities = ({ ...props }) => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         const { data } = await desactivar({ variables: { id } });
-        const { estado, message } = data.desactivarComodidad;
+        const { estado, message } = data.desactivarItem;
         if (estado) {
-          infoAlert("Comodidad eliminada", message, "success", 3000, "top-end");
+          infoAlert("Item eliminado", message, "success", 3000, "top-end");
         } else {
-          infoAlert("Eliminar comodidad", message, "error", 3000, "top-end");
+          infoAlert("Eliminar item", message, "error", 3000, "top-end");
         }
       }
     });
@@ -58,9 +51,9 @@ const Amenities = ({ ...props }) => {
   }
 
   const getData = () => {
-    if (tiposComodidades) {
-      if (tiposComodidades.obtenerComodidades) {
-        return tiposComodidades.obtenerComodidades.filter((value) => {
+    if (tiposItems) {
+      if (tiposItems.obtenerItems) {
+        return tiposItems.obtenerItems.filter((value) => {
           if (filter !== "" && modo !== "") {
             return getFilteredByKey(modo, value, filter);
           }
@@ -77,15 +70,15 @@ const Amenities = ({ ...props }) => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
-          <Breadcrumbs
-            title="Comodidades"
+          <Breadcrumb
+            title="Items"
             breadcrumbItem="Ajustes generales Hotel"
             breadcrumbItemUrl="/hotelsettings"
           />
           <Row className="flex" style={{ alignItems: "flex-end" }}>
             <div className="col-md-10 mb-3">
-              <label htmlFor="search-input" className="col-md-4 col-form-label">
-                Busca tipo de comodidad
+              <label htmlFor="filter" className="form-label">
+                Buscar items
               </label>
               <input
                 className="form-control"
@@ -98,13 +91,13 @@ const Amenities = ({ ...props }) => {
               />
             </div>
             <div className="col-md-2 col-sm-12 mb-3">
-              <Link to="/hotelsettings/newamenities">
+              <Link to="/hotelsettings/newitems">
                 <button
                   type="button"
                   className="btn btn-primary waves-effect waves-light"
                   style={{ width: "100%" }}
                 >
-                  Agregar <i className="mdi mdi-plus align-middle ms-2"></i>
+                  Agregar{" "}
                 </button>
               </Link>
             </div>
@@ -114,9 +107,9 @@ const Amenities = ({ ...props }) => {
               <Card>
                 <CardBody>
                   <DataList
-                    onDelete={onDeleteAmenities}
+                    onDelete={onDeleteItem}
                     data={data}
-                    type="amenities"
+                    type="items"
                     displayLength={9}
                     {...props}
                   />
@@ -130,4 +123,4 @@ const Amenities = ({ ...props }) => {
   );
 };
 
-export default Amenities;
+export default Items;

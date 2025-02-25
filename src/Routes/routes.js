@@ -136,6 +136,7 @@ import CheckOut from "../Pages/Reception/Check/CheckOut/CheckOut";
 import BookingCheckOut from "../Pages/Reception/Check/CheckOut/BookingCheckOut";
 import InHouse from "../Pages/Reception/InHouse/InHouse";
 import BookService from "../Pages/Reception/BookService/BookService";
+import Items from "../Pages/GeneralSettings/Hotel/Items/Items";
 
 import InvoiceMaintenance from "../Pages/Invoices/Maintenance";
 import InvoiceIssued from "../Pages/Invoices/Issued";
@@ -149,6 +150,8 @@ import AdditionalServices from "../Pages/Reception/InHouse/AdditionalServices/Ad
 import RoomCharges from "../Pages/Reception/InHouse/RoomCharges/RoomCharges";
 import RoomChange from "../Pages/Reception/InHouse/RoomChange/RoomChange";
 import Tours from "../Pages/Reception/InHouse/Tours/Tours";
+import NewItems from "../Pages/GeneralSettings/Hotel/Items/NewItems";
+import EditItems from "../Pages/GeneralSettings/Hotel/Items/EditItems";
 
 const authProtectedRoutes = [
   { path: "/home", component: <Home /> },
@@ -337,6 +340,9 @@ const authProtectedRoutes = [
     path: "/hotelsettings/editoperativeareas/:id",
     component: <EditOperativeAreas />,
   },
+  { path: "/hotelsettings/items", component: <Items /> },
+  { path: "/hotelsettings/newitems", component: <NewItems /> },
+  { path: "/hotelsettings/edititems/:id", component: <EditItems /> },
   { path: "/invoice/maintenance", component: <InvoiceMaintenance /> },
   { path: "/invoice/credit/notes", component: <InvoiceCreditNote /> },
   { path: "/invoice/debit/notes", component: <InvoiceMaintenance /> },

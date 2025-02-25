@@ -231,6 +231,11 @@ export const hotelsettings = [
     icon: "mdi mdi-bell-plus",
     link: "/hotelsettings/externalservices",
   },
+  {
+    label: "Artículos",
+    icon: "mdi mdi-key-chain",
+    link: "/hotelsettings/items",
+  },
 ];
 
 export const sidebarRoutes = [
